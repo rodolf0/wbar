@@ -1,0 +1,44 @@
+# The Bar && Font
+i: wbar.icons/osxbarback.png
+t: wbar.icons/VeraBd/9
+c:
+
+i: wbar.icons/term.png
+c: xterm
+t: xterm
+
+i: wbar.icons/xmms.png
+c: ps -A | grep -o xmms && killall xmms || xmms
+t: xmms
+
+i: wbar.icons/acroread.png
+c: acroread
+t: pdf
+
+i: wbar.icons/gulls.png
+c: ooffice2
+t: oo2
+
+i: wbar.icons/gimp.png
+c: gimp-2.2
+t: l'Gimp
+
+i: wbar.icons/xcalc.png
+c: xcalc
+t: xcalc
+
+i: wbar.icons/firefox.png
+c: firefox
+t: firefox
+
+i: wbar.icons/psi.png
+c: psi
+t: psi
+
+i: wbar.icons/gnutella.png
+c: gtk-gnutella
+t: gnut
+
+i: wbar.icons/power.png
+c: sudo /sbin/shutdown -h now 
+t: power

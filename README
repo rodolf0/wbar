@@ -1,0 +1,106 @@
+General:
+--------
+Wbar is a quick launch bar inspired on superkaramba's tux-bar.
+Its only reuirements are imlib2.
+
+This is eye candy developed in C++. The motivation is to run as 
+fast as possible but probably it can still be made faster.
+
+Tested succesfully on Fluxbox, WindowMaker.
+
+Since version 1.0 can run on top of desktops such as xfdesktop 
+or nautilus with the -above-desk switch.
+
+
+Installing: (for the impacient)
+-----------
+
+$ make
+
+As root
+# make install
+
+As the user who's gonna run the wbar
+this should create appropiate files for running
+
+$ make config
+
+$ wbar -help
+
+Now wbar should work out of the box(, but again ... may be not).
+
+Notes:
+------
+* If you're getting window decorations (you shouldn't) when you start
+  your window manager because you're using the -above-desk switch, 
+  try to give the WM some time to start up before wbar does. 
+  Example (in your startup script): sleep 5s && wbar &
+
+Fonts:
+------
+Font support is new. Its used to display text below the icons.
+To change font color / shadow / position you'll have
+to hack into the code which shouldn't be dificult at all.
+TODO: Fix wide labels, chopped when rendering as vertical bar.
+
+
+Configuration file:
+-------------------
+If not supplied $HOME/.wbar will be used, 
+else dot.wbar at $PWD, else /usr/local/share/wbar/dot.wbar
+
+.wbar format:
+---------------
+Commented lines start whith #.
+Blank lines are ignored.
+
+Example file: dot.wbar 
+
+Each icon has the following format:
+
+i: <icon-file-path>
+c: <command to execute on click>
+t: <text to display on mouse over>
+
+The order of appearance doesn't matter but all 3 of these lines must
+appear. If you aren't gonna display text nor have a command associated
+for a certain icon you should do the following:
+
+i: <icon-file-path>
+c: 
+t: 
+
+
+The first icon definition has a special meaning:
+------------------------------------------------
+i: <path-to-the-bar-background-image>
+c: --
+t: <path-to-font-to-display-text-with/size>
+
+IF A FONT ISN'T SUPPLIED THEN NO TEXT RENDERING IS DONE.
+
+*******************
+If you aren't going to use fonts you should change the following line in Makefile:
+
+CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DDOCKWIN -DCOOLMACHINE_N_SHITCODE
+Change for this one:
+CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DDOCKWIN
+
+which should make things imperceptiblly faster.
+*******************
+
+Filters:
+--------
+-fr -fg -fb -fa set the filter color which is applied to icons
+
+-filter controls where to apply filter 
+0: dont apply 
+1: apply to hovered icon 
+2: apply to all but hovered 
+3: all
+
+experiment with other options.
+
+BUGS:
+----
+* non existing options will segfault
