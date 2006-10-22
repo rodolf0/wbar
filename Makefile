@@ -17,6 +17,9 @@ $(TARGET): $(objects)
 	g++ $(LDFLAGS) -o $(@) $(objects)
 	#strip $(@)
 
+patch:
+	patch < animation.patch
+
 install: $(TARGET)
 	if [ "`whoami`" != "root" ]; then \
 		echo "You must be root to install"; \
