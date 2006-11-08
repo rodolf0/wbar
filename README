@@ -103,4 +103,6 @@ experiment with other options.
 
 BUGS:
 ----
+* when switching themes (like with switch2) wbar starts eating CPU.
+ dont know why yet ... click it with button 3 to respawn it.
 * non existing options will segfault
