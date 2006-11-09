@@ -15,7 +15,7 @@ $(objects): $(headers) Makefile
 
 $(TARGET): $(objects) 
 	g++ $(LDFLAGS) -o $(@) $(objects)
-	#strip $(@)
+	strip $(@)
 
 patch:
 	patch < animation.patch
