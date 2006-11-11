@@ -51,11 +51,44 @@ void SuperBar::initFilters(){
 	colorFilter = imlib_create_filter(0);
 	imlib_context_set_filter(colorFilter);
 
+#ifndef AVGFILTER
+	/* Idem a lo que esta abajo
 	imlib_filter_set_red  (0, 0, 0, filtRed, 0, 0);
 	imlib_filter_set_green(0, 0, 0, 0, filtGreen, 0);
 	imlib_filter_set_blue (0, 0, 0, 0, 0, filtBlue);
 	imlib_filter_set_alpha(0, 0, filtAlfa, 0, 0, 0); // new
+	*/
+	imlib_filter_set(0, 0, filtAlfa, filtRed, filtGreen, filtBlue);
 	imlib_filter_divisors(255, 255, 255, 255);
+#else
+	/* 100 en vez de 1 para no usar comma */
+	/* explicacion: (r+g+b)/3 = gray
+	 *
+	 * (r+g+b)/(3*R) = tonos de rojo ( R -> [0 - 1])
+	 * (r+g+b)/(3*G) = tonos de verd ( G -> [0 - 1])
+	 * (r+g+b)/(3*B) = tonos de blue ( B -> [0 - 1])
+	 * */
+
+	if(filtRed != 0)
+	    imlib_filter_set_red  (0, 0, 0, 1, 1, 1);
+	else
+	    imlib_filter_set_red  (0, 0, 0, 0, 0, 0);
+
+	if(filtGreen != 0)
+	    imlib_filter_set_green(0, 0, 0, 1, 1, 1);
+	else
+	    imlib_filter_set_green(0, 0, 0, 0, 0, 0);
+
+	if(filtBlue != 0)
+	    imlib_filter_set_blue (0, 0, 0, 1, 1, 1);
+	else
+	    imlib_filter_set_blue (0, 0, 0, 0, 0, 0);
+
+	imlib_filter_set_alpha(0, 0, filtAlfa, 0, 0, 0); // new
+	imlib_filter_divisors(255, filtRed!=0?3*255/filtRed:1, 
+		filtGreen!=0?3*255/filtGreen:1, filtBlue!=0?3*255/filtBlue:1);
+#endif
+
     }
 
     /* Set alfa to the Bar */

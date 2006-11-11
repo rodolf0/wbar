@@ -1,5 +1,5 @@
 TARGET=wbar
-CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DDOCKWIN -DCOOLMACHINE_N_SHITCODE
+CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DDOCKWIN -DCOOLMACHINE_N_SHITCODE -DAVGFILTER
 LDFLAGS=`imlib2-config --libs`  -Wl,-O2
 PREFIX=/usr/local/share/wbar
 
