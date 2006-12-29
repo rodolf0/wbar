@@ -1,0 +1,216 @@
+Index: Bar.cc
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/Bar.cc,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 Bar.cc
+--- Bar.cc	19 Oct 2006 23:25:01 -0000	1.1.1.1
++++ Bar.cc	29 Dec 2006 00:48:53 -0000
+@@ -147,8 +147,10 @@
+ /*}}}*/
+ 
+ /* Icons Scaling *//*{{{*/
+-void Bar::transform(int i_num, int i_off){ 
++void Bar::transform(int i_num, int i_off, float fact){ 
+     int t_x, t_y, a;
++    float tzoomf = 1.0 + (zoom_factor - 1.0) * fact;
++
+ 
+     Icon *cur_ic=0;
+ 
+@@ -174,16 +176,16 @@
+     cur_ic->csize = cur_ic->size;
+ 
+     cur_ic->size =(int)( icon_size 
+-	+((zoom_factor-1)/2
+-	+(zoom_factor-1)/icon_unit*i_off
+-	-2*(zoom_factor-1)/icon_unit/icon_unit*
++	+((tzoomf-1)/2
++	+(tzoomf-1)/icon_unit*i_off
++	-2*(tzoomf-1)/icon_unit/icon_unit*
+ 	    i_off*(i_off-icon_unit/2))*icon_size
+ 	);
+     
+     /* max offset => x = xo-dd/2+dd/4
+      * min offset => x = xo-dd/2+3*dd/4 */
+-    cur_ic->x =(int)( cur_ic->ox + b_dd/4
+-	- b_dd/2/icon_unit*i_off );
++    cur_ic->x =(int)( cur_ic->ox + (b_dd/4
++	- b_dd/2/icon_unit*i_off)*fact );
+ 
+     /* keep all icons on same floor subtracting what it grew */
+     cur_ic->y =  cur_ic->oy-
+@@ -203,13 +205,13 @@
+ 
+ 	/* Icon scl factor 1 at max offset, 1.5 at min offs */
+ 	cur_ic->size = (int)( icon_size
+-	    + ((zoom_factor-1)/2 
+-	    - (zoom_factor-1)/icon_unit/2*i_off) * icon_size );
++	    + ((tzoomf-1)/2 
++	    - (tzoomf-1)/icon_unit/2*i_off) * icon_size );
+ 
+     /* max offset => x = xo-dd/2
+      * min offset => x = xo-dd/2+dd/4 */
+-	cur_ic->x = (int)( cur_ic->ox - b_dd/4
+-	    - b_dd/4/icon_unit*i_off );
++	cur_ic->x = (int)( cur_ic->ox - (b_dd/4
++	    + b_dd/4/icon_unit*i_off)*fact );
+ 
+ 	/* Icons on the same floor */
+ 	cur_ic->y = cur_ic->oy-
+@@ -228,12 +230,12 @@
+ 
+ 	/* Icon scl factor 1 at min offset, 1.5 at max offs */
+ 	cur_ic->size = (int)( icon_size
+-	    + ((zoom_factor-1)/icon_unit/2*i_off) * icon_size );
++	    + ((tzoomf-1)/icon_unit/2*i_off) * icon_size );
+ 		
+ 	/* max offset => x = xo-dd/2+3*dd/4
+ 	 * min offset => x = xo-dd/2+dd */
+-	cur_ic->x = (int)( cur_ic->ox + b_dd/2
+-	    - b_dd/4/icon_unit*i_off );
++	cur_ic->x = (int)( cur_ic->ox + (b_dd/2
++	    - b_dd/4/icon_unit*i_off)*fact );
+ 
+ 	/* Icons on the same floor */
+ 	cur_ic->y = cur_ic->oy-
+@@ -246,7 +248,7 @@
+     for(a=0; a<i_num-1; a++){
+ 	cur_ic = icons[a];
+ 
+-	t_x = (int)( cur_ic->ox - b_dd/2 );
++	t_x = (int)( cur_ic->ox - b_dd/2*fact );
+ 	t_y = cur_ic->oy;
+ 	if(cur_ic->size != icon_size ||
+ 		cur_ic->x != t_x ||
+@@ -266,7 +268,7 @@
+     /* next icons *//*{{{*/
+     for(a=i_num+2; a<(int)icons.size(); a++){
+ 	cur_ic = icons[a];
+-	t_x = (int)( cur_ic->ox + b_dd/2 );
++	t_x = (int)( cur_ic->ox + b_dd/2*fact );
+ 	t_y = cur_ic->oy;
+ 	if(cur_ic->size != icon_size ||
+ 		cur_ic->x != t_x ||
+@@ -405,18 +407,24 @@
+ /*}}}*/
+ 
+ /* Refresh *//*{{{*/
+-void Bar::refresh(int mouse_x){
++void Bar::refresh(int mouse_x, int mouse_y){
+     Icon *cur_ic;
+ 
+     int iNum = iconNumber(mouse_x);
+     int iOff = iconOffset(mouse_x);
++    //float iPer = (float)mouse_y / window->h;
++    /* Interpolated from: 
++     * 0    ->  0
++     * wh/2 ->  1 
++     * wh   ->  0 */
++    float iPer = 2.0 * mouse_y / window->h * (2.0 - 2.0 * mouse_y / window->h);
+ 
+     /* on the bar */
+     if(mouse_x > (int)(icon_offset + icon_size/2.0) && iNum < (int)icons.size()){
+ 
+ 	if(!focused) focus();
+ 
+-	transform(iNum, iOff);
++	transform(iNum, iOff, iPer);
+ #ifndef COOLMACHINE_N_SHITCODE
+ 	cleanBack();
+ #endif
+@@ -452,8 +460,8 @@
+ inline void Bar::unfocus(){
+     focused = 0;
+ 
+-    x = (int)icon_offset;
+-    width = (int)(window->w - 2*icon_offset);
++    //x = (int)icon_offset;
++    //width = (int)(window->w - 2*icon_offset);
+     zoomed_icon = -1;
+ 
+     drawBack();
+@@ -462,8 +470,8 @@
+ inline void Bar::focus(){
+     focused = 1;
+ 
+-    x=0;
+-    width = window->w;
++    //x=0;
++    //width = window->w;
+ 
+     drawBack();
+ }
+Index: Bar.h
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/Bar.h,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 Bar.h
+--- Bar.h	19 Oct 2006 23:25:01 -0000	1.1.1.1
++++ Bar.h	24 Dec 2006 23:44:03 -0000
+@@ -53,7 +53,7 @@
+ 
+ 	void iconPress(int i_num, int offs);
+ 
+-	void transform(int num, int off);
++	void transform(int num, int off, float fact = 0.0);
+ 	virtual void render();
+ 
+ 	void acquireBack();
+@@ -80,7 +80,7 @@
+ 	std::string iconCommand(int i_num);
+ 
+ 	/* Focus & unfocus events */
+-	void refresh(int mouse_x = -1);
++	void refresh(int mouse_x = -1, int mouse_y = 0);
+ 
+ 	/* Icon press events */
+ 	void iconDown(int i_num);
+Index: Main.cc
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/Main.cc,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 Main.cc
+--- Main.cc	19 Oct 2006 23:25:01 -0000	1.1.1.1
++++ Main.cc	27 Dec 2006 02:57:26 -0000
+@@ -231,9 +231,9 @@
+ 	    /* Motion Notify *//*{{{*/
+ 	    case MotionNotify:
+ 		if(!vertbar)
+-		    barra->refresh(ev.xmotion.x);
++		    barra->refresh(ev.xmotion.x, ev.xmotion.y);
+ 		else
+-		    barra->refresh(ev.xmotion.y);
++		    barra->refresh(ev.xmotion.y, ev.xmotion.x);
+ 		break;
+ 	    /*}}}*/
+ 
+@@ -247,9 +247,9 @@
+ 	    case EnterNotify:
+ 		if(ev.xcrossing.mode!=NotifyUngrab && !(ev.xcrossing.state&Button1Mask)){
+ 		    if(!vertbar)
+-			barra->refresh(ev.xcrossing.x);
++			barra->refresh(ev.xcrossing.x, ev.xcrossing.y);
+ 		    else
+-			barra->refresh(ev.xcrossing.y);
++			barra->refresh(ev.xcrossing.y, ev.xcrossing.x);
+ 		}
+ 		break;
+ 	    /*}}}*/
+Index: SuperBar.cc
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/SuperBar.cc,v
+retrieving revision 1.2
+diff -u -r1.2 SuperBar.cc
+--- SuperBar.cc	11 Nov 2006 20:03:42 -0000	1.2
++++ SuperBar.cc	29 Dec 2006 00:54:16 -0000
+@@ -146,8 +146,8 @@
+ 
+     focused = 0;
+ 
+-    x = (int)icon_offset;
+-    width = (int)(window->w - 2*icon_offset);
++    //x = (int)icon_offset;
++    //width = (int)(window->w - 2*icon_offset);
+     zoomed_icon = -1;
+ 
+     /* Alfa filter the Bar */

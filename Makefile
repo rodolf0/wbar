@@ -17,8 +17,11 @@ $(TARGET): $(objects)
 	g++ $(LDFLAGS) -o $(@) $(objects)
 	strip $(@)
 
-patch:
+patch-anim1:
 	patch < animation.patch
+
+patch-anim2:
+	patch < animation2.patch
 
 install: $(TARGET)
 	if [ "`whoami`" != "root" ]; then \
@@ -27,9 +30,9 @@ install: $(TARGET)
 	fi
 
 	install -d $(PREFIX)
-	awk '!/VeraBd/ {if($$1 == "i:") print "i: $(PREFIX)/"$$2; else print $$0} \
-	    /VeraBd/ {print "t: $(PREFIX)/"$$2}' ./dot.wbar > $(PREFIX)/dot.wbar
-	rsync -va ./wbar.icons/* $(PREFIX)/wbar.icons
+	awk '{if($$1 ~ /i:/ || ($$1 ~ /t:/ && NR<4)) print $$1" $(PREFIX)/"$$2; else print $$0;}' \
+		./dot.wbar > $(PREFIX)/dot.wbar
+	cp -a ./wbar.icons $(PREFIX)/wbar.icons
 	install ./wbar /usr/local/bin
 
 config:
@@ -37,9 +40,9 @@ config:
 		echo -en "Do you want to replace the existing config? "; \
 		read recfg; \
 		if [ "$$recfg" = "y" -o "$$recfg" = "Y" ]; then \
-			awk '!/VeraBd/ {if($$1 == "i:") print "i: $(HOME)/."$$2; else print $$0} \
-			/VeraBd/ {print "t: $(HOME)/."$$2}' ./dot.wbar > $(HOME)/.wbar; \
-			rsync -va ./wbar.icons/* $(HOME)/.wbar.icons; \
+			awk '{if($$1 ~ /i:/ || ($$1 ~ /t:/ && NR<4)) print $$1" $(HOME)/"$$2; else print $$0;}' \
+			    ./dot.wbar > $(HOME)/dot.wbar; \
+			cp -a ./wbar.icons $(HOME)/.wbar.icons; \
 		fi \
 	fi
 
