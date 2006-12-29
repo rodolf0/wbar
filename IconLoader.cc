@@ -24,8 +24,8 @@ IconLoader::IconLoader(const char *cfgFile) : configFile(cfgFile){
 	else if( !stat("dot.wbar", &cfg_stat) )
 	    configFile = "dot.wbar";
 
-	else if( !stat("/usr/local/share/wbar/dot.wbar", &cfg_stat) )
-	    configFile = "/usr/local/share/wbar/dot.wbar";
+	else if( !stat("/usr/share/wbar/dot.wbar", &cfg_stat) )
+	    configFile = "/usr/share/wbar/dot.wbar";
 
 	else 
 	    throw "Can't stat a config file. Try # make install or -config <cfgfile>";
