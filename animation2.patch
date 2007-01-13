@@ -1,97 +1,47 @@
 Index: Bar.cc
 ===================================================================
 RCS file: /mnt/back/repository/c/wbar/Bar.cc,v
-retrieving revision 1.1.1.1
-diff -u -r1.1.1.1 Bar.cc
---- Bar.cc	19 Oct 2006 23:25:01 -0000	1.1.1.1
-+++ Bar.cc	29 Dec 2006 00:48:53 -0000
-@@ -147,8 +147,10 @@
+retrieving revision 1.2
+diff -u -r1.2 Bar.cc
+--- Bar.cc	13 Jan 2007 20:57:03 -0000	1.2
++++ Bar.cc	13 Jan 2007 21:14:17 -0000
+@@ -164,13 +164,14 @@
  /*}}}*/
  
  /* Icons Scaling *//*{{{*/
 -void Bar::transform(int i_num, int i_off){ 
 +void Bar::transform(int i_num, int i_off, float fact){ 
      int t_x, t_y, a;
-+    float tzoomf = 1.0 + (zoom_factor - 1.0) * fact;
-+
  
+     int x0 = (icon_ansd+1) * icon_unit,
+ 	xx = i_num * icon_unit + i_off,
+ 	rx = xx - icon_unit/2;
+ 
++    float tzoomf = 1.0 + (zoom_factor - 1.0) * fact;
      Icon *cur_ic=0;
  
-@@ -174,16 +176,16 @@
-     cur_ic->csize = cur_ic->size;
- 
-     cur_ic->size =(int)( icon_size 
--	+((zoom_factor-1)/2
--	+(zoom_factor-1)/icon_unit*i_off
--	-2*(zoom_factor-1)/icon_unit/icon_unit*
-+	+((tzoomf-1)/2
-+	+(tzoomf-1)/icon_unit*i_off
-+	-2*(tzoomf-1)/icon_unit/icon_unit*
- 	    i_off*(i_off-icon_unit/2))*icon_size
- 	);
-     
-     /* max offset => x = xo-dd/2+dd/4
-      * min offset => x = xo-dd/2+3*dd/4 */
--    cur_ic->x =(int)( cur_ic->ox + b_dd/4
--	- b_dd/2/icon_unit*i_off );
-+    cur_ic->x =(int)( cur_ic->ox + (b_dd/4
-+	- b_dd/2/icon_unit*i_off)*fact );
- 
-     /* keep all icons on same floor subtracting what it grew */
-     cur_ic->y =  cur_ic->oy-
-@@ -203,13 +205,13 @@
- 
- 	/* Icon scl factor 1 at max offset, 1.5 at min offs */
- 	cur_ic->size = (int)( icon_size
--	    + ((zoom_factor-1)/2 
--	    - (zoom_factor-1)/icon_unit/2*i_off) * icon_size );
-+	    + ((tzoomf-1)/2 
-+	    - (tzoomf-1)/icon_unit/2*i_off) * icon_size );
- 
-     /* max offset => x = xo-dd/2
-      * min offset => x = xo-dd/2+dd/4 */
--	cur_ic->x = (int)( cur_ic->ox - b_dd/4
--	    - b_dd/4/icon_unit*i_off );
-+	cur_ic->x = (int)( cur_ic->ox - (b_dd/4
-+	    + b_dd/4/icon_unit*i_off)*fact );
- 
- 	/* Icons on the same floor */
- 	cur_ic->y = cur_ic->oy-
-@@ -228,12 +230,12 @@
- 
- 	/* Icon scl factor 1 at min offset, 1.5 at max offs */
- 	cur_ic->size = (int)( icon_size
--	    + ((zoom_factor-1)/icon_unit/2*i_off) * icon_size );
-+	    + ((tzoomf-1)/icon_unit/2*i_off) * icon_size );
- 		
- 	/* max offset => x = xo-dd/2+3*dd/4
- 	 * min offset => x = xo-dd/2+dd */
--	cur_ic->x = (int)( cur_ic->ox + b_dd/2
--	    - b_dd/4/icon_unit*i_off );
-+	cur_ic->x = (int)( cur_ic->ox + (b_dd/2
-+	    - b_dd/4/icon_unit*i_off)*fact );
- 
- 	/* Icons on the same floor */
- 	cur_ic->y = cur_ic->oy-
-@@ -246,7 +248,7 @@
-     for(a=0; a<i_num-1; a++){
+     /* check wether we're over the icon *//*{{{*/
+@@ -188,7 +189,7 @@
  	cur_ic = icons[a];
  
--	t_x = (int)( cur_ic->ox - b_dd/2 );
-+	t_x = (int)( cur_ic->ox - b_dd/2*fact );
- 	t_y = cur_ic->oy;
- 	if(cur_ic->size != icon_size ||
- 		cur_ic->x != t_x ||
-@@ -266,7 +268,7 @@
-     /* next icons *//*{{{*/
-     for(a=i_num+2; a<(int)icons.size(); a++){
- 	cur_ic = icons[a];
--	t_x = (int)( cur_ic->ox + b_dd/2 );
-+	t_x = (int)( cur_ic->ox + b_dd/2*fact );
- 	t_y = cur_ic->oy;
- 	if(cur_ic->size != icon_size ||
- 		cur_ic->x != t_x ||
-@@ -405,18 +407,24 @@
+ 	if( ((a<i_num)?i_num-a:a-i_num) > icon_ansd ){
+-	    t_x = (int)(cur_ic->ox + ((a<i_num)?-1:1) * icon_ansd * b_dd / 2);
++	    t_x = (int)(cur_ic->ox + fact * ((a<i_num)?-1:1) * icon_ansd * b_dd / 2);
+ 	    t_y = cur_ic->oy;
+ 
+ 	    if(cur_ic->size != icon_size || cur_ic->x != t_x || cur_ic->y != t_y){
+@@ -207,8 +208,8 @@
+ 	    cur_ic->csize = cur_ic->size;
+ 
+ 	    cur_ic->size = (int)( icon_size * 
+-		( 1.0 + (zoom_factor-1.0)/(1.0 + expf(b_scl_a + b_scl_b*rx*rx))/b_scl_d));
+-	    cur_ic->x = (int)( cur_ic->ox - icon_ansd * b_dd/2 + b_pos_m * (xx - x0) );
++		( 1.0 + (tzoomf-1.0)/(1.0 + expf(b_scl_a + b_scl_b*rx*rx))/b_scl_d));
++	    cur_ic->x = (int)( cur_ic->ox - fact * (icon_ansd * b_dd/2 - b_pos_m * (xx - x0)) );
+ 	    cur_ic->y = cur_ic->oy - (int)(jump_factor*(cur_ic->size-icon_size));
+ 	    cur_ic->need_update = 1;
+ 	}
+@@ -335,18 +336,24 @@
  /*}}}*/
  
  /* Refresh *//*{{{*/
@@ -118,7 +68,7 @@ diff -u -r1.1.1.1 Bar.cc
  #ifndef COOLMACHINE_N_SHITCODE
  	cleanBack();
  #endif
-@@ -452,8 +460,8 @@
+@@ -382,8 +389,8 @@
  inline void Bar::unfocus(){
      focused = 0;
  
@@ -129,7 +79,7 @@ diff -u -r1.1.1.1 Bar.cc
      zoomed_icon = -1;
  
      drawBack();
-@@ -462,8 +470,8 @@
+@@ -392,8 +399,8 @@
  inline void Bar::focus(){
      focused = 1;
  
@@ -143,11 +93,11 @@ diff -u -r1.1.1.1 Bar.cc
 Index: Bar.h
 ===================================================================
 RCS file: /mnt/back/repository/c/wbar/Bar.h,v
-retrieving revision 1.1.1.1
-diff -u -r1.1.1.1 Bar.h
---- Bar.h	19 Oct 2006 23:25:01 -0000	1.1.1.1
-+++ Bar.h	24 Dec 2006 23:44:03 -0000
-@@ -53,7 +53,7 @@
+retrieving revision 1.2
+diff -u -r1.2 Bar.h
+--- Bar.h	13 Jan 2007 20:57:03 -0000	1.2
++++ Bar.h	13 Jan 2007 21:05:50 -0000
+@@ -60,7 +60,7 @@
  
  	void iconPress(int i_num, int offs);
  
@@ -156,7 +106,7 @@ diff -u -r1.1.1.1 Bar.h
  	virtual void render();
  
  	void acquireBack();
-@@ -80,7 +80,7 @@
+@@ -87,7 +87,7 @@
  	std::string iconCommand(int i_num);
  
  	/* Focus & unfocus events */
@@ -168,11 +118,11 @@ diff -u -r1.1.1.1 Bar.h
 Index: Main.cc
 ===================================================================
 RCS file: /mnt/back/repository/c/wbar/Main.cc,v
-retrieving revision 1.1.1.1
-diff -u -r1.1.1.1 Main.cc
---- Main.cc	19 Oct 2006 23:25:01 -0000	1.1.1.1
-+++ Main.cc	27 Dec 2006 02:57:26 -0000
-@@ -231,9 +231,9 @@
+retrieving revision 1.2
+diff -u -r1.2 Main.cc
+--- Main.cc	13 Jan 2007 20:57:03 -0000	1.2
++++ Main.cc	13 Jan 2007 21:06:48 -0000
+@@ -228,9 +228,9 @@
  	    /* Motion Notify *//*{{{*/
  	    case MotionNotify:
  		if(!vertbar)
@@ -184,7 +134,7 @@ diff -u -r1.1.1.1 Main.cc
  		break;
  	    /*}}}*/
  
-@@ -247,9 +247,9 @@
+@@ -244,9 +244,9 @@
  	    case EnterNotify:
  		if(ev.xcrossing.mode!=NotifyUngrab && !(ev.xcrossing.state&Button1Mask)){
  		    if(!vertbar)
@@ -196,14 +146,28 @@ diff -u -r1.1.1.1 Main.cc
  		}
  		break;
  	    /*}}}*/
+Index: Makefile
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/Makefile,v
+retrieving revision 1.7
+diff -u -r1.7 Makefile
+--- Makefile	13 Jan 2007 20:57:03 -0000	1.7
++++ Makefile	13 Jan 2007 20:58:12 -0000
+@@ -1,5 +1,5 @@
+ TARGET=wbar
+-CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DCOOLMACHINE_N_SHITCODE -DAVGFILTER -DDOCKWIN 
++CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DCOOLMACHINE_N_SHITCODE -DAVGFILTER #-DDOCKWIN 
+ LDFLAGS=`imlib2-config --libs`  -Wl,-O2
+ PREFIX=/usr/share/wbar
+ 
 Index: SuperBar.cc
 ===================================================================
 RCS file: /mnt/back/repository/c/wbar/SuperBar.cc,v
-retrieving revision 1.2
-diff -u -r1.2 SuperBar.cc
---- SuperBar.cc	11 Nov 2006 20:03:42 -0000	1.2
-+++ SuperBar.cc	29 Dec 2006 00:54:16 -0000
-@@ -146,8 +146,8 @@
+retrieving revision 1.3
+diff -u -r1.3 SuperBar.cc
+--- SuperBar.cc	13 Jan 2007 20:57:03 -0000	1.3
++++ SuperBar.cc	13 Jan 2007 21:07:17 -0000
+@@ -147,8 +147,8 @@
  
      focused = 0;
  
