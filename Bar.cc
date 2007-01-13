@@ -1,4 +1,5 @@
 #include "Bar.h"
+#include <math.h>
 
 /* Posicionamiento de la ventana */
 #define MARGEN 8
@@ -7,11 +8,11 @@ using namespace std;
 
 /* Bar Constructor & Destructor *//*{{{*/
 Bar::Bar(XWin *win, string barImg, int iSize, int iDist, float zFactor, 
-	float jFactor, int bOrient, int bPosition) :
+	float jFactor, int bOrient, int bPosition, int nAnim) :
 
     /* Initialization */
     buffer(0), barback(0), bar(0), window(win), icon_dist(iDist),
-    icon_size(iSize), jump_factor(jFactor), zoom_factor(zFactor),
+    icon_size(iSize), icon_anim(nAnim), jump_factor(jFactor), zoom_factor(zFactor),
     orientation(bOrient), position(bPosition), zoomed_icon(-1), focused(1){
 
     /* Load Bar back ground */
@@ -57,14 +58,30 @@ void Bar::addIcon(string path, string comm){
 
 /* Scale bar *//*{{{*/
 void Bar::scale(bool updateBG){
-    float up_growth, dn_growth;
+    float up_growth, dn_growth, b_scl_c;
 
     /* unit icon */
     icon_unit = (icon_size + icon_dist);
+    /* icons on side */
+    icon_ansd = (icon_anim-1)/2;
     /* icon offset constant */
-    icon_offset = ( (zoom_factor>1)? (zoom_factor-1) : 0.5 ) * icon_unit;
+    icon_offset =  icon_ansd * ( (zoom_factor>1)?(zoom_factor-1) : 0.5 ) * icon_unit;
     /* Icon scaling constant */
     b_dd = (zoom_factor>1)? (2*(zoom_factor-1)*icon_unit) : zoom_factor*icon_unit;
+
+    // x0 = (a + (icon_anim + 1)/2) * icon_unit;
+    // x1 = (a - (icon_anim - 1)/2) * icon_unit;
+    // xm = (a + 0.5) * icon_unit;
+
+    /* Estos calculos de escala son en base a la funcion sigmoidea f = 1/(1+exp(a+bx^2))*/
+    b_scl_c = 0.01; // mientras mas cercano a 0 mas se desplaza chico
+    b_scl_d = 0.20; // mientras mas cercano a 1 mas se desplaza grande -> si quiero pico lo achico
+    b_scl_a = logf((1.0-b_scl_d)/b_scl_d);
+    //b_scl_b = (logf((1.0-b_scl_c)/b_scl_c) - b_scl_a)/(x0-xm)^2;
+    b_scl_b = 4*(logf((1.0-b_scl_c)/b_scl_c) - b_scl_a)/
+	(icon_anim*icon_anim*icon_unit*icon_unit);
+    //float m = (icon_anim-1)/2*b_dd / (x1 - x0);
+    b_pos_m = -icon_ansd * b_dd / icon_unit / icon_anim;
 
 
     /* bar dimensions */
@@ -150,139 +167,52 @@ void Bar::acquireBack(){
 void Bar::transform(int i_num, int i_off){ 
     int t_x, t_y, a;
 
-    Icon *cur_ic=0;
+    int x0 = (icon_ansd+1) * icon_unit,
+	xx = i_num * icon_unit + i_off,
+	rx = xx - icon_unit/2;
 
-    /* the Big icon *//*{{{*/
-    /* Working with the Big Icon */
-    cur_ic = icons[i_num];
+    Icon *cur_ic=0;
 
     /* check wether we're over the icon *//*{{{*/
     /* i_off > i_x-i_ox  &&
      * i_off < i_x+i_s-i_ox of zoomed icon? => on it */
     if(i_off > b_dd/(4+2*b_dd/icon_unit) &&
-       i_off < (b_dd+4*cur_ic->size)/(4+2*b_dd/icon_unit))
+       i_off < (b_dd+4*icons[i_num]->size)/(4+2*b_dd/icon_unit))
 	zoomed_icon = i_num;
     else
 	zoomed_icon = -1 ; 
     /*}}}*/
 
-    /* interpolate zoom increment
-     * 0-> (z-1)/2; 
-     * maxoff/2-> (z-1); 
-     * maxoff-> (z-1)/2 */
-    cur_ic->cx = cur_ic->x;
-    cur_ic->csize = cur_ic->size;
+    for(a=0; a<(int)icons.size(); a++, x0 += icon_unit, rx -= icon_unit ){
 
-    cur_ic->size =(int)( icon_size 
-	+((zoom_factor-1)/2
-	+(zoom_factor-1)/icon_unit*i_off
-	-2*(zoom_factor-1)/icon_unit/icon_unit*
-	    i_off*(i_off-icon_unit/2))*icon_size
-	);
-    
-    /* max offset => x = xo-dd/2+dd/4
-     * min offset => x = xo-dd/2+3*dd/4 */
-    cur_ic->x =(int)( cur_ic->ox + b_dd/4
-	- b_dd/2/icon_unit*i_off );
-
-    /* keep all icons on same floor subtracting what it grew */
-    cur_ic->y =  cur_ic->oy-
-	(int)(jump_factor*(cur_ic->size-icon_size)) ;
-
-    /* Update this icon, important uh?*/
-    cur_ic->need_update = 1;
-    /*}}}*/
-
-    /* Working with zoom - 1 Icon *//*{{{*/
-    if(i_num>0){
-	cur_ic = icons[i_num-1];
-
-	/* Used for restoring background */
-	cur_ic->cx = cur_ic->x;
-	cur_ic->csize = cur_ic->size;
-
-	/* Icon scl factor 1 at max offset, 1.5 at min offs */
-	cur_ic->size = (int)( icon_size
-	    + ((zoom_factor-1)/2 
-	    - (zoom_factor-1)/icon_unit/2*i_off) * icon_size );
-
-    /* max offset => x = xo-dd/2
-     * min offset => x = xo-dd/2+dd/4 */
-	cur_ic->x = (int)( cur_ic->ox - b_dd/4
-	    - b_dd/4/icon_unit*i_off );
-
-	/* Icons on the same floor */
-	cur_ic->y = cur_ic->oy-
-	    (int)(jump_factor*(cur_ic->size-icon_size));
-	/* Update new size n pos */
-	cur_ic->need_update = 1;
-    }
-    /*}}}*/
-
-    /* Working with zoom + 1 Icon *//*{{{*/
-    if(i_num < (int)icons.size()-1){
-	cur_ic = icons[i_num+1];
-    
-	cur_ic->cx = cur_ic->x;
-	cur_ic->csize = cur_ic->size;
-
-	/* Icon scl factor 1 at min offset, 1.5 at max offs */
-	cur_ic->size = (int)( icon_size
-	    + ((zoom_factor-1)/icon_unit/2*i_off) * icon_size );
-		
-	/* max offset => x = xo-dd/2+3*dd/4
-	 * min offset => x = xo-dd/2+dd */
-	cur_ic->x = (int)( cur_ic->ox + b_dd/2
-	    - b_dd/4/icon_unit*i_off );
-
-	/* Icons on the same floor */
-	cur_ic->y = cur_ic->oy-
-	    (int)(jump_factor*(cur_ic->size-icon_size));
-	cur_ic->need_update = 1;
-    }
-    /*}}}*/
-
-    /* previous icons *//*{{{*/
-    for(a=0; a<i_num-1; a++){
 	cur_ic = icons[a];
 
-	t_x = (int)( cur_ic->ox - b_dd/2 );
-	t_y = cur_ic->oy;
-	if(cur_ic->size != icon_size ||
-		cur_ic->x != t_x ||
-		cur_ic->y != t_y){
-    
+	if( ((a<i_num)?i_num-a:a-i_num) > icon_ansd ){
+	    t_x = (int)(cur_ic->ox + ((a<i_num)?-1:1) * icon_ansd * b_dd / 2);
+	    t_y = cur_ic->oy;
+
+	    if(cur_ic->size != icon_size || cur_ic->x != t_x || cur_ic->y != t_y){
+
+		cur_ic->cx = cur_ic->x;
+		cur_ic->csize = cur_ic->size;
+
+		cur_ic->size = icon_size;
+		cur_ic->x = t_x;
+		cur_ic->y = t_y;
+		cur_ic->need_update = 1;
+	    }
+	}else{
+
 	    cur_ic->cx = cur_ic->x;
 	    cur_ic->csize = cur_ic->size;
 
-	    cur_ic->size = icon_size;
-	    cur_ic->x = t_x;
-	    cur_ic->y = t_y;
+	    cur_ic->size = (int)( icon_size * 
+		( 1.0 + (zoom_factor-1.0)/(1.0 + expf(b_scl_a + b_scl_b*rx*rx))/b_scl_d));
+	    cur_ic->x = (int)( cur_ic->ox - icon_ansd * b_dd/2 + b_pos_m * (xx - x0) );
+	    cur_ic->y = cur_ic->oy - (int)(jump_factor*(cur_ic->size-icon_size));
 	    cur_ic->need_update = 1;
-	}//else cur_ic->need_update = 0;
+	}
     }
-    /*}}}*/
-
-    /* next icons *//*{{{*/
-    for(a=i_num+2; a<(int)icons.size(); a++){
-	cur_ic = icons[a];
-	t_x = (int)( cur_ic->ox + b_dd/2 );
-	t_y = cur_ic->oy;
-	if(cur_ic->size != icon_size ||
-		cur_ic->x != t_x ||
-		cur_ic->y != t_y){
-    
-	    cur_ic->cx = cur_ic->x;
-	    cur_ic->csize = cur_ic->size;
-
-	    cur_ic->size = icon_size;
-	    cur_ic->x = t_x;
-	    cur_ic->y = t_y;
-	    cur_ic->need_update = 1;
-	}//else cur_ic->need_update = 0;
-    }
-    /*}}}*/
-
 }
 /*}}}*/
 

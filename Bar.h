@@ -23,15 +23,22 @@ class Bar{
 	int icon_dist;
 	/* icon size */
 	int icon_size;
+	/* how many icons move */
+	int icon_anim;
 	/* jump factor on hover */
 	float jump_factor;
 	/* zoom factor on hover */
 	float zoom_factor;
 
 	/* fast math constants */
+	float b_scl_d;
+	float b_scl_a;
+	float b_scl_b;
+	float b_pos_m;
 	float b_dd;
 	float icon_offset;
 	int icon_unit;
+	int icon_ansd; // anim aside icons
 
 	/* bar position in window */
 	int x, y;
@@ -68,7 +75,7 @@ class Bar{
     public:
 
 	Bar(XWin *win, std::string barImg, int iSize, int iDist, float zFactor, 
-		float jFactor, int bOrient, int bPosition);
+		float jFactor, int bOrient, int bPosition, int nAnim);
 
 	virtual ~Bar();
 

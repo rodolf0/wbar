@@ -2,6 +2,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <iostream>
 
 #include "XWin.h"
@@ -47,10 +48,8 @@ int main(int argc, char **argv) try{
     optparser.addOption("bpress", 0);
     optparser.addOption("vbar", 0);
     optparser.addOption("filter", 1, "0");
-    optparser.addOption("fr", 1, "0");
-    optparser.addOption("fg", 1, "200");
-    optparser.addOption("fb", 1, "0");
-    optparser.addOption("fa", 1, "255");
+    optparser.addOption("fc", 1, "0xff00c800");
+    optparser.addOption("nanim", 1, "7");
     optparser.parse(argc, argv);
     
     if(optparser.isset("help")){
@@ -72,7 +71,8 @@ int main(int argc, char **argv) try{
 	cout << "   -balfa  i         bar alfa (0-100)" << endl;
 	cout << "   -falfa  i         unfocused bar alfa (0-100)" << endl;
 	cout << "   -filter i         color filter (0: none 1: hovered 2: others, 3: all)" << endl;
-	cout << "   -f[r|g|b|a] i       filter color factors (0-255)" << endl;
+	cout << "   -fc  0xAARRGGBB   filter color (default green 0xff00c800)" << endl;
+	cout << "   -nanim  i         number of animated icons: 1, 3, 5, 7, 9, ..." << endl;
 	return 0;
     }
 /*}}}*/
@@ -125,14 +125,11 @@ int main(int argc, char **argv) try{
 	    atoi(optparser.getArg("idist").c_str()),
 	    atof(optparser.getArg("zoomf").c_str()),
 	    atof(optparser.getArg("jumpf").c_str()), 
-	    vertbar, 1,
+	    vertbar, 1, atoi(optparser.getArg("nanim").c_str()),
 	    atoi(optparser.getArg("balfa").c_str()),
 	    atoi(optparser.getArg("falfa").c_str()),
 	    atoi(optparser.getArg("filter").c_str()),
-	    atoi(optparser.getArg("fr").c_str()),
-	    atoi(optparser.getArg("fg").c_str()),
-	    atoi(optparser.getArg("fb").c_str()),
-	    atoi(optparser.getArg("fa").c_str()));
+	    strtoul(optparser.getArg("fc").c_str(), NULL, 16));
 
 	/* Load Icon Info */
 	while( !icload.nextIconInfo(image, command, text) )
@@ -144,7 +141,7 @@ int main(int argc, char **argv) try{
 	    atoi(optparser.getArg("idist").c_str()),
 	    atof(optparser.getArg("zoomf").c_str()),
 	    atof(optparser.getArg("jumpf").c_str()), 
-	    vertbar, 1);
+	    vertbar, 1, atoi(optparser.getArg("nanim").c_str()));
 
 	/* Load Icon Info */
 	while( !icload.nextIconInfo(image, command, text) )
