@@ -6,11 +6,11 @@ using namespace std;
 /* Super Constructor *//*{{{*/
 SuperBar::SuperBar(XWin *win, string barImg, string barFont, int iSize, int iDist, 
     float zFactor, float jFactor, int bOrient, int bPosition, int nAnim, int barAlfa, 
-    int unfocusAlfa, int filtSel, int filtCol) :
+    int unfocusAlfa, int filtSel, unsigned int filtCol) :
 
     Bar(win, barImg, iSize, iDist, zFactor, jFactor, bOrient, bPosition, nAnim), 
-    filtSel(filtSel), filtRed(filtCol & 0x00ff0000), filtGreen(filtCol & 0x0000ff00), 
-    filtBlue(filtCol & 0x000000ff), filtAlfa(filtCol & 0xff000000), 
+    filtSel(filtSel), filtRed((filtCol & 0x00ff0000)>>16), filtGreen((filtCol & 0x0000ff00)>>8), 
+    filtBlue(filtCol & 0x000000ff), filtAlfa((filtCol & 0xff000000)>>24), 
     unfocusAlfa(unfocusAlfa), barAlfa(barAlfa){ 
 
     initFilters();
