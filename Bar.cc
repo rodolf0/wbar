@@ -80,8 +80,12 @@ void Bar::scale(bool updateBG){
     //b_scl_b = (logf((1.0-b_scl_c)/b_scl_c) - b_scl_a)/(x0-xm)^2;
     b_scl_b = 4*(logf((1.0-b_scl_c)/b_scl_c) - b_scl_a)/
 	(icon_anim*icon_anim*icon_unit*icon_unit);
+#ifdef LINEAR_TRASL
     //float m = (icon_anim-1)/2*b_dd / (x1 - x0);
     b_pos_m = -icon_ansd * b_dd / icon_unit / icon_anim;
+#else
+    b_pos_m= - 3.14159 / icon_unit / icon_anim;
+#endif
 
 
     /* bar dimensions */
@@ -167,9 +171,9 @@ void Bar::acquireBack(){
 void Bar::transform(int i_num, int i_off){ 
     int t_x, t_y, a;
 
-    int x0 = (icon_ansd+1) * icon_unit,
-	xx = i_num * icon_unit + i_off,
-	rx = xx - icon_unit/2;
+    int x0 = (icon_ansd+1) * icon_unit, // last movable pos
+	xx = i_num * icon_unit + i_off, // abs mouse pos
+	rx = xx - icon_unit/2; // relative mouse pos
 
     Icon *cur_ic=0;
 
@@ -208,7 +212,13 @@ void Bar::transform(int i_num, int i_off){
 
 	    cur_ic->size = (int)( icon_size * 
 		( 1.0 + (zoom_factor-1.0)/(1.0 + expf(b_scl_a + b_scl_b*rx*rx))/b_scl_d));
-	    cur_ic->x = (int)( cur_ic->ox - icon_ansd * b_dd/2 + b_pos_m * (xx - x0) );
+
+#ifdef LINEAR_TRASL
+	    cur_ic->x = cur_ic->ox - (int)(icon_ansd * b_dd/2 + b_pos_m * (xx - x0));
+#else 
+	    cur_ic->x = cur_ic->ox + (int)(icon_ansd * b_dd/2 * sinf(b_pos_m * rx));
+#endif
+
 	    cur_ic->y = cur_ic->oy - (int)(jump_factor*(cur_ic->size-icon_size));
 	    cur_ic->need_update = 1;
 	}

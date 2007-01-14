@@ -50,6 +50,7 @@ int main(int argc, char **argv) try{
     optparser.addOption("filter", 1, "0");
     optparser.addOption("fc", 1, "0xff00c800");
     optparser.addOption("nanim", 1, "7");
+    optparser.addOption("nofont", 0);
     optparser.parse(argc, argv);
     
     if(optparser.isset("help")){
@@ -73,6 +74,7 @@ int main(int argc, char **argv) try{
 	cout << "   -filter i         color filter (0: none 1: hovered 2: others, 3: all)" << endl;
 	cout << "   -fc  0xAARRGGBB   filter color (default green 0xff00c800)" << endl;
 	cout << "   -nanim  i         number of animated icons: 1, 3, 5, 7, 9, ..." << endl;
+	cout << "   -nofont           if set disables font rendering" << endl;
 	return 0;
     }
 /*}}}*/
@@ -129,7 +131,8 @@ int main(int argc, char **argv) try{
 	    atoi(optparser.getArg("balfa").c_str()),
 	    atoi(optparser.getArg("falfa").c_str()),
 	    atoi(optparser.getArg("filter").c_str()),
-	    strtoul(optparser.getArg("fc").c_str(), NULL, 16));
+	    strtoul(optparser.getArg("fc").c_str(), NULL, 16),
+	    optparser.isset("nofont")?0:1);
 
 	/* Load Icon Info */
 	while( !icload.nextIconInfo(image, command, text) )

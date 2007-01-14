@@ -6,12 +6,12 @@ using namespace std;
 /* Super Constructor *//*{{{*/
 SuperBar::SuperBar(XWin *win, string barImg, string barFont, int iSize, int iDist, 
     float zFactor, float jFactor, int bOrient, int bPosition, int nAnim, int barAlfa, 
-    int unfocusAlfa, int filtSel, unsigned int filtCol) :
+    int unfocusAlfa, int filtSel, unsigned int filtCol, bool dfont) :
 
     Bar(win, barImg, iSize, iDist, zFactor, jFactor, bOrient, bPosition, nAnim), 
-    filtSel(filtSel), filtRed((filtCol & 0x00ff0000)>>16), filtGreen((filtCol & 0x0000ff00)>>8), 
-    filtBlue(filtCol & 0x000000ff), filtAlfa((filtCol & 0xff000000)>>24), 
-    unfocusAlfa(unfocusAlfa), barAlfa(barAlfa){ 
+    drawfont(dfont), filtSel(filtSel), filtRed((filtCol & 0x00ff0000)>>16), 
+    filtGreen((filtCol & 0x0000ff00)>>8), filtBlue(filtCol & 0x000000ff), 
+    filtAlfa((filtCol & 0xff000000)>>24), unfocusAlfa(unfocusAlfa), barAlfa(barAlfa){ 
 
     initFilters();
 
@@ -243,7 +243,7 @@ void SuperBar::render(){
 		BLEND_IMAGE(cur_im, 0, 0, cur_ic->osize, cur_ic->osize, 
 		    cur_ic->y, cur_ic->x, cur_ic->size, cur_ic->size);
 
-	    if(font){
+	    if(font && drawfont){
 		if(a == icons.size()-1 && zoomed_icon != -1){
 		    if(orientation == 0){
 			tw = cur_ic->x - (cur_ic->textW - cur_ic->size)/2;
