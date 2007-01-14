@@ -1,12 +1,21 @@
+===================
+      wbar
+===================
+
+Dependencies:
+-------------
+imlib2-dev
+
 General:
 --------
-Wbar is a quick launch bar inspired on superkaramba's tux-bar.
-Its only reuirements are imlib2.
+wbar is a quick launch bar. Its fast, light and cool eye-candy.
 
-This is eye candy developed in C++. The motivation is to run as 
-fast as possible but probably it can still be made faster.
+Its hacked in c++ trying to keep code as readable as possible
+with out sacrificing speed. It works directly on top of X to avoid
+going throug a lot of layers.
 
-Tested succesfully on Fluxbox, WindowMaker.
+Initially developed for Fluxbox, then tested on WindowMaker, Xfce, 
+Gnome, etc.
 
 Since version 1.0 can run on top of desktops such as xfdesktop 
 or nautilus with the -above-desk switch.
@@ -25,7 +34,7 @@ this should create appropiate files for running
 
 $ make config
 
-$ wbar -help
+$ wbar -help (this gives you important options)
 
 Now wbar should work out of the box(, but again ... may be not).
 
@@ -34,7 +43,9 @@ Notes:
 * If you're getting window decorations (you shouldn't) when you start
   your window manager because you're using the -above-desk switch, 
   try to give the WM some time to start up before wbar does. 
-  Example (in your startup script): sleep 5s && wbar &
+
+  Example (in your startup script): (sleep 5s && wbar) &
+  Note that the parenthesis surrounding the command are important.
 
 Fonts:
 ------
@@ -91,7 +102,8 @@ which should make things imperceptiblly faster.
 
 Filters:
 --------
--fr -fg -fb -fa set the filter color which is applied to icons
+-fc set the filter color which is applied to icons.
+The format is 0xAARRGGBB
 
 -filter controls where to apply filter 
 0: dont apply 
@@ -103,6 +115,4 @@ experiment with other options.
 
 BUGS:
 ----
-* when switching themes (like with switch2) wbar starts eating CPU.
- dont know why yet ... click it with button 3 to respawn it.
-* non existing options will segfault
+* Attempt to run wbar with non existing options will make it segfault.

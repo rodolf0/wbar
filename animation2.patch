@@ -151,20 +151,7 @@ diff -u -r1.3 Main.cc
  		}
  		break;
  	    /*}}}*/
-Index: Makefile
-===================================================================
-RCS file: /mnt/back/repository/c/wbar/Makefile,v
-retrieving revision 1.7
-diff -u -r1.7 Makefile
---- Makefile	13 Jan 2007 20:57:03 -0000	1.7
-+++ Makefile	14 Jan 2007 17:16:51 -0000
-@@ -1,5 +1,5 @@
- TARGET=wbar
--CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DCOOLMACHINE_N_SHITCODE -DAVGFILTER -DDOCKWIN 
-+CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DCOOLMACHINE_N_SHITCODE -DAVGFILTER #-DDOCKWIN 
- LDFLAGS=`imlib2-config --libs`  -Wl,-O2
- PREFIX=/usr/share/wbar
- 
+
 Index: SuperBar.cc
 ===================================================================
 RCS file: /mnt/back/repository/c/wbar/SuperBar.cc,v

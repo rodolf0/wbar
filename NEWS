@@ -1,0 +1,2 @@
+10/01/2007 fixed a bug that made wbar eat cpu under some situations.
+10/01/2007 added support for animating more than 3 icons.
