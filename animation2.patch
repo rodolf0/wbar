@@ -1,11 +1,11 @@
 Index: Bar.cc
 ===================================================================
 RCS file: /mnt/back/repository/c/wbar/Bar.cc,v
-retrieving revision 1.2
-diff -u -r1.2 Bar.cc
---- Bar.cc	13 Jan 2007 20:57:03 -0000	1.2
-+++ Bar.cc	13 Jan 2007 21:14:17 -0000
-@@ -164,13 +164,14 @@
+retrieving revision 1.3
+diff -u -r1.3 Bar.cc
+--- Bar.cc	14 Jan 2007 17:13:15 -0000	1.3
++++ Bar.cc	14 Jan 2007 17:20:08 -0000
+@@ -168,13 +168,14 @@
  /*}}}*/
  
  /* Icons Scaling *//*{{{*/
@@ -13,15 +13,15 @@ diff -u -r1.2 Bar.cc
 +void Bar::transform(int i_num, int i_off, float fact){ 
      int t_x, t_y, a;
  
-     int x0 = (icon_ansd+1) * icon_unit,
- 	xx = i_num * icon_unit + i_off,
- 	rx = xx - icon_unit/2;
+     int x0 = (icon_ansd+1) * icon_unit, // last movable pos
+ 	xx = i_num * icon_unit + i_off, // abs mouse pos
+ 	rx = xx - icon_unit/2; // relative mouse pos
  
 +    float tzoomf = 1.0 + (zoom_factor - 1.0) * fact;
      Icon *cur_ic=0;
  
      /* check wether we're over the icon *//*{{{*/
-@@ -188,7 +189,7 @@
+@@ -192,7 +193,7 @@
  	cur_ic = icons[a];
  
  	if( ((a<i_num)?i_num-a:a-i_num) > icon_ansd ){
@@ -30,18 +30,23 @@ diff -u -r1.2 Bar.cc
  	    t_y = cur_ic->oy;
  
  	    if(cur_ic->size != icon_size || cur_ic->x != t_x || cur_ic->y != t_y){
-@@ -207,8 +208,8 @@
+@@ -211,12 +212,12 @@
  	    cur_ic->csize = cur_ic->size;
  
  	    cur_ic->size = (int)( icon_size * 
 -		( 1.0 + (zoom_factor-1.0)/(1.0 + expf(b_scl_a + b_scl_b*rx*rx))/b_scl_d));
--	    cur_ic->x = (int)( cur_ic->ox - icon_ansd * b_dd/2 + b_pos_m * (xx - x0) );
 +		( 1.0 + (tzoomf-1.0)/(1.0 + expf(b_scl_a + b_scl_b*rx*rx))/b_scl_d));
-+	    cur_ic->x = (int)( cur_ic->ox - fact * (icon_ansd * b_dd/2 - b_pos_m * (xx - x0)) );
+ 
+ #ifdef LINEAR_TRASL
+-	    cur_ic->x = cur_ic->ox - (int)(icon_ansd * b_dd/2 + b_pos_m * (xx - x0));
++	    cur_ic->x = cur_ic->ox - (int)(fact*(icon_ansd * b_dd/2 - b_pos_m * (xx - x0)));
+ #else 
+-	    cur_ic->x = cur_ic->ox + (int)(icon_ansd * b_dd/2 * sinf(b_pos_m * rx));
++	    cur_ic->x = cur_ic->ox + (int)(fact*icon_ansd * b_dd/2 * sinf(b_pos_m * rx));
+ #endif
+ 
  	    cur_ic->y = cur_ic->oy - (int)(jump_factor*(cur_ic->size-icon_size));
- 	    cur_ic->need_update = 1;
- 	}
-@@ -335,18 +336,24 @@
+@@ -345,18 +346,24 @@
  /*}}}*/
  
  /* Refresh *//*{{{*/
@@ -68,7 +73,7 @@ diff -u -r1.2 Bar.cc
  #ifndef COOLMACHINE_N_SHITCODE
  	cleanBack();
  #endif
-@@ -382,8 +389,8 @@
+@@ -392,8 +399,8 @@
  inline void Bar::unfocus(){
      focused = 0;
  
@@ -79,7 +84,7 @@ diff -u -r1.2 Bar.cc
      zoomed_icon = -1;
  
      drawBack();
-@@ -392,8 +399,8 @@
+@@ -402,8 +409,8 @@
  inline void Bar::focus(){
      focused = 1;
  
@@ -96,7 +101,7 @@ RCS file: /mnt/back/repository/c/wbar/Bar.h,v
 retrieving revision 1.2
 diff -u -r1.2 Bar.h
 --- Bar.h	13 Jan 2007 20:57:03 -0000	1.2
-+++ Bar.h	13 Jan 2007 21:05:50 -0000
++++ Bar.h	14 Jan 2007 17:16:51 -0000
 @@ -60,7 +60,7 @@
  
  	void iconPress(int i_num, int offs);
@@ -118,11 +123,11 @@ diff -u -r1.2 Bar.h
 Index: Main.cc
 ===================================================================
 RCS file: /mnt/back/repository/c/wbar/Main.cc,v
-retrieving revision 1.2
-diff -u -r1.2 Main.cc
---- Main.cc	13 Jan 2007 20:57:03 -0000	1.2
-+++ Main.cc	13 Jan 2007 21:06:48 -0000
-@@ -228,9 +228,9 @@
+retrieving revision 1.3
+diff -u -r1.3 Main.cc
+--- Main.cc	14 Jan 2007 17:13:15 -0000	1.3
++++ Main.cc	14 Jan 2007 17:16:51 -0000
+@@ -231,9 +231,9 @@
  	    /* Motion Notify *//*{{{*/
  	    case MotionNotify:
  		if(!vertbar)
@@ -134,7 +139,7 @@ diff -u -r1.2 Main.cc
  		break;
  	    /*}}}*/
  
-@@ -244,9 +244,9 @@
+@@ -247,9 +247,9 @@
  	    case EnterNotify:
  		if(ev.xcrossing.mode!=NotifyUngrab && !(ev.xcrossing.state&Button1Mask)){
  		    if(!vertbar)
@@ -152,7 +157,7 @@ RCS file: /mnt/back/repository/c/wbar/Makefile,v
 retrieving revision 1.7
 diff -u -r1.7 Makefile
 --- Makefile	13 Jan 2007 20:57:03 -0000	1.7
-+++ Makefile	13 Jan 2007 20:58:12 -0000
++++ Makefile	14 Jan 2007 17:16:51 -0000
 @@ -1,5 +1,5 @@
  TARGET=wbar
 -CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DCOOLMACHINE_N_SHITCODE -DAVGFILTER -DDOCKWIN 
@@ -163,10 +168,10 @@ diff -u -r1.7 Makefile
 Index: SuperBar.cc
 ===================================================================
 RCS file: /mnt/back/repository/c/wbar/SuperBar.cc,v
-retrieving revision 1.3
-diff -u -r1.3 SuperBar.cc
---- SuperBar.cc	13 Jan 2007 20:57:03 -0000	1.3
-+++ SuperBar.cc	13 Jan 2007 21:07:17 -0000
+retrieving revision 1.5
+diff -u -r1.5 SuperBar.cc
+--- SuperBar.cc	14 Jan 2007 17:13:15 -0000	1.5
++++ SuperBar.cc	14 Jan 2007 17:16:51 -0000
 @@ -147,8 +147,8 @@
  
      focused = 0;
