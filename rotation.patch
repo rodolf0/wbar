@@ -4,16 +4,18 @@ RCS file: /mnt/back/repository/c/wbar/Bar.cc,v
 retrieving revision 1.3
 diff -u -r1.3 Bar.cc
 --- Bar.cc	14 Jan 2007 17:13:15 -0000	1.3
-+++ Bar.cc	16 Jan 2007 22:15:14 -0000
-@@ -1,5 +1,7 @@
++++ Bar.cc	16 Jan 2007 23:15:57 -0000
+@@ -1,5 +1,9 @@
  #include "Bar.h"
 +#include "debug.h"
++#include <typeinfo>
  #include <math.h>
 +#include <unistd.h>
++#include "SuperIcon.h"
  
  /* Posicionamiento de la ventana */
  #define MARGEN 8
-@@ -490,6 +492,45 @@
+@@ -490,6 +494,59 @@
  }
  /*}}}*/
  
@@ -28,7 +30,11 @@ diff -u -r1.3 Bar.cc
 +
 +    cur_ic = icons[zoomed_icon];
 +
-+    USE_IMAGE(cur_ic->icon);
++    if(typeid(*this) == typeid(Bar))
++	USE_IMAGE(cur_ic->icon);
++    else
++	USE_IMAGE(((SuperIcon*)cur_ic)->icon_color);
++
 +    tmp_img = CLONE_IMAGE();
 +    r = sqrt(cur_ic->osize * cur_ic->osize / 2);
 +
@@ -36,7 +42,11 @@ diff -u -r1.3 Bar.cc
 +    float y01 = r * sin(135*M_PI/180);
 +
 +    for(ang=0 ; ang < 6.28; ang += 0.2){ 
-+	USE_IMAGE(cur_ic->icon);
++	if(typeid(*this) == typeid(Bar))
++	    USE_IMAGE(cur_ic->icon);
++	else
++	    USE_IMAGE(((SuperIcon*)cur_ic)->icon_color);
++
 +	SET_BLEND(0);
 +
 +	imlib_blend_image_onto_image_at_angle(tmp_img, 1,
@@ -50,8 +60,14 @@ diff -u -r1.3 Bar.cc
 +	usleep(800);
 +    }
 +
-+    FREE_IMAGE(cur_ic->icon);
-+    cur_ic->icon = tmp_img;
++    if(typeid(*this) == typeid(Bar)){
++	FREE_IMAGE(cur_ic->icon);
++	cur_ic->icon = tmp_img;
++    }else{
++	FREE_IMAGE(((SuperIcon*)cur_ic)->icon_color);
++	((SuperIcon*)cur_ic)->icon_color = tmp_img;
++    }
++
 +    cur_ic->need_update = 1;
 +    render();
 +}
@@ -65,7 +81,7 @@ RCS file: /mnt/back/repository/c/wbar/Bar.h,v
 retrieving revision 1.2
 diff -u -r1.2 Bar.h
 --- Bar.h	13 Jan 2007 20:57:03 -0000	1.2
-+++ Bar.h	16 Jan 2007 19:58:00 -0000
++++ Bar.h	16 Jan 2007 22:26:37 -0000
 @@ -94,6 +94,7 @@
  	void iconUp(int i_num);
  	void setPosition(std::string p);
@@ -80,7 +96,7 @@ RCS file: /mnt/back/repository/c/wbar/Main.cc,v
 retrieving revision 1.3
 diff -u -r1.3 Main.cc
 --- Main.cc	14 Jan 2007 17:13:15 -0000	1.3
-+++ Main.cc	16 Jan 2007 19:57:43 -0000
++++ Main.cc	16 Jan 2007 22:26:37 -0000
 @@ -208,6 +208,11 @@
  		    case 3:/* Redraw Bar*/
  			execvp(argv[0], argv);
@@ -93,3 +109,18 @@ diff -u -r1.3 Main.cc
  		    case 1:/* Execute Program */
  			if(!vertbar)
  			    inum = barra->iconIndex(ev.xbutton.x);
+Index: SuperIcon.h
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/SuperIcon.h,v
+retrieving revision 1.1.1.1
+diff -u -r1.1.1.1 SuperIcon.h
+--- SuperIcon.h	19 Oct 2006 23:25:01 -0000	1.1.1.1
++++ SuperIcon.h	16 Jan 2007 22:47:51 -0000
+@@ -14,6 +14,7 @@
+ 	std::string text;
+ 	
+ 	friend class SuperBar;
++	friend class Bar;
+ 
+     public:
+ 	SuperIcon(std::string iconImg, std::string cmd, std::string txt, 
