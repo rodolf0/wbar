@@ -1,0 +1,95 @@
+Index: Bar.cc
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/Bar.cc,v
+retrieving revision 1.3
+diff -u -r1.3 Bar.cc
+--- Bar.cc	14 Jan 2007 17:13:15 -0000	1.3
++++ Bar.cc	16 Jan 2007 22:15:14 -0000
+@@ -1,5 +1,7 @@
+ #include "Bar.h"
++#include "debug.h"
+ #include <math.h>
++#include <unistd.h>
+ 
+ /* Posicionamiento de la ventana */
+ #define MARGEN 8
+@@ -490,6 +492,45 @@
+ }
+ /*}}}*/
+ 
++void Bar::animate(){
++    _image tmp_img;
++    Icon* cur_ic;
++    double ang = 0.0;
++    double r;
++
++    if(zoomed_icon == -1)
++	return;
++
++    cur_ic = icons[zoomed_icon];
++
++    USE_IMAGE(cur_ic->icon);
++    tmp_img = CLONE_IMAGE();
++    r = sqrt(cur_ic->osize * cur_ic->osize / 2);
++
++    float x01 = r * cos(135*M_PI/180);
++    float y01 = r * sin(135*M_PI/180);
++
++    for(ang=0 ; ang < 6.28; ang += 0.2){ 
++	USE_IMAGE(cur_ic->icon);
++	SET_BLEND(0);
++
++	imlib_blend_image_onto_image_at_angle(tmp_img, 1,
++	    0, 0, cur_ic->osize, cur_ic->osize, 
++	    cur_ic->osize/2 + (x01 * cos(ang) - y01 * sin(ang)), // 
++	    cur_ic->osize/2 - (x01 * sin(ang) + y01 * cos(ang)), // upper left corner
++	    cur_ic->osize * cos(ang), -cur_ic->osize * sin(ang)); // upper right corner (relative)
++
++	cur_ic->need_update = 1;
++	render();
++	usleep(800);
++    }
++
++    FREE_IMAGE(cur_ic->icon);
++    cur_ic->icon = tmp_img;
++    cur_ic->need_update = 1;
++    render();
++}
++
+ #if 0
+ /* Zoom beans *//*{{{*/
+ void Bar::setZoom(float zoomf){
+Index: Bar.h
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/Bar.h,v
+retrieving revision 1.2
+diff -u -r1.2 Bar.h
+--- Bar.h	13 Jan 2007 20:57:03 -0000	1.2
++++ Bar.h	16 Jan 2007 19:58:00 -0000
+@@ -94,6 +94,7 @@
+ 	void iconUp(int i_num);
+ 	void setPosition(std::string p);
+ 
++	void animate();
+ 	//void setZoom(float zoomf);
+ 	//float getZoom();
+ };
+Index: Main.cc
+===================================================================
+RCS file: /mnt/back/repository/c/wbar/Main.cc,v
+retrieving revision 1.3
+diff -u -r1.3 Main.cc
+--- Main.cc	14 Jan 2007 17:13:15 -0000	1.3
++++ Main.cc	16 Jan 2007 19:57:43 -0000
+@@ -208,6 +208,11 @@
+ 		    case 3:/* Redraw Bar*/
+ 			execvp(argv[0], argv);
+ 			break;
++
++		    case 2:
++			barra->animate();
++			break;
++
+ 		    case 1:/* Execute Program */
+ 			if(!vertbar)
+ 			    inum = barra->iconIndex(ev.xbutton.x);
