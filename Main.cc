@@ -121,7 +121,7 @@ int main(int argc, char **argv) try{
     /* Create the Bar *//*{{{*/
     if(optparser.isset("balfa") || optparser.isset("falfa") || 
 	optparser.isset("filter") || optparser.isset("fr")|| optparser.isset("fa") ||
-	optparser.isset("fg")|| optparser.isset("fb") || !text.empty()){
+	optparser.isset("fg")|| optparser.isset("fb") || !(text.empty() || optparser.isset("nofont")) ){
 	
 	barra = new SuperBar(&barwin, image, text,
 	    atoi(optparser.getArg("isize").c_str()),
