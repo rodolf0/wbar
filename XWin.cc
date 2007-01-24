@@ -29,6 +29,9 @@ XWin::XWin(int xx, int yy, int ww, int hh) :
     delWindow = XInternAtom(display, "WM_DELETE_WINDOW", false);
     /* Set WM Protocols to report window delete event */
     XSetWMProtocols(display, window, &delWindow, 1);
+
+    XClassHint ch = {"wbar", "wbar"};
+    XSetClassHint(display, window, &ch);
 }
 
 XWin::~XWin(){
