@@ -82,7 +82,7 @@ int main(int argc, char **argv) try{
     /* window configuration *//*{{{*/
     barwin.setName("wbar");
     if( optparser.isset("above-desk") ){
-	barwin.setDesktopWindow();
+	barwin.setDockWindow();
 	barwin.skipTaskNPager();
 	barwin.noDecorations();
 	barwin.setSticky();

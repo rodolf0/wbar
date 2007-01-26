@@ -111,12 +111,13 @@ void XWin::setOverrideRedirection(Bool ovr){
     XChangeWindowAttributes(display, window, CWOverrideRedirect | CWBackPixmap  , &attr);
 }
 
-void XWin::setDesktopWindow(){
+void XWin::setDockWindow(){
     Atom a = XInternAtom(display, "_NET_WM_WINDOW_TYPE", True);
 
     if (a != None) {
-	Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", True);
+	//Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", True);
 	//Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
+	Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DOCK", True);
 	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeReplace, (unsigned char *) &prop, 1);
     }
 }
