@@ -111,12 +111,11 @@ void XWin::setOverrideRedirection(Bool ovr){
     XChangeWindowAttributes(display, window, CWOverrideRedirect | CWBackPixmap  , &attr);
 }
 
-void XWin::setDockWindow(){
+void XWin::setDesktopWindow(){
     Atom a = XInternAtom(display, "_NET_WM_WINDOW_TYPE", True);
 
     if (a != None) {
-	Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DOCK", True);
-	// For XFCE NORMAL keeps window from going under desktop
+	Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", True);
 	//Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
 	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeReplace, (unsigned char *) &prop, 1);
     }
@@ -136,10 +135,9 @@ void XWin::setSticky(){
 
     if (a != None) {
 	long prop = 0xFFFFFFFF;
-	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &prop, 1);
+	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &prop, 1);
     }
 
-    /* PHK: Add EWMH hint STICKY to _NET_WM_STATE */
     a = XInternAtom(display, "_NET_WM_STATE", True);
     if (a != None) {
 	Atom prop = XInternAtom(display, "_NET_WM_STATE_STICKY", True);
@@ -149,14 +147,12 @@ void XWin::setSticky(){
 
 void XWin::skipTaskNPager(){
 
-    /* PHK: Add EWMH hint SKIP_TASKBAR to _NET_WM_STATE */
     Atom a = XInternAtom(display, "_NET_WM_STATE", True);
     if (a != None) {
 	Atom prop = XInternAtom(display, "_NET_WM_STATE_SKIP_TASKBAR", True);
 	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
     }
 
-    /* PHK: Add EWMH hint SKIP_PAGER to _NET_WM_STATE */
     a = XInternAtom(display, "_NET_WM_STATE", True);
     if (a != None) {
 	Atom prop = XInternAtom(display, "_NET_WM_STATE_SKIP_PAGER", True);
@@ -165,13 +161,12 @@ void XWin::skipTaskNPager(){
 }
 
 void XWin::bottomLayer(){
-    /* make sure the layer is on the bottom */
     Atom a = XInternAtom(display, "_WIN_LAYER", True);
     if (a != None) {
-	long prop = 0;
-	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeReplace, (unsigned char *) &prop, 1);
+	long prop = 0; // 6 is above && _NET_WM_STATE_ABOVE in STATE
+	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &prop, 1);
     }
-    /* PHK: also append EWMH hint for BELOW also */
+
     a = XInternAtom(display, "_NET_WM_STATE", True);
     if (a != None) {
 	Atom prop = XInternAtom(display, "_NET_WM_STATE_BELOW", True);

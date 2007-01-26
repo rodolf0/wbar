@@ -48,7 +48,7 @@ class XWin{
 
 	void setOverrideRedirection(Bool ovr = True);
 	void noDecorations();
-	void setDockWindow();
+	void setDesktopWindow();
 	void setSticky();
 	void skipTaskNPager();
 	void bottomLayer();
