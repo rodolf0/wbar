@@ -425,7 +425,6 @@ inline void Bar::iconPress(int i_num, int offs){
 
     cur_ic = icons[i_num];
 
-    //cleanI(cur_ic->x, cur_ic->size);
     cur_ic->cx = cur_ic->x;
     cur_ic->csize = cur_ic->size;
 

@@ -183,12 +183,13 @@ int main(int argc, char **argv) try{
 		switch(ev.xbutton.button){
 		    case 1:
 			if(butpress!=0){
-			    if(!vertbar)
+			    if(!vertbar){
 				if((inum = barra->iconIndex(ev.xbutton.x))!=-1)
 				    barra->iconDown(inum);
-			    else
+			    }else{
 				if((inum = barra->iconIndex(ev.xbutton.y))!=-1)
 				    barra->iconDown(inum);
+			    }
 			}
 			break;
 		    case 4: //wheel up

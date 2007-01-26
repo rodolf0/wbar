@@ -56,68 +56,8 @@ void XWin::mapWindow(){
     XMapWindow(display, window);
 }
 
-#if 0
-/* nextEvent for normal apps wich wouldn't fast response *//*{{{*/
-/* returns false if timeout */
-bool XWin::nextEvent(XEvent *ev, int msec){
-    struct timeval timeout;
-    fd_set rset;
-
-    XSync(display, False);
-    if (XPending(display)) {
-	XNextEvent(display, ev);
-    }else{
-	timeout.tv_sec = msec / 1000;
-	timeout.tv_usec = (msec % 1000) * 1000;
-
-	FD_ZERO(&rset);
-	FD_SET(ConnectionNumber(display), &rset);
-
-	if (select(ConnectionNumber(display)+1, &rset, NULL, NULL, &timeout) > 0) 
-	    XNextEvent(display, ev);
-	else
-	    /* timeout */
-	    return false;
-    }
-
-    if(ev->type == ClientMessage)
-	if(ev->xclient.data.l[0] == (long)delWindow){
-	    XDestroyWindow(display, window);
-	    XFlush(display);
-	}
-
-    return true;
-}
-/*}}}*/
-#endif
-
 bool XWin::nextEvent(XEvent *ev){
-    /* Dont block cause pointer-motion events acumulate
-     * and we need to discard them to keep interactive
-     */
-	// This is the old method/*{{{*/
-# if 0
-    /* The sense of this is: process important all important
-     * events. Once that's done flush posibly acumulated 
-     * pointer motion events */
 
-    /* Check for the events we're interested in except
-     * for pointer motion notifications */
-    if( XCheckWindowEvent(display, window, 
-               eventMask & ~PointerMotionMask, ev) )
-       return true;
-    else{
-       /* Wait for server to process events 
-        * & discards events in queue (1) */
-       XSync(display, True);
-       /* No ev in queue => sleeps 
-        * once we procesed all important events and discarded
-        * acumulated trivial events wait fore some event */
-       XWindowEvent(display, window, eventMask, ev);
-       return true;
-    }
-#endif
-/*}}}*/
 
     int qlen;
 
@@ -127,7 +67,7 @@ bool XWin::nextEvent(XEvent *ev){
 	    if( XCheckWindowEvent(display, window, eventMask, ev) == False ){
 		/* process events we're not waiting for */
 		XSync(display, True);
-		XWindowEvent(display, window, eventMask, ev);
+		continue;
 	    }
 	}else
 	    XWindowEvent(display, window, eventMask, ev);
