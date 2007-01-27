@@ -9,9 +9,11 @@ SuperBar::SuperBar(XWin *win, string barImg, string barFont, int iSize, int iDis
     int unfocusAlfa, int filtSel, unsigned int filtCol, bool dfont) :
 
     Bar(win, barImg, iSize, iDist, zFactor, jFactor, bOrient, bPosition, nAnim), 
-    drawfont(dfont), filtSel(filtSel), filtRed((filtCol & 0x00ff0000)>>16), 
-    filtGreen((filtCol & 0x0000ff00)>>8), filtBlue(filtCol & 0x000000ff), 
-    filtAlfa((filtCol & 0xff000000)>>24), unfocusAlfa(unfocusAlfa), barAlfa(barAlfa){ 
+    font(NULL), font_w(0), drawfont(dfont), filtSel(filtSel), filtRed((filtCol & 0x00ff0000)>>16), 
+    filtGreen((filtCol & 0x0000ff00)>>8), filtBlue(filtCol & 0x000000ff),
+    filtAlfa((filtCol & 0xff000000)>>24), unfocusAlfa(unfocusAlfa), barAlfa(barAlfa) { 
+
+    int textW, textH;
 
     initFilters();
 
@@ -21,10 +23,16 @@ SuperBar::SuperBar(XWin *win, string barImg, string barFont, int iSize, int iDis
 	if( !(font = LOAD_FONT(barFont.c_str())) )
 	    throw (barFont + " -> Couldn't load font.").c_str();
 	USE_FONT(font);
+
+	imlib_get_text_size("MMMMMMMMMMMMMMM", &textW, &textH);
+	font_restore = imlib_create_image(textW, 2*textH);
     }
 }
 
 SuperBar::~SuperBar(){
+
+    if( font )
+	FREE_IMAGE(font_restore);
 
     if(filtSel != 0){
 	imlib_context_set_filter(colorFilter);
@@ -173,33 +181,55 @@ inline void SuperBar::unfocus(){
 void SuperBar::render(){
     SuperIcon *cur_ic;
     _image cur_im = NULL, tIcon;
-    int tw, th;
+    int tw = 0, th = 0;
 
-#ifdef COOLMACHINE_N_SHITCODE
-    drawBack();
-#endif
+    /* save text coords and render zoomed ic last *//*{{{*/
+    /* restore image under text */
+    if(font && drawfont)
+	if(font_w != 0 )
+	    BLEND_IMAGE(font_restore, 0, 0, font_w, font_h, font_x, font_y, font_w, font_h);
+
+    if(zoomed_icon != -1){
+	/* Blend the zoomed icon last */
+	cur_ic = (SuperIcon*)icons.back();
+	icons.back() = icons[zoomed_icon];
+	icons[zoomed_icon] = cur_ic;
+
+
+	if(font && drawfont){
+	    cur_ic = (SuperIcon*)icons.back();
+	    /* text drawing cords */
+	    if(orientation == 0){
+		tw = cur_ic->x - (cur_ic->textW - cur_ic->size)/2;
+		th = cur_ic->y + cur_ic->size - cur_ic->textH;
+	    }else{
+		tw = cur_ic->y - (cur_ic->textW - cur_ic->size)/2;
+		th = cur_ic->x + cur_ic->size - cur_ic->textH;
+	    }
+	
+	    /* Keep the image before text */
+	    font_x = tw; font_y = th;
+	    font_w = cur_ic->textW+2; font_h = cur_ic->textH+2;
+	    
+	    USE_IMAGE(font_restore);
+	    BLEND_IMAGE(buffer, tw, th, font_w, font_h, 0, 0, font_w, font_h);
+	}
+
+    }else 
+	if(font && drawfont)
+	    font_w = 0;
+/*}}}*/
 
     /* Set work area */
     USE_IMAGE(buffer);
     SET_BLEND(1);
-
-    /* Blend the zoomed icon last */
-    if(zoomed_icon != -1){
-	cur_ic = (SuperIcon*)icons.back();
-	icons.back() = icons[zoomed_icon];
-	icons[zoomed_icon] = cur_ic;
-    }
 
     /* Blend Icons */
     for(size_t a=0; a<icons.size(); a++){
 	cur_ic = (SuperIcon*)icons[a];
 	
 	/* If Icon needs update => blend it */
-#ifdef COOLMACHINE_N_SHITCODE
-	if(cur_ic->need_update != 9){
-#else
 	if(cur_ic->need_update == 1){
-#endif
 
 	    cur_ic->need_update = 0;
 
@@ -243,15 +273,11 @@ void SuperBar::render(){
 		BLEND_IMAGE(cur_im, 0, 0, cur_ic->osize, cur_ic->osize, 
 		    cur_ic->y, cur_ic->x, cur_ic->size, cur_ic->size);
 
+
+
 	    if(font && drawfont){
+
 		if(a == icons.size()-1 && zoomed_icon != -1){
-		    if(orientation == 0){
-			tw = cur_ic->x - (cur_ic->textW - cur_ic->size)/2;
-			th = cur_ic->y + cur_ic->size - cur_ic->textH;
-		    }else{
-			tw = cur_ic->y - (cur_ic->textW - cur_ic->size)/2;
-			th = cur_ic->x + cur_ic->size - cur_ic->textH;
-		    }
 
 		    imlib_context_set_color(255, 0, 0, 255);
 		    imlib_text_draw(tw, th, cur_ic->text.c_str());

@@ -294,10 +294,6 @@ void Bar::drawBack(){
 void Bar::render(){
     Icon *cur_ic;
 
-#ifdef COOLMACHINE_N_SHITCODE
-    drawBack();
-#endif
-
     /* Set work area */
     USE_IMAGE(buffer);
     SET_BLEND(1);
@@ -314,11 +310,7 @@ void Bar::render(){
 	cur_ic = icons[a];
 	
 	/* If Icon needs update => blend it */
-#ifdef COOLMACHINE_N_SHITCODE
-	if(cur_ic->need_update != 9){
-#else
 	if(cur_ic->need_update == 1){
-#endif
 
 	    cur_ic->need_update = 0;
 
@@ -357,9 +349,7 @@ void Bar::refresh(int mouse_x){
 	if(!focused) focus();
 
 	transform(iNum, iOff);
-#ifndef COOLMACHINE_N_SHITCODE
 	cleanBack();
-#endif
 
     /* out of the bar */
     }else{

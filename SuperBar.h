@@ -10,6 +10,9 @@ class SuperBar : public Bar{
 	Imlib_Filter fAlfaUnfocus;
 	_font font;
 
+	_image font_restore;
+	int font_x, font_y, font_w, font_h;
+
 	int drawfont;
 
 	/* Icon selection */

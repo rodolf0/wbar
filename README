@@ -91,14 +91,6 @@ t: <path-to-font-to-display-text-with/size>
 IF A FONT ISN'T SUPPLIED THEN NO TEXT RENDERING IS DONE.
 
 *******************
-If you aren't going to use fonts you should change the following line in Makefile:
-
-CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DDOCKWIN -DCOOLMACHINE_N_SHITCODE
-Change for this one:
-CXXFLAGS=`imlib2-config --cflags` -Wall -O2 -DDOCKWIN
-
-which should make things imperceptiblly faster.
-*******************
 
 Filters:
 --------
