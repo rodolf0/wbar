@@ -41,7 +41,7 @@ config:
 		read recfg; \
 		if [ "$$recfg" = "y" -o "$$recfg" = "Y" ]; then \
 			awk '{if($$1 ~ /i:/ || ($$1 ~ /t:/ && NR<4)) print $$1" $(HOME)/"$$2; else print $$0;}' \
-			    ./dot.wbar > $(HOME)/dot.wbar; \
+			    ./dot.wbar > $(HOME)/.wbar; \
 			cp -a ./wbar.icons $(HOME)/.wbar.icons; \
 		fi \
 	fi
