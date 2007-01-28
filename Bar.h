@@ -57,6 +57,7 @@ class Bar{
 	/* set bar */
 	void focus();
 	virtual void unfocus();
+	void restoreIcons();
 
 	void iconPress(int i_num, int offs);
 

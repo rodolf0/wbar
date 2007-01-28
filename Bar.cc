@@ -175,17 +175,7 @@ void Bar::transform(int i_num, int i_off){
 	xx = i_num * icon_unit + i_off, // abs mouse pos
 	rx = xx - icon_unit/2; // relative mouse pos
 
-    Icon *cur_ic=0;
-
-    /* check wether we're over the icon *//*{{{*/
-    /* i_off > i_x-i_ox  &&
-     * i_off < i_x+i_s-i_ox of zoomed icon? => on it */
-    if(i_off > b_dd/(4+2*b_dd/icon_unit) &&
-       i_off < (b_dd+4*icons[i_num]->size)/(4+2*b_dd/icon_unit))
-	zoomed_icon = i_num;
-    else
-	zoomed_icon = -1 ; 
-    /*}}}*/
+    Icon *cur_ic=0, *prev_ic=0;
 
     for(a=0; a<(int)icons.size(); a++, x0 += icon_unit, rx -= icon_unit ){
 
@@ -204,6 +194,16 @@ void Bar::transform(int i_num, int i_off){
 		cur_ic->x = t_x;
 		cur_ic->y = t_y;
 		cur_ic->need_update = 1;
+	    }else{
+		/* if icon is stepped uppon -> redraw it */
+		if(a>0){
+		    prev_ic = icons[a-1];
+		    if(prev_ic->need_update == 1 && prev_ic->cx + prev_ic->csize > t_x ){
+			cur_ic->cx = t_x;
+			cur_ic->csize = cur_ic->size;
+			cur_ic->need_update = 1;
+		    }
+		}
 	    }
 	}else{
 
@@ -223,6 +223,16 @@ void Bar::transform(int i_num, int i_off){
 	    cur_ic->need_update = 1;
 	}
     }
+    /* check wether we're over the icon *//*{{{*/
+    /* i_off > i_x-i_ox  &&
+     * i_off < i_x+i_s-i_ox of zoomed icon? => on it */
+    cur_ic = icons[i_num];
+    if(i_off > cur_ic->x - cur_ic->ox &&
+       i_off < cur_ic->x + cur_ic->size - cur_ic->ox)
+	zoomed_icon = i_num;
+    else
+	zoomed_icon = -1 ; 
+    /*}}}*/
 }
 /*}}}*/
 
@@ -338,40 +348,24 @@ void Bar::render(){
 
 /* Refresh *//*{{{*/
 void Bar::refresh(int mouse_x){
-    Icon *cur_ic;
-
     int iNum = iconNumber(mouse_x);
     int iOff = iconOffset(mouse_x);
 
     /* on the bar */
     if(mouse_x > (int)(icon_offset + icon_size/2.0) && iNum < (int)icons.size()){
 
-	if(!focused) focus();
+	if(!focused){
+	    focus();
+	    restoreIcons();
+	}
 
 	transform(iNum, iOff);
 	cleanBack();
 
     /* out of the bar */
-    }else{
-
-	if(focused) unfocus();
-
-	for(size_t a=0; a < icons.size(); a++){
-
-	    cur_ic = icons[a];
-
-	    if(cur_ic->size == icon_size && cur_ic->x == cur_ic->ox &&
-		cur_ic->y == cur_ic->oy) continue;
-
-	    cur_ic->cx = cur_ic->x;
-	    cur_ic->csize = cur_ic->size;
-
-	    cur_ic->x = cur_ic->ox;
-	    cur_ic->y = cur_ic->oy;
-
-	    cur_ic->size = icon_size;
-	    cur_ic->need_update = 1;
-	}
+    }else if(focused){
+	unfocus();
+	restoreIcons();
     }
 
     render();
@@ -379,6 +373,24 @@ void Bar::refresh(int mouse_x){
 /*}}}*/
 
 /* In & out of the bar *//*{{{*/
+inline void Bar::restoreIcons(){
+    Icon *cur_ic;
+
+    for(size_t a=0; a < icons.size(); a++){
+	
+	cur_ic = icons[a];
+	
+	cur_ic->cx = cur_ic->x;
+	cur_ic->csize = cur_ic->size;
+	
+	cur_ic->x = cur_ic->ox;
+	cur_ic->y = cur_ic->oy;
+	
+	cur_ic->size = icon_size;
+	cur_ic->need_update = 1;
+    }
+}
+
 inline void Bar::unfocus(){
     focused = 0;
 
