@@ -9,7 +9,7 @@ Icon::Icon(string iconImg, string cmd, int xx, int yy) :
 	throw (iconImg + " -> Couldn't load icon image.").c_str();
 
     USE_IMAGE(icon);
-    csize = osize = size = IMAGE_WIDTH();
+    osize = size = IMAGE_WIDTH();
 }    
 
 Icon::~Icon(){

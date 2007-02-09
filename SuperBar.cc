@@ -9,7 +9,7 @@ SuperBar::SuperBar(XWin *win, string barImg, string barFont, int iSize, int iDis
     int unfocusAlfa, int filtSel, unsigned int filtCol, bool dfont) :
 
     Bar(win, barImg, iSize, iDist, zFactor, jFactor, bOrient, bPosition, nAnim), 
-    font(NULL), font_w(0), drawfont(dfont), filtSel(filtSel), filtRed((filtCol & 0x00ff0000)>>16), 
+    font(NULL), drawfont(dfont), rest_w(0), filtSel(filtSel), filtRed((filtCol & 0x00ff0000)>>16), 
     filtGreen((filtCol & 0x0000ff00)>>8), filtBlue(filtCol & 0x000000ff),
     filtAlfa((filtCol & 0xff000000)>>24), unfocusAlfa(unfocusAlfa), barAlfa(barAlfa) { 
 
@@ -24,8 +24,8 @@ SuperBar::SuperBar(XWin *win, string barImg, string barFont, int iSize, int iDis
 	    throw (barFont + " -> Couldn't load font.").c_str();
 	USE_FONT(font);
 
-	imlib_get_text_size("MMMMMMMMMMMMMMM", &textW, &textH);
-	font_restore = imlib_create_image(textW, 2*textH);
+	imlib_get_text_size("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM", &textW, &textH);
+	font_restore = CREATE_IMAGE(textW, 2*textH);
     }
 }
 
@@ -133,7 +133,7 @@ void SuperBar::addIcon(string path, string comm, string txt){
     }
 
     icons.push_back( new SuperIcon(path, comm, txt,
-	x + icon_size/2 + icons.size() * (icon_size + icon_dist), // x coord
+	(int)icon_offset + icon_size/2 + icons.size() * icon_unit, // x coord
 	y + (int)(0.125 * icon_size), textW, textH) ); // y coord
 
     ic = (SuperIcon*)icons.back();
@@ -183,12 +183,16 @@ void SuperBar::render(){
     _image cur_im = NULL, tIcon;
     int tw = 0, th = 0;
 
-    /* save text coords and render zoomed ic last *//*{{{*/
-    /* restore image under text */
     if(font && drawfont)
-	if(font_w != 0 )
-	    BLEND_IMAGE(font_restore, 0, 0, font_w, font_h, font_x, font_y, font_w, font_h);
+	if(rest_w != 0){
+	    USE_IMAGE(buffer);
+	    BLEND_IMAGE(font_restore, 0, 0, rest_w, rest_h, 
+		rest_x, rest_y, rest_w, rest_h);
 
+	    rest_w = 0;
+	}
+
+    /* save text coords and render zoomed ic last *//*{{{*/
     if(zoomed_icon != -1){
 	/* Blend the zoomed icon last */
 	cur_ic = (SuperIcon*)icons.back();
@@ -206,19 +210,19 @@ void SuperBar::render(){
 		tw = cur_ic->y - (cur_ic->textW - cur_ic->size)/2;
 		th = cur_ic->x + cur_ic->size - cur_ic->textH;
 	    }
-	
-	    /* Keep the image before text */
-	    font_x = tw; font_y = th;
-	    font_w = cur_ic->textW+2; font_h = cur_ic->textH+2;
-	    
+
+	    /* keep image under text */
 	    USE_IMAGE(font_restore);
-	    BLEND_IMAGE(buffer, tw, th, font_w, font_h, 0, 0, font_w, font_h);
+	    rest_x = tw; rest_y = th; 
+	    rest_w = cur_ic->textW + 2; rest_h = cur_ic->textH + 2;
+
+	    BLEND_IMAGE(buffer, rest_x, rest_y, rest_w, rest_h, 
+		0, 0, rest_w, rest_h);
 	}
 
-    }else 
-	if(font && drawfont)
-	    font_w = 0;
-/*}}}*/
+    }
+    
+    /*}}}*/
 
     /* Set work area */
     USE_IMAGE(buffer);

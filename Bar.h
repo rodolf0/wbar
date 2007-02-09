@@ -61,7 +61,7 @@ class Bar{
 
 	void iconPress(int i_num, int offs);
 
-	void transform(int num, int off);
+	void transform(int mousex);
 	virtual void render();
 
 	void acquireBack();
@@ -70,9 +70,6 @@ class Bar{
 
 	void scale(bool updateBG = true);
 
-	int iconNumber(int mouse_x);
-	int iconOffset(int mouse_x);
-	
     public:
 
 	Bar(XWin *win, std::string barImg, int iSize, int iDist, float zFactor, 
