@@ -33,6 +33,7 @@ class SuperBar : public Bar{
 	void initFilters();
 
 	void render();
+	void cleanBack();
 
     public:
 	SuperBar(XWin *win, std::string barImg, std::string barFont, int iSize, int iDist, 

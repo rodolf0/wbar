@@ -73,23 +73,22 @@ void Bar::scale(bool updateBG){
     // x1 = (a - (icon_anim - 1)/2) * icon_unit;
     // xm = (a + 0.5) * icon_unit;
 
-    /* Estos calculos de escala son en base a la funcion sigmoidea f = 1/(1+exp(a+bx^2))*/
-#if 0
-    b_scl_c = 0.005; // mientras mas cercano a 0 mas se desplaza chico
-    b_scl_d = 0.05; // mientras mas cercano a 1 mas se desplaza grande -> si quiero pico lo achico
+#ifdef COS_ZOOM
+    b_scl_b = 3.14159 / icon_unit / icon_anim;
 #else
+    /* Estos calculos de escala son en base a la funcion sigmoidea f = 1/(1+exp(a+bx^2))*/
     b_scl_c = 0.01; // mientras mas cercano a 0 mas se desplaza chico
     b_scl_d = 0.20; // mientras mas cercano a 1 mas se desplaza grande -> si quiero pico lo achico
-#endif
     b_scl_a = logf((1.0-b_scl_d)/b_scl_d);
     //b_scl_b = (logf((1.0-b_scl_c)/b_scl_c) - b_scl_a)/(x0-xm)^2;
     b_scl_b = 4*(logf((1.0-b_scl_c)/b_scl_c) - b_scl_a)/
 	(icon_anim*icon_anim*icon_unit*icon_unit);
+#endif
 #ifdef LINEAR_TRASL
     //float m = (icon_anim-1)*b_dd / (x1 - x0);
     b_pos_m = -icon_ansd * 2 * b_dd / icon_unit / icon_anim;
 #else
-    b_pos_m= - 3.14159 / icon_unit / icon_anim;
+    b_pos_m = - 3.14159 / icon_unit / icon_anim;
 #endif
 
     /* bar dimensions */
@@ -218,8 +217,13 @@ void Bar::transform(int mousex){
 	    cur_ic->cx = cur_ic->x;
 	    cur_ic->csize = cur_ic->size;
 
+#ifdef COS_ZOOM
+	    cur_ic->size = (int)( icon_size * 
+		    ( 1.0 + (zoom_factor-1.0)*cosf(b_scl_b * rx)));
+#else
 	    cur_ic->size = (int)( icon_size * 
 		( 1.0 + (zoom_factor-1.0)/(1.0 + expf(b_scl_a + b_scl_b*rx*rx))/b_scl_d));
+#endif
 
 #ifdef LINEAR_TRASL
 	    cur_ic->x = cur_ic->ox - (int)(icon_ansd * b_dd - b_pos_m * (mousex - x0));
@@ -492,9 +496,8 @@ int Bar::iconIndex(int mousex){
 	cur_ic = icons[a];
 	
 	/* Check if over the icon */
-	if(mousex >= cur_ic->x && mousex < cur_ic->x + cur_ic->size){
+	if(mousex >= cur_ic->x && mousex < cur_ic->x + cur_ic->size)
 	    return a;
-	}
     }
 
     return -1;

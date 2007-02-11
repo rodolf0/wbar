@@ -35,6 +35,7 @@ class Bar{
 	float b_scl_a;
 	float b_scl_b;
 	float b_pos_m;
+	float b_pos_n;
 	float b_dd;
 	float icon_offset;
 	int icon_unit;
@@ -66,7 +67,7 @@ class Bar{
 
 	void acquireBack();
 	void drawBack();
-	void cleanBack();
+	virtual void cleanBack();
 
 	void scale(bool updateBG = true);
 

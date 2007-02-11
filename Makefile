@@ -1,5 +1,5 @@
 TARGET=wbar
-CXXFLAGS=`imlib2-config --cflags` -Wall -O2 #-DLINEAR_TRASL #-DAVGFILTER #-DDOCKWIN
+CXXFLAGS=`imlib2-config --cflags` -Wall -O2 #-DCOS_ZOOM #-DLINEAR_TRASL #-DAVGFILTER #-DDOCKWIN
 LDFLAGS=`imlib2-config --libs`  -Wl,-O2
 PREFIX=/usr/share/wbar
 
@@ -15,7 +15,7 @@ $(objects): $(headers) Makefile
 
 $(TARGET): $(objects) 
 	g++ $(LDFLAGS) -o $(@) $(objects)
-	strip $(@)
+	#strip $(@)
 
 patch-anim1:
 	patch < animation.patch

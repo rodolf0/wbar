@@ -177,20 +177,26 @@ inline void SuperBar::unfocus(){
 }
 /*}}}*/
 
+/* Clean the Bar *//*{{{*/
+void SuperBar::cleanBack(){
+    if(font && drawfont)
+	if(rest_w > 0 ){
+	    USE_IMAGE(buffer);
+	    BLEND_IMAGE(font_restore, 0, 0, rest_w, rest_h, 
+		rest_x, rest_y, rest_w, rest_h);
+	    rest_w = 0;
+	}
+
+    Bar::cleanBack();
+}
+
+/*}}}*/
+
 /* Render the Bar *//*{{{*/
 void SuperBar::render(){
     SuperIcon *cur_ic;
     _image cur_im = NULL, tIcon;
     int tw = 0, th = 0;
-
-    if(font && drawfont)
-	if(rest_w != 0){
-	    USE_IMAGE(buffer);
-	    BLEND_IMAGE(font_restore, 0, 0, rest_w, rest_h, 
-		rest_x, rest_y, rest_w, rest_h);
-
-	    rest_w = 0;
-	}
 
     /* save text coords and render zoomed ic last *//*{{{*/
     if(zoomed_icon != -1){
@@ -210,18 +216,11 @@ void SuperBar::render(){
 		tw = cur_ic->y - (cur_ic->textW - cur_ic->size)/2;
 		th = cur_ic->x + cur_ic->size - cur_ic->textH;
 	    }
-
-	    /* keep image under text */
-	    USE_IMAGE(font_restore);
 	    rest_x = tw; rest_y = th; 
-	    rest_w = cur_ic->textW + 2; rest_h = cur_ic->textH + 2;
-
-	    BLEND_IMAGE(buffer, rest_x, rest_y, rest_w, rest_h, 
-		0, 0, rest_w, rest_h);
+	    rest_w = cur_ic->textW + 1; 
+	    rest_h = cur_ic->textH + 1;
 	}
-
     }
-    
     /*}}}*/
 
     /* Set work area */
@@ -278,15 +277,22 @@ void SuperBar::render(){
 		    cur_ic->y, cur_ic->x, cur_ic->size, cur_ic->size);
 
 
-
 	    if(font && drawfont){
 
 		if(a == icons.size()-1 && zoomed_icon != -1){
+		    /* keep image under text */
+		    SET_BLEND(0);
+		    USE_IMAGE(font_restore);
+		    BLEND_IMAGE(buffer, rest_x, rest_y, rest_w, rest_h, 0, 0, rest_w, rest_h);
 
-		    imlib_context_set_color(255, 0, 0, 255);
-		    imlib_text_draw(tw, th, cur_ic->text.c_str());
-		    imlib_context_set_color(255, 255, 255, 255);
+		    SET_BLEND(1);
+		    USE_IMAGE(buffer);
+
+		    /* draw text */
+		    imlib_context_set_color(128, 128, 128, 255);
 		    imlib_text_draw(tw+1, th+1, cur_ic->text.c_str());
+		    imlib_context_set_color(255, 255, 255, 255);
+		    imlib_text_draw(tw, th, cur_ic->text.c_str());
 		}
 	    }
 
