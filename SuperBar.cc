@@ -154,6 +154,8 @@ inline void SuperBar::unfocus(){
     _image tBar = NULL;
 
     focused = 0;
+    /* avoid from restoring bad image */
+    rest_w = 0;
 
     x = (int)icon_offset;
     width = (int)(window->w - 2*icon_offset);
