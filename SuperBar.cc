@@ -291,7 +291,7 @@ void SuperBar::render(){
 		    USE_IMAGE(buffer);
 
 		    /* draw text */
-		    imlib_context_set_color(128, 128, 128, 255);
+		    imlib_context_set_color(0, 0, 0, 255);
 		    imlib_text_draw(tw+1, th+1, cur_ic->text.c_str());
 		    imlib_context_set_color(255, 255, 255, 255);
 		    imlib_text_draw(tw, th, cur_ic->text.c_str());
