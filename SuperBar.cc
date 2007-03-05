@@ -236,7 +236,8 @@ void SuperBar::render(){
 	/* If Icon needs update => blend it */
 	if(cur_ic->need_update == 1){
 
-	    cur_ic->need_update = 0;
+	    if(a < icons.size()-1 || !focused)
+		cur_ic->need_update = 0;
 
 	    /* Select image to blend *//*{{{*/
 	    if(a == icons.size()-1 && zoomed_icon != -1){
