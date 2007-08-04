@@ -11,6 +11,7 @@ class Bar{
     protected:
 	/* Drawing buffs */
 	_image buffer;
+	_image cleaning_buffer;
 	_image barback;
 	_image bar;
 	
@@ -39,7 +40,8 @@ class Bar{
 	float b_dd;
 	float icon_offset;
 	int icon_unit;
-	int icon_ansd; // anim aside icons
+	/* animated icons on one side */
+	int icon_ansd;
 
 	/* bar position in window */
 	int x, y;
@@ -58,7 +60,9 @@ class Bar{
 	/* set bar */
 	void focus();
 	virtual void unfocus();
-	void restoreIcons();
+#ifndef NO_EXPAND
+	void expand(bool inverse);
+#endif
 
 	void iconPress(int i_num, int offs);
 

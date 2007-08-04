@@ -18,6 +18,9 @@ class Icon{
 	int x, y;
 	int size;
 
+	int bs, bx, by;
+	float vx, vs, vy;
+
 	/* redraw ? */
 	int need_update;
 	/* clean coords */

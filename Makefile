@@ -1,5 +1,5 @@
 TARGET=wbar
-CXXFLAGS=`imlib2-config --cflags` -Wall -O2 #-DCOS_ZOOM #-DLINEAR_TRASL #-DAVGFILTER #-DDOCKWIN
+CXXFLAGS=`imlib2-config --cflags` -Wall -O2 #-DCOS_ZOOM #-DLINEAR_TRASL -DNO_EXPAND #-DAVGFILTER
 LDFLAGS=`imlib2-config --libs`  -Wl,-O2
 PREFIX=/usr/share/wbar
 

@@ -1,8 +1,10 @@
-#include "Bar.h"
 #include <math.h>
+#include <sys/time.h>
+
+#include "Bar.h"
 
 /* Posicionamiento de la ventana */
-#define MARGEN 8
+#define MARGEN 4
 
 using namespace std;
 
@@ -36,6 +38,7 @@ Bar::~Bar(){
     FREE_IMAGE(buffer);
     FREE_IMAGE(barback);
     FREE_IMAGE(bar);
+    FREE_IMAGE(cleaning_buffer);
 
     while( !icons.empty() ){
 	delete icons.back();
@@ -244,6 +247,7 @@ void Bar::cleanBack(){
     Icon *cur_ic, *next_ic;
 
     USE_IMAGE(buffer);
+    SET_BLEND(0);
 
     for(size_t a=0; a<icons.size(); a++){
 	cur_ic = icons[a];
@@ -266,33 +270,19 @@ void Bar::cleanBack(){
 	}
 
 	/* Copy Root Background */
-	SET_BLEND(0);
-
-	if(orientation == 0){
-	    BLEND_IMAGE(barback, cur_ic->cx, 0, cur_ic->csize, window->h, 
+	if(orientation == 0)
+	    BLEND_IMAGE(cleaning_buffer, cur_ic->cx, 0, cur_ic->csize, window->h, 
 		    cur_ic->cx, 0, cur_ic->csize, window->h);
-	    
-	    /* Blend the bar */
-	    SET_BLEND(1);
-	    BLEND_IMAGE(bar, cur_ic->cx * owidth / width, 0, 
-		    cur_ic->csize * owidth / width, oheight,
-		    cur_ic->cx, y, cur_ic->csize, height);
-
-	}else{
-	    BLEND_IMAGE(barback, 0, cur_ic->cx, window->h, cur_ic->csize, 
+	else
+	    BLEND_IMAGE(cleaning_buffer, 0, cur_ic->cx, window->h, cur_ic->csize, 
 		    0, cur_ic->cx, window->h, cur_ic->csize);
-
-	    /* Blend the bar */
-	    SET_BLEND(1);
-	    BLEND_IMAGE(bar, 0, cur_ic->cx * owidth / width,
-		    oheight, cur_ic->csize * owidth / width,
-		    y, cur_ic->cx, height, cur_ic->csize);
-	}
     }
 }
 
 void Bar::drawBack(){
     
+    if(cleaning_buffer) FREE_IMAGE(cleaning_buffer);
+
     USE_IMAGE(buffer);
 
     /* Copy Root Background */
@@ -315,6 +305,7 @@ void Bar::drawBack(){
 	BLEND_IMAGE(bar, 0, 0, oheight, owidth, y, x, height, width);
     }
 
+    cleaning_buffer = CLONE_IMAGE();
 }
 /*}}}*/
 
@@ -372,43 +363,22 @@ void Bar::refresh(int mouse_x){
     /* on the bar */
     if(mouse_x > 0 && mouse_x < (int)icons.size() * icon_unit){
 
-	if(!focused){
-	    focus();
-	    restoreIcons();
-	}
-
 	transform(mouse_x);
+
+	if(!focused)
+	    focus();
+
 	cleanBack();
 
     /* out of the bar */
-    }else if(focused){
+    }else if(focused)
 	unfocus();
-	restoreIcons();
-    }
 
     render();
 }
 /*}}}*/
 
 /* In & out of the bar *//*{{{*/
-inline void Bar::restoreIcons(){
-    Icon *cur_ic;
-
-    for(size_t a=0; a < icons.size(); a++){
-	
-	cur_ic = icons[a];
-	
-	cur_ic->cx = cur_ic->x;
-	cur_ic->csize = cur_ic->size;
-	
-	cur_ic->x = cur_ic->ox;
-	cur_ic->y = cur_ic->oy;
-	
-	cur_ic->size = icon_size;
-	cur_ic->need_update = 1;
-    }
-}
-
 inline void Bar::unfocus(){
     focused = 0;
 
@@ -417,6 +387,10 @@ inline void Bar::unfocus(){
     zoomed_icon = -1;
 
     drawBack();
+
+#ifndef NO_EXPAND
+    expand(true);
+#endif
 }
 
 inline void Bar::focus(){
@@ -426,7 +400,68 @@ inline void Bar::focus(){
     width = window->w;
 
     drawBack();
+
+#ifndef NO_EXPAND
+    expand(false);
+#endif
 }
+
+#ifndef NO_EXPAND
+void Bar::expand(bool inverse){
+    Icon *cur_ic=0;
+    /* animation time in ms */
+    int t=0, anim_time = 80;
+    struct timeval tv0, tv;
+
+    if(inverse)
+	for(size_t i = 0; i<icons.size(); i++){
+	    cur_ic = icons[i];
+	    cur_ic->vx = -(cur_ic->x - cur_ic->ox) / (float)anim_time;
+	    cur_ic->vy = -(cur_ic->y - cur_ic->oy) / (float)anim_time;
+	    cur_ic->vs = -(cur_ic->size - icon_size) / (float)anim_time;
+
+	    cur_ic->bx = cur_ic->x;
+	    cur_ic->by = cur_ic->y;
+	    cur_ic->bs = cur_ic->size;
+	}
+    else
+	for(size_t i = 0; i<icons.size(); i++){
+	    cur_ic = icons[i];
+	    cur_ic->vx = (cur_ic->x - cur_ic->ox) / (float)anim_time;
+	    cur_ic->vy = (cur_ic->y - cur_ic->oy) / (float)anim_time;
+	    cur_ic->vs = (cur_ic->size - icon_size) / (float)anim_time;
+
+	    cur_ic->bx = cur_ic->ox;
+	    cur_ic->by = cur_ic->oy;
+	    cur_ic->bs = icon_size;
+	}
+
+    gettimeofday(&tv0, NULL);
+
+    while(t < anim_time){
+	gettimeofday(&tv, NULL);
+
+	t = (int)((tv.tv_sec - tv0.tv_sec) * 1000 + (tv.tv_usec - tv0.tv_usec)/1000);
+	/* Printing t here can tell you the max system responsiveness */
+	if(t > anim_time) t = anim_time;
+
+	for(size_t j = 0; j< icons.size(); j++){
+	    cur_ic = icons[j];
+	    cur_ic->cx = cur_ic->x;
+	    cur_ic->csize = cur_ic->size;
+
+	    cur_ic->x = cur_ic->bx + (int)(t * cur_ic->vx);
+	    cur_ic->y = cur_ic->by + (int)(t * cur_ic->vy);
+	    cur_ic->size = cur_ic->bs + (int)(t * cur_ic->vs);
+
+	    cur_ic->need_update = 1;
+	}
+	cleanBack();
+	render();
+
+    }
+}
+#endif
 /*}}}*/
 
 /* Icon press / release events *//*{{{*/
@@ -444,10 +479,6 @@ inline void Bar::iconPress(int i_num, int offs){
     cur_ic->y += offs;
 
     cur_ic->need_update = 1;
-
-    /* this should fix nex icon blanking */
-    if(i_num < (int)icons.size()-1)
-	icons[i_num+1]->need_update = 1;
 
     cleanBack();
     render();

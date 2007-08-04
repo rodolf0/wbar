@@ -11,6 +11,8 @@
 #include "IconLoader.h"
 #include "SuperBar.h"
 
+#include "debug.h"
+
 using namespace std;
 
 void corpshandler(int);
@@ -135,6 +137,8 @@ int main(int argc, char **argv) try{
 	    strtoul(optparser.getArg("fc").c_str(), NULL, 16),
 	    optparser.isset("nofont")?0:1);
 
+	ERRMSG("Using a Super Bar.");
+
 	/* Load Icon Info */
 	while( !icload.nextIconInfo(image, command, text) )
 	    ((SuperBar*)barra)->addIcon(image, command, text);
@@ -146,6 +150,8 @@ int main(int argc, char **argv) try{
 	    atof(optparser.getArg("zoomf").c_str()),
 	    atof(optparser.getArg("jumpf").c_str()), 
 	    vertbar, 1, atoi(optparser.getArg("nanim").c_str()));
+	
+	ERRMSG("Using a normal Bar.");
 
 	/* Load Icon Info */
 	while( !icload.nextIconInfo(image, command, text) )

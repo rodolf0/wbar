@@ -170,6 +170,9 @@ inline void SuperBar::unfocus(){
     }
 
     drawBack();
+#ifndef NO_EXPAND
+    expand(true);
+#endif
 
     /* Restore bar */
     if(unfocusAlfa != -1){
