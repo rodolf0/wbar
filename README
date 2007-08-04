@@ -57,7 +57,7 @@ TODO: Fix wide labels, chopped when rendering as vertical bar.
 
 Configuration file:
 -------------------
-If not supplied $HOME/.wbar will be used, 
+If not supplied $HOME/.wbar will be tried, 
 else dot.wbar at $PWD, else /usr/share/wbar/dot.wbar
 
 .wbar format:
@@ -107,4 +107,6 @@ experiment with other options.
 
 BUGS:
 ----
-* Attempt to run wbar with non existing options will make it segfault.
+You gotta be joking. :-)
+
+Fix them man ! I need a hand to keep this alive.

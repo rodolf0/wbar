@@ -17,12 +17,6 @@ $(TARGET): $(objects)
 	g++ $(LDFLAGS) -o $(@) $(objects)
 	#strip $(@)
 
-patch-anim1:
-	patch < animation.patch
-
-patch-anim2:
-	patch < animation2.patch
-
 install: $(TARGET)
 	if [ "`whoami`" != "root" ]; then \
 		echo "You must be root to install"; \
@@ -32,19 +26,13 @@ install: $(TARGET)
 	install -d $(PREFIX)
 	awk '{if($$1 ~ /i:/ || ($$1 ~ /t:/ && NR<4)) print $$1" $(PREFIX)/"$$2; else print $$0;}' \
 		./dot.wbar > $(PREFIX)/dot.wbar
-	cp -a ./wbar.icons $(PREFIX)/wbar.icons
-	install ./wbar /usr/bin
+	cp -a ./iconpack $(PREFIX)/iconpack
 
-config:
-	if [ -f "$(HOME)/.wbar" -o -d "$(HOME)/.wbar.icons" ]; then \
-		echo -en "Do you want to replace the existing config? "; \
-		read recfg; \
-		if [ "$$recfg" = "y" -o "$$recfg" = "Y" ]; then \
-			awk '{if($$1 ~ /i:/ || ($$1 ~ /t:/ && NR<4)) print $$1" $(HOME)/"$$2; else print $$0;}' \
-			    ./dot.wbar > $(HOME)/.wbar; \
-			cp -a ./wbar.icons $(HOME)/.wbar.icons; \
-		fi \
-	fi
+	ln -s -t $(PREFIX)/iconpack/wbar.nuvoux ../comic.ttf font.ttf
+	ln -s -t $(PREFIX)/iconpack/wbar.ice ../comic.ttf font.ttf
+	ln -s -t $(PREFIX)/iconpack/wbar.osx ../comic.ttf font.ttf
+	
+	install ./wbar /usr/bin
 
 uninstall:
 	if [ "`whoami`" != "root" ]; then \

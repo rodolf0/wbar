@@ -1,2 +1,5 @@
+02/07/2007 added expansion animation when entering / leaving the bar
+01/07/2007 improved background cleaning
+
 10/01/2007 fixed a bug that made wbar eat cpu under some situations.
 10/01/2007 added support for animating more than 3 icons.
