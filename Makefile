@@ -28,9 +28,9 @@ install: $(TARGET)
 		./dot.wbar > $(PREFIX)/dot.wbar
 	cp -a ./iconpack $(PREFIX)/iconpack
 
-	ln -s $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.nuvoux/font.ttf
-	ln -s $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.ice/font.ttf
-	ln -s $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.osx/font.ttf
+	ln -fs $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.nuvoux/font.ttf
+	ln -fs $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.ice/font.ttf
+	ln -fs $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.osx/font.ttf
 	
 	install ./wbar /usr/bin
 

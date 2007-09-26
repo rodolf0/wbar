@@ -13,7 +13,7 @@ Bar::Bar(XWin *win, string barImg, int iSize, int iDist, float zFactor,
 	float jFactor, int bOrient, int bPosition, int nAnim) :
 
     /* Initialization */
-    buffer(0), barback(0), bar(0), window(win), icon_dist(iDist),
+    buffer(0), cleaning_buffer(0), barback(0), bar(0), window(win), icon_dist(iDist),
     icon_size(iSize), icon_anim(nAnim), jump_factor(jFactor), zoom_factor(zFactor),
     orientation(bOrient), position(bPosition), zoomed_icon(-1), focused(1){
 
