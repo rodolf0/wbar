@@ -18,11 +18,6 @@ $(TARGET): $(objects)
 	#strip $(@)
 
 install: $(TARGET)
-	if [ "`whoami`" != "root" ]; then \
-		echo "You must be root to install"; \
-		exit 1; \
-	fi
-
 	install -d $(PREFIX)
 	awk '{if($$1 ~ /i:/ || ($$1 ~ /t:/ && NR<4)) print $$1" $(PREFIX)/"$$2; else print $$0;}' \
 		./dot.wbar > $(PREFIX)/dot.wbar
@@ -35,11 +30,6 @@ install: $(TARGET)
 	install ./wbar /usr/bin
 
 uninstall:
-	if [ "`whoami`" != "root" ]; then \
-		echo "You must be root to install"; \
-		exit 1; \
-	fi
-
 	rm -rf $(PREFIX)
 	rm -f /usr/bin/wbar
 

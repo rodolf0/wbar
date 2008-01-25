@@ -1,3 +1,13 @@
+26/09/2007 fixed cleaning buffer not being initialized that made the wbar get a SIGBUS on bsd
+26/09/2007 fixed symlink issue not being replaced and avoiding instalation
+
+10/09/2007 fixed font symlink pointing wronlgy on installation
+
+09/09/2007 added a patch to hide wbar ... doesnt come applied 
+    cause it's got some visual issues: 
+	* needs -balfa 0 to look pretty
+	* needs to be at the bottom or vertical left
+
 02/07/2007 added expansion animation when entering / leaving the bar
 01/07/2007 improved background cleaning
 
