@@ -30,7 +30,7 @@ XWin::XWin(int xx, int yy, int ww, int hh) :
     /* Set WM Protocols to report window delete event */
     XSetWMProtocols(display, window, &delWindow, 1);
 
-    XClassHint ch = {"wbar", "wbar"};
+    XClassHint ch = {(char*)"wbar", (char*)"wbar"};
     XSetClassHint(display, window, &ch);
 }
 

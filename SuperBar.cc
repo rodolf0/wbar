@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "SuperBar.h"
 #include "SuperIcon.h"
 
