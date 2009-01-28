@@ -2,14 +2,14 @@
 #define _ICON_H_
 
 #include <string>
-#include "ImgWrap.h"
+#include "Image.h"
 
 class Bar;
 class SuperBar;
 
 class Icon{
     protected:
-	_image icon;
+	ImlibImage icon;
 
 	/* normal state */
 	int ox, oy;
@@ -30,7 +30,7 @@ class Icon{
 
 	/* extend friendship? */
 	friend class Bar;
-	friend class SuperBar;
+	//friend class SuperBar;
 
     public:
 

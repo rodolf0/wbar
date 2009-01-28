@@ -4,8 +4,7 @@ LDFLAGS=`imlib2-config --libs`  -Wl,-O2
 PREFIX=/usr/share/wbar
 
 	
-sources= XWin.cc Icon.cc Bar.cc IconLoader.cc \
-	 OptParser.cc SuperBar.cc SuperIcon.cc
+sources= XWin.cc Icon.cc Bar.cc OptParser.cc
 objects= $(sources:.cc=.o) Main.o
 headers= $(sources:.cc=.h) debug.h
 

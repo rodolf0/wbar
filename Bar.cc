@@ -1,54 +1,23 @@
 #include <math.h>
 #include <sys/time.h>
+#include <string>
 
 #include "Bar.h"
+#include "Image.h"
 
 /* Posicionamiento de la ventana */
 #define MARGEN 4
 
-using namespace std;
-
-/* Bar Constructor & Destructor *//*{{{*/
-Bar::Bar(XWin *win, string barImg, int iSize, int iDist, float zFactor, 
-	float jFactor, int bOrient, int bPosition, int nAnim) :
-
+Bar::Bar(XWin *win, const char *bpath) :
     /* Initialization */
-    buffer(0), cleaning_buffer(0), barback(0), bar(0), window(win), icon_dist(iDist),
-    icon_size(iSize), icon_anim(nAnim), jump_factor(jFactor), zoom_factor(zFactor),
-    orientation(bOrient), position(bPosition), zoomed_icon(-1), focused(1){
+    buffer(1, 1), cleaning_buffer(1, 1), barback(1, 1), bar(bpath), window(win), icon_dist(1),
+    icon_size(32), icon_anim(7), jump_factor(1.0), zoom_factor(1.8),
+    orientation(0), position(1), zoomed_icon(-1), focused(1){
 
-    /* Load Bar back ground */
-    if( !(bar = LOAD_IMAGE(barImg.c_str())) )
-	throw (barImg + " -> Image not found. Maybe using a relative path?").c_str();
-
-    /* Get Bar Dimensions */
-    USE_IMAGE(bar);
-
-    owidth = IMAGE_WIDTH(); oheight = IMAGE_HEIGHT();
-    if( orientation == 1 ) IMAGE_TRANSPOSE();
-       
-    /* Enable Bar's alpha channel */
-    IMAGE_ENABLE_ALPHA(1);
-
-    /* set bar initial values */
     scale();
 }
 
-Bar::~Bar(){
-    FREE_IMAGE(buffer);
-    FREE_IMAGE(barback);
-    FREE_IMAGE(bar);
-    FREE_IMAGE(cleaning_buffer);
-
-    while( !icons.empty() ){
-	delete icons.back();
-	icons.pop_back();
-    }
-}
-/*}}}*/
-
-/* Add Icon *//*{{{*/
-void Bar::addIcon(string path, string comm){
+void Bar::addIcon(std::string path, std::string comm){
 
     icons.push_back( new Icon(path, comm,
 	(int)icon_offset + icon_size/2 + icons.size() * icon_unit, // x coord
@@ -57,9 +26,7 @@ void Bar::addIcon(string path, string comm){
     /* not efficient to call it here but ... user doesn't have to call it */
     scale();
 }
-/*}}}*/
 
-/* Scale bar *//*{{{*/
 void Bar::scale(bool updateBG){
     float up_growth, dn_growth, b_scl_c;
 
@@ -119,9 +86,7 @@ void Bar::scale(bool updateBG){
     if(updateBG) 
 	acquireBack();
 }
-/*}}}*/
 
-/* Acquire background *//*{{{*/
 void Bar::acquireBack(){
     int t_w, t_h;
 
@@ -161,19 +126,11 @@ void Bar::acquireBack(){
     /* Move & resize win for fitting new icons */
     window->moveNresize(window->x, window->y, t_w, t_h);
 
-    if(barback) FREE_IMAGE(barback);
-    if(buffer) FREE_IMAGE(buffer);
-
-    buffer = CREATE_IMAGE(t_w, t_h);
-
-    /* Get background Image */
-    USE_DRAWABLE(DefaultRootWindow(window->display));
-    barback = IMAGE_FROM_DRAWABLE(window->x, window->y, t_w, t_h);
-    USE_DRAWABLE(window->window);
+    buffer = ImlibImage(t_w, t_h);
+    barback = ImlibImage( DefaultRootWindow(window->display), 
+            window->x, window->y, t_w, t_h);
 }
-/*}}}*/
 
-/* Icons Scaling *//*{{{*/
 void Bar::transform(int mousex){ 
 #ifdef LINEAR_TRASL
     int x0 = (icon_ansd+1) * icon_unit; // last movable pos
@@ -246,112 +203,82 @@ void Bar::transform(int mousex){
 void Bar::cleanBack(){
     Icon *cur_ic, *next_ic;
 
-    USE_IMAGE(buffer);
-    SET_BLEND(0);
-
     for(size_t a=0; a<icons.size(); a++){
-	cur_ic = icons[a];
+        cur_ic = icons[a];
 
-	if(cur_ic->need_update == 0) continue;
+        if(cur_ic->need_update == 0) continue;
 
-	/* force next icons redraw if stepped on them */
-	for(size_t b=a+1; b<icons.size(); b++){
-	    next_ic = icons[b];
+        /* force next icons redraw if stepped on them */
+        for(size_t b=a+1; b<icons.size(); b++){
+            next_ic = icons[b];
 
-	    if(next_ic->need_update == 1) 
-		continue;
+            if(next_ic->need_update == 1) 
+            continue;
 
-	    if(cur_ic->cx + cur_ic->csize >= next_ic->x){
-		next_ic->cx = next_ic->x;
-		next_ic->csize = next_ic->csize;
-		next_ic->need_update = 1;
-	    }else
-		break;
-	}
+            if(cur_ic->cx + cur_ic->csize >= next_ic->x){
+                next_ic->cx = next_ic->x;
+                next_ic->csize = next_ic->csize;
+                next_ic->need_update = 1;
+            }else
+                break;
+        }
 
-	/* Copy Root Background */
-	if(orientation == 0)
-	    BLEND_IMAGE(cleaning_buffer, cur_ic->cx, 0, cur_ic->csize, window->h, 
-		    cur_ic->cx, 0, cur_ic->csize, window->h);
-	else
-	    BLEND_IMAGE(cleaning_buffer, 0, cur_ic->cx, window->h, cur_ic->csize, 
-		    0, cur_ic->cx, window->h, cur_ic->csize);
+        /* Copy Root Background */
+        if(orientation == 0)
+            buffer.subImage(cur_ic->cx, 0, cur_ic->csize, window->h) += cleaning_buffer.subImage(cur_ic->cx, 0, cur_ic->csize, window->h);
+        else
+            buffer.subImage(0, cur_ic->cx, window->h, cur_ic->csize) += cleaning_buffer.subImage(0, cur_ic->cx, window->h, cur_ic->csize);
     }
 }
 
 void Bar::drawBack(){
-    
-    if(cleaning_buffer) FREE_IMAGE(cleaning_buffer);
-
-    USE_IMAGE(buffer);
-
-    /* Copy Root Background */
-    SET_BLEND(0);
 
     if(orientation == 0){
-	BLEND_IMAGE(barback, 0, 0, window->w, window->h, 
-		0, 0, window->w, window->h);
-	
-	/* Blend the bar */
-	SET_BLEND(1);
-	BLEND_IMAGE(bar, 0, 0, owidth, oheight, x, y, width, height);
-
+        buffer.subImage(0, 0, window->w, window->h) += barback.subImage(0, 0, window->w, window->h);
+        buffer.subImage(x, y, width, height) |= bar.full();
     }else{
-	BLEND_IMAGE(barback, 0, 0, window->h, window->w, 
-		0, 0, window->h, window->w);
-
-	/* Blend the bar */
-	SET_BLEND(1);
-	BLEND_IMAGE(bar, 0, 0, oheight, owidth, y, x, height, width);
+        buffer.subImage(0, 0, window->h, window->w) += barback.subImage(0, 0, window->h, window->w);
+        buffer.subImage(x, y, height, width) |= bar.subImage(0, 0, bar.ow, bar.oh);
     }
 
-    cleaning_buffer = CLONE_IMAGE();
+    cleaning_buffer = buffer;
 }
-/*}}}*/
 
-/* Render the Bar *//*{{{*/
 void Bar::render(){
     Icon *cur_ic=0;
 
-    /* Set work area */
-    USE_IMAGE(buffer);
-    SET_BLEND(1);
-
     /* Blend the zoomed icon last */
     if(zoomed_icon != -1){
-	cur_ic = icons.back();
-	icons.back() = icons[zoomed_icon];
-	icons[zoomed_icon] = cur_ic;
+        cur_ic = icons.back();
+        icons.back() = icons[zoomed_icon];
+        icons[zoomed_icon] = cur_ic;
     }
 
     /* Blend Icons */
     for(size_t a=0; a<icons.size(); a++){
-	cur_ic = icons[a];
-	
-	/* If Icon needs update => blend it */
-	if(cur_ic->need_update == 1){
+        cur_ic = icons[a];
+        
+        /* If Icon needs update => blend it */
+        if(cur_ic->need_update == 1){
 
-	    cur_ic->need_update = 0;
+            cur_ic->need_update = 0;
 
-	    if(orientation == 0)
-		BLEND_IMAGE(cur_ic->icon, 0, 0, cur_ic->osize, cur_ic->osize, 
-		    cur_ic->x, cur_ic->y, cur_ic->size, cur_ic->size);
-	    else
-		BLEND_IMAGE(cur_ic->icon, 0, 0, cur_ic->osize, cur_ic->osize, 
-		    cur_ic->y, cur_ic->x, cur_ic->size, cur_ic->size);
-	}
+            if(orientation == 0)
+                buffer.subImage(cur_ic->x, cur_ic->y, cur_ic->size, cur_ic->size) |= 
+                    cur_ic->icon.full();
+            else
+                buffer.subImage(cur_ic->y, cur_ic->x, cur_ic->size, cur_ic->size) |= 
+                    cur_ic->icon.full();
+        }
     }
 
     if(zoomed_icon != -1){
-	cur_ic = icons.back();
-	icons.back() = icons[zoomed_icon];
-	icons[zoomed_icon] = cur_ic;
+        cur_ic = icons.back();
+        icons.back() = icons[zoomed_icon];
+        icons[zoomed_icon] = cur_ic;
     }
     
-    /* Show the buffer */
-    SET_BLEND(0);
-    RENDER_TO_DRAWABLE(0, 0);
-
+    buffer.splat(window->window);
 }
 /*}}}*/
 
@@ -494,7 +421,7 @@ void Bar::iconDown(int i_num){
 /*}}}*/
 
 /* Position the Bar *//*{{{*/
-void Bar::setPosition(string pos){
+void Bar::setPosition(std::string pos){
     
     if( !pos.compare("bottom") ) position = 1;
     else if( !pos.compare("top") ) position = 2;
@@ -512,7 +439,7 @@ void Bar::setPosition(string pos){
 /*}}}*/
 
 /* Icon info *//*{{{*/
-string Bar::iconCommand(int i_num){
+std::string Bar::iconCommand(int i_num){
 
     if(i_num<0 || i_num>=(int)icons.size()) return NULL;
     
@@ -534,17 +461,3 @@ int Bar::iconIndex(int mousex){
     return -1;
 }
 /*}}}*/
-
-#if 0
-/* Zoom beans *//*{{{*/
-void Bar::setZoom(float zoomf){
-    b_zoom_f = zoomf;
-    scale(false);
-}
-
-float Bar::getZoom(){
-    return b_zoom_f;
-}
-/*}}}*/
-#endif
-

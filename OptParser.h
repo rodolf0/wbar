@@ -1,34 +1,36 @@
 #ifndef _OPTPARSER_
 #define _OPTPARSER_
 
-#define MAXOPTS 20
-#include <getopt.h>
-#include <string>
+#include <vector>
 
-class OptParser{
-    private:
-	struct realOpts{
-	    int isOptionSet;
-	    std::string argument;
-	};
+#define ARG_SIZE 32
 
-	struct option longOption[MAXOPTS];
-	struct realOpts setOption[MAXOPTS];
-
-	int optCount;
-
+class OptParser {
     public:
 
-	OptParser();
+        OptParser(int argc, char *argv[]);
 
-	void addOption(const char *name, bool hasArg, const char *defArg=NULL);
-	void parse(int argc, char * const argv[]);
+        int isSet(const char *name) const;
+        int takesArg(const char *name) const;
+        const char *getArgument(const char *name) const;
+        const char *getDefault(const char *name) const;
+        void printDescrip() const;
+};
 
-	/* returns option index */
-	int isset(std::string name);
-	std::string getArg(std::string name);
+class ConfigParser {
+    public:
 
+        ConfigParser(const char *cfg);
 
+        const char *getWidget(int index) const;
+        const char *getCommand(int index) const;
+        const char *getCaption(int index) const;
+        int widgetCount() const;
+
+    private:
+        std::vector<std::string> widget;
+        std::vector<std::string> command;
+        std::vector<std::string> caption;
 };
 
 #endif /* _OPTPARSER_ */

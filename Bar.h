@@ -3,17 +3,17 @@
 
 #include <vector>
 #include <string>
-#include "ImgWrap.h"
+#include "Image.h"
 #include "XWin.h"
 #include "Icon.h"
 
 class Bar{
     protected:
 	/* Drawing buffs */
-	_image buffer;
-	_image cleaning_buffer;
-	_image barback;
-	_image bar;
+	ImlibImage buffer;
+	ImlibImage cleaning_buffer;
+	ImlibImage barback;
+	ImlibImage bar;
 	
 	/* reference to the container window */
 	XWin *window;
@@ -77,10 +77,9 @@ class Bar{
 
     public:
 
-	Bar(XWin *win, std::string barImg, int iSize, int iDist, float zFactor, 
-		float jFactor, int bOrient, int bPosition, int nAnim);
+	Bar(XWin *win, const char *barImg);
 
-	virtual ~Bar();
+	//virtual ~Bar();
 
 	/* add an Icon */
 	void addIcon(std::string path, std::string comm);

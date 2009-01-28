@@ -58,21 +58,24 @@ void XWin::mapWindow(){
 
 bool XWin::nextEvent(XEvent *ev){
 
-
+#ifdef QUICKRESPONSE
     int qlen;
 
     do{
-	/* queue length is relate to my only window */
-	if( (qlen = XQLength(display)) ){
-	    if( XCheckWindowEvent(display, window, eventMask, ev) == False ){
-		/* process events we're not waiting for */
-		XSync(display, True);
-		continue;
-	    }
-	}else
-	    XWindowEvent(display, window, eventMask, ev);
-	
+        /* queue length is relate to my only window */
+        if( (qlen = XQLength(display)) ){
+            if( XCheckWindowEvent(display, window, eventMask, ev) == False ){
+                /* process events we're not waiting for */
+                XSync(display, True);
+                continue;
+            }
+        }else
+            XWindowEvent(display, window, eventMask, ev);
+        
     }while( ev->type == MotionNotify && qlen > 1 );
+#else
+            XWindowEvent(display, window, eventMask, ev);
+#endif
 
     return true;
 }
