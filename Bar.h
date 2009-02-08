@@ -8,96 +8,59 @@
 #include "Icon.h"
 
 class Bar{
-    protected:
-	/* Drawing buffs */
-	ImlibImage buffer;
-	ImlibImage cleaning_buffer;
-	ImlibImage barback;
-	ImlibImage bar;
-	
-	/* reference to the container window */
-	XWin *window;
-
-	std::vector<Icon*> icons;
-
-	/* dist. between */ 
-	int icon_dist;
-	/* icon size */
-	int icon_size;
-	/* how many icons move */
-	int icon_anim;
-	/* jump factor on hover */
-	float jump_factor;
-	/* zoom factor on hover */
-	float zoom_factor;
-
-	/* fast math constants */
-	float b_scl_d;
-	float b_scl_a;
-	float b_scl_b;
-	float b_pos_m;
-	float b_pos_n;
-	float b_dd;
-	float icon_offset;
-	int icon_unit;
-	/* animated icons on one side */
-	int icon_ansd;
-
-	/* bar position in window */
-	int x, y;
-	/* original bar dimensions */
-	int owidth, oheight;
-	/* actual dimensions */
-	int width, height;
-	int orientation;
-	int position;
-	
-	/* actual zoomed icon */
-	int zoomed_icon;
-	/* is bar focused? */
-	int focused;
-
-	/* set bar */
-	void focus();
-	virtual void unfocus();
-#ifndef NO_EXPAND
-	void expand(bool inverse);
-#endif
-
-	void iconPress(int i_num, int offs);
-
-	void transform(int mousex);
-	virtual void render();
-
-	void acquireBack();
-	void drawBack();
-	virtual void cleanBack();
-
-	void scale(bool updateBG = true);
 
     public:
 
-	Bar(XWin *win, const char *barImg);
+        Bar(XWin *win, const char *barImg);
+        ~Bar();
 
-	//virtual ~Bar();
+        /* add an Icon */
+        void addIcon(std::string path, std::string comm);
 
-	/* add an Icon */
-	void addIcon(std::string path, std::string comm);
+        /* Focus & unfocus events */
+        void refresh(int mouse_x);
 
-	/* Icon information */
-	int iconIndex(int mouse_x);
-	std::string iconCommand(int i_num);
+        /* set bar */
+        void set_focus(int focus);
 
-	/* Focus & unfocus events */
-	void refresh(int mouse_x = -1);
+    protected:
 
-	/* Icon press events */
-	void iconDown(int i_num);
-	void iconUp(int i_num);
-	void setPosition(std::string p);
+        // Drawing buffs
+        ImlibImage buffer;
+        ImlibImage bar;
+        // reference to the container window
+        XWin *window;
+        std::vector<Icon*> icons;
 
-	//void setZoom(float zoomf);
-	//float getZoom();
+        // Bar config parameters
+        int icon_dist;
+        int icon_size;
+        int icon_anim;
+        float jump_factor;
+        float zoom_factor;
+
+        // fast math constants
+        float b_scl_d;
+        float b_scl_a;
+        float b_scl_b;
+        float b_pos_m;
+        float b_pos_n;
+        float b_dd;
+        float icon_offset;
+        int icon_unit;
+        int icon_ansd;
+
+        int owidth, oheight;
+
+        // current status
+        int x, y, width, height;
+        int zoomed_icon;
+        int focused;
+
+        void transform(int mousex);
+        void render();
+        void animate();
+        void scale();
 };
 
 #endif /* _BAR_H_ */

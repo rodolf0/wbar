@@ -33,6 +33,7 @@ class ImlibImage : public Image {
             imlib_context_set_colormap(c);
             imlib_context_set_drawable(dw);
             imlib_set_cache_size(cache);
+            imlib_context_set_operation(IMLIB_OP_COPY);
         }
 
         ImlibImage(const char *path) : 
@@ -93,6 +94,15 @@ class ImlibImage : public Image {
             return *this;
         }
 
+        void colorClear(int r, int g, int b, int a) {
+            Imlib_Image t = imlib_context_get_image();
+
+            imlib_context_set_image(_img);
+            imlib_image_clear_color(r, g, b, a);
+
+            imlib_context_set_image(t);
+        }
+
         // Blend image
         ImlibImage& operator |= (const ImlibImage &i) {
             Imlib_Image t = imlib_context_get_image();
@@ -102,7 +112,7 @@ class ImlibImage : public Image {
                 imlib_context_set_blend(1);
 
             imlib_context_set_image(_img);
-            imlib_blend_image_onto_image(i._img, 0, i.sx, i.sy, i.sw, i.sh,
+            imlib_blend_image_onto_image(i._img, 1, i.sx, i.sy, i.sw, i.sh,
                 sx, sy, sw, sh);
 
             imlib_context_set_blend(b);
@@ -120,7 +130,7 @@ class ImlibImage : public Image {
                 imlib_context_set_blend(0);
 
             imlib_context_set_image(_img);
-            imlib_blend_image_onto_image(i._img, 0, i.sx, i.sy, i.sw, i.sh,
+            imlib_blend_image_onto_image(i._img, 1, i.sx, i.sy, i.sw, i.sh,
                 sx, sy, sw, sh);
 
             imlib_context_set_blend(b);

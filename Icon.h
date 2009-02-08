@@ -5,37 +5,29 @@
 #include "Image.h"
 
 class Bar;
-class SuperBar;
 
 class Icon{
-    protected:
-	ImlibImage icon;
-
-	/* normal state */
-	int ox, oy;
-	int osize;
-	/* current state */
-	int x, y;
-	int size;
-
-	int bs, bx, by;
-	float vx, vs, vy;
-
-	/* redraw ? */
-	int need_update;
-	/* clean coords */
-	int cx, csize;
-
-	std::string command;
-
-	/* extend friendship? */
-	friend class Bar;
-	//friend class SuperBar;
-
     public:
 
-	Icon(std::string iconImg, std::string cmd, int x, int y);
-	~Icon();
+        Icon(const char *iconImg, const char *cmd, int x, int y);
+        ~Icon();
+
+    protected:
+        friend class Bar;
+
+        ImlibImage icon;
+
+        // original state
+        int ox, oy;
+        int osize;
+        // current state
+        int x, y;
+        int size;
+        // animation
+        int bx, by, bs;
+        float vx, vy, vs;
+
+        std::string command;
 };
 
 #endif /* _ICON_H_ */

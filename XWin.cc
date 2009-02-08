@@ -1,64 +1,96 @@
 #include <sys/select.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/Xrender.h>
 #include "XWin.h"
 
 using namespace std;
 
 XWin::XWin(int xx, int yy, int ww, int hh) : 
-    eventMask(NoEventMask), x(xx), y(yy), w(ww), h(hh){
+    background(1,1), eventMask(NoEventMask), x(xx), y(yy), w(ww), h(hh) {
 
-    /* if(threads) XInitThreads() */
-    int defScreen;
+    XVisualInfo vi, *xvi;
+    XRenderPictFormat *format;
+    XSetWindowAttributes wa;
+
+    int render_event, render_error;
+    int screen, nvi;
 
     if( !(display = XOpenDisplay(NULL)) )
-	throw "Couldn't open display";
+        throw "Couldn't open display";
 
-    defScreen = DefaultScreen(display);
-    if( !(visual = DefaultVisual(display, defScreen)) )
-	throw "Couldn't get visual";
-    if( !(colormap = DefaultColormap(display, defScreen)) )
-	throw "Couln't get colormap";
-    if( !(depth = DefaultDepth(display, defScreen)) )
-	throw "Couldn't get depth";
-    if( !(window = XCreateSimpleWindow(display, 
-	    DefaultRootWindow(display), x, y, w, h, 0, 0, 0)) )
-	throw "Couldn't create window";
+    screen = DefaultScreen(display);
+
+    argb32_visual = false;
+
+    // ARGB32 visual
+    if( XRenderQueryExtension (display, &render_event, &render_error) ) {
+
+        vi.screen = screen;
+        depth = vi.depth = 32;
+        vi.c_class = TrueColor;
+
+        xvi = XGetVisualInfo(display, VisualScreenMask | VisualDepthMask | 
+                VisualClassMask, &vi, &nvi);
+
+        for(int i=0; i<nvi; i++) {
+            format = XRenderFindVisualFormat(display, xvi[i].visual);
+
+            if( format->type == PictTypeDirect && format->direct.alphaMask ) {
+                visual = xvi[i].visual;
+                argb32_visual = true;
+                break;
+            }
+        }
+
+        XFree(xvi);
+
+        wa.colormap = colormap = XCreateColormap(display, RootWindow(display, screen),
+                visual, AllocNone);
+
+    } else {
+    
+        depth = DefaultDepth(display, screen);
+        visual = DefaultVisual(display, screen);
+        wa.colormap = colormap = DefaultColormap(display, screen);
+    }
+
+    wa.background_pixel = ScreenOfDisplay(display, screen)->black_pixel;
+    wa.border_pixel = ScreenOfDisplay(display, screen)->white_pixel;
+    wa.event_mask = eventMask = PointerMotionMask | ExposureMask | ButtonPressMask |
+                                ButtonReleaseMask | LeaveWindowMask | EnterWindowMask;
+
+    if( !(window = XCreateWindow(display, DefaultRootWindow(display), 
+                        x, y, w, h, 0, depth, InputOutput, visual, CWBackPixel |
+                        CWBorderPixel | CWEventMask | CWColormap, &wa)) )
+        throw "Couldn't create window";
+
 
     /* prepare for delete window */
     delWindow = XInternAtom(display, "WM_DELETE_WINDOW", false);
     /* Set WM Protocols to report window delete event */
     XSetWMProtocols(display, window, &delWindow, 1);
-
-    XClassHint ch = {(char*)"wbar", (char*)"wbar"};
-    XSetClassHint(display, window, &ch);
 }
 
 XWin::~XWin(){
     XDestroyWindow(display, window);
+    XFreeColormap(display, colormap);
     XCloseDisplay(display);
 }
 
-void XWin::selectInput(int ev_mask){
-    eventMask = ev_mask;
-    XSelectInput(display, window, ev_mask);
+ImlibImage& XWin::go_transparent() {
+
+    if( argb32_visual )
+        background.colorClear(0, 0, 0, 0);
+    else
+        background = ImlibImage( DefaultRootWindow(display), x, y, w, h );
+
+    return background;
 }
 
-void XWin::lowerWindow(){
-    XLowerWindow(display, window);
-}
+bool XWin::get_event(XEvent *ev) const {
 
-void XWin::raiseWindow(){
-    XRaiseWindow(display, window);
-}
-
-void XWin::mapWindow(){
-    XMapWindow(display, window);
-}
-
-bool XWin::nextEvent(XEvent *ev){
-
-#ifdef QUICKRESPONSE
+#ifndef CATCH_ALL_EVENTS
     int qlen;
 
     do{
@@ -74,35 +106,23 @@ bool XWin::nextEvent(XEvent *ev){
         
     }while( ev->type == MotionNotify && qlen > 1 );
 #else
-            XWindowEvent(display, window, eventMask, ev);
+    XWindowEvent(display, window, eventMask, ev);
 #endif
 
     return true;
 }
 
-void XWin::setName(char *name){
+void XWin::set_info(char *name){
     XTextProperty windowName;
+    XClassHint ch;
+    
+    ch.res_name = name;
+    ch.res_class = name;
     XStringListToTextProperty(&name, 1, &windowName);
 
     XSetWMName(display, window, &windowName);
+    XSetClassHint(display, window, &ch);
 }
-
-void XWin::moveNresize(int x, int y, int w, int h){
-    XMoveResizeWindow(display, window, x, y, w, h);
-}
-
-int XWin::screenWidth() const{
-    return WidthOfScreen(DefaultScreenOfDisplay(display));
-}
-
-int XWin::screenHeight()const{
-    return HeightOfScreen(DefaultScreenOfDisplay(display));
-}
-
-Display *XWin::getDisplay(){ return display; }
-Visual *XWin::getVisual(){ return visual; }
-Colormap XWin::getColormap(){ return colormap; }
-Drawable XWin::getDrawable(){ return window; }
 
 /* Dont allow window manager to decorate / restack / remap / ... */
 void XWin::setOverrideRedirection(Bool ovr){
@@ -114,66 +134,50 @@ void XWin::setOverrideRedirection(Bool ovr){
     XChangeWindowAttributes(display, window, CWOverrideRedirect | CWBackPixmap  , &attr);
 }
 
-void XWin::setDockWindow(){
-    Atom a = XInternAtom(display, "_NET_WM_WINDOW_TYPE", True);
+void XWin::set_toolbar_properties(int wlayer) {
+    Atom a, prop;
+    long lprop[5] = { 0, 0, 0, 0, 0 };
 
-    if (a != None) {
-	//Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", True);
-	//Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
-	Atom prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DOCK", True);
-	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeReplace, (unsigned char *) &prop, 1);
-    }
-}
+    // set dock type (_NET_WM_WINDOW_TYPE_DESKTOP / NORMAL)
+    a = XInternAtom(display, "_NET_WM_WINDOW_TYPE", True);
+    prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DOCK", True);
+    XChangeProperty(display, window, a, XA_ATOM, 32, PropModeReplace, (unsigned char *) &prop, 1);
 
-void XWin::noDecorations(){
-    Atom a = XInternAtom(display, "_MOTIF_WM_HINTS", True);
+    // no decorations
+    a = XInternAtom(display, "_MOTIF_WM_HINTS", True);
+    lprop[0] = 2;
+    XChangeProperty(display, window, a, a, 32, PropModeReplace, (unsigned char *) lprop, 5);
 
-    if (a != None) {
-	long prop[5] = { 2, 0, 0, 0, 0 };
-	XChangeProperty(display, window, a, a, 32, PropModeReplace, (unsigned char *) prop, 5);
-    }
-}
-
-void XWin::setSticky(){
-    Atom a = XInternAtom(display, "_NET_WM_DESKTOP", True);
-
-    if (a != None) {
-	long prop = 0xFFFFFFFF;
-	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &prop, 1);
-    }
+    // set sticky
+    a = XInternAtom(display, "_NET_WM_DESKTOP", True);
+    lprop[0] = 0xFFFFFFFF;
+    XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) lprop, 1);
 
     a = XInternAtom(display, "_NET_WM_STATE", True);
-    if (a != None) {
-	Atom prop = XInternAtom(display, "_NET_WM_STATE_STICKY", True);
+    prop = XInternAtom(display, "_NET_WM_STATE_STICKY", True);
+    XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
+
+    // skip pager
+	prop = XInternAtom(display, "_NET_WM_STATE_SKIP_PAGER", True);
 	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
-    }
-}
 
-void XWin::skipTaskNPager(){
-
-    Atom a = XInternAtom(display, "_NET_WM_STATE", True);
-    if (a != None) {
-	Atom prop = XInternAtom(display, "_NET_WM_STATE_SKIP_TASKBAR", True);
+    // skip taskbar
+	prop = XInternAtom(display, "_NET_WM_STATE_SKIP_TASKBAR", True);
 	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
-    }
 
-    a = XInternAtom(display, "_NET_WM_STATE", True);
-    if (a != None) {
-	Atom prop = XInternAtom(display, "_NET_WM_STATE_SKIP_PAGER", True);
-	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
+    // set win layer
+    if( wlayer == LAYER_BELOW ) {
+        prop = XInternAtom(display, "_NET_WM_STATE_BELOW", True);
+        XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
+    } else if( wlayer == LAYER_ABOVE ) {
+        prop = XInternAtom(display, "_NET_WM_STATE_ABOVE", True);
+        XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
     }
-}
+    a = XInternAtom(display, "_WIN_LAYER", True);
+	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &wlayer, 1);
 
-void XWin::bottomLayer(){
-    Atom a = XInternAtom(display, "_WIN_LAYER", True);
-    if (a != None) {
-	long prop = 0; // 6 is above && _NET_WM_STATE_ABOVE in STATE
-	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &prop, 1);
-    }
-
-    a = XInternAtom(display, "_NET_WM_STATE", True);
-    if (a != None) {
-	Atom prop = XInternAtom(display, "_NET_WM_STATE_BELOW", True);
-	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
-    }
+    // set opacity
+	//prop = XInternAtom(display, "_NET_WM_WINDOW_OPACITY", True);
+    //wopacity = (int)(0xFFFFFFFF * opacity);
+	//XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &wopacity, 1);
 }

@@ -1,12 +1,12 @@
 TARGET=wbar
 CXXFLAGS=`imlib2-config --cflags` -Wall -O2 #-DCOS_ZOOM #-DLINEAR_TRASL -DNO_EXPAND #-DAVGFILTER
-LDFLAGS=`imlib2-config --libs`  -Wl,-O2
+LDFLAGS=`imlib2-config --libs` -lXrender -Wl,-O2
 PREFIX=/usr/share/wbar
 
 	
 sources= XWin.cc Icon.cc Bar.cc OptParser.cc
 objects= $(sources:.cc=.o) Main.o
-headers= $(sources:.cc=.h) debug.h
+headers= $(sources:.cc=.h) Image.h
 
 all: $(TARGET) 
 
