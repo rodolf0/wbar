@@ -11,6 +11,7 @@ extern "C" {
 #include <iostream>
 #include <fstream>
 #include "OptParser.h"
+#include "Bar.h"
 
 
 static struct _op_options {
@@ -23,7 +24,8 @@ static struct _op_options {
 } op_options[] = {
 
     {"help"         , 0, ""             , "this help"},
-    {"config"       , 0, "-"            , "config file"},
+    {"config"       , 1, "-"            , "config file"},
+    {"layer"        , 1, ""             , "[above|bellow] choose at wich layer to run"},
     {"above-desk"   , 0, ""             , "run over desktop manager (ie: nautilus)"},
     {"isize"        , 1, "32"           , "icon normal size"},
     {"idist"        , 1, "1"            , "icon spacing"},
@@ -42,6 +44,30 @@ static struct _op_options {
     {"startdelay"   , 1, "15"           , "startup delay"}
 };
 
+void OptParser::configure(Bar *wbar) {
+    wbar->window->set_info( (char*)"wbar" );
+    wbar->icon_dist = atoi( getArgument("idist") );
+    wbar->icon_size = atoi( getArgument("isize") );
+    wbar->icon_anim = atoi( getArgument("nanim") );
+    wbar->jump_factor = atof( getArgument("jumpf") );
+    wbar->zoom_factor = atof( getArgument("zoomf") );
+
+    wbar->window->set_toolbar_properties(
+        !strcmp(getArgument("layer"), "above") ? LAYER_ABOVE : LAYER_BELOW );
+
+    wbar->scale();
+
+    if( !strcmp(getArgument("pos"), "top") ) {
+        wbar->window->x = (wbar->window->screen_width() - wbar->window->w)/2;
+        wbar->window->y = 0;
+    }else if( !strcmp(getArgument("pos"), "bottom") ) {
+        wbar->window->x = (wbar->window->screen_width() - wbar->window->w)/2;
+        wbar->window->y = wbar->window->screen_height() - wbar->window->h;
+    }else if( !strcmp(getArgument("pos"), "") ) {
+    }
+
+    wbar->scale();
+}
 
 OptParser::OptParser(int argc, char *argv[]) {
     int i;

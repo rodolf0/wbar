@@ -7,6 +7,8 @@
 #include "XWin.h"
 #include "Icon.h"
 
+class OptParser;
+
 class Bar{
 
     public:
@@ -25,9 +27,11 @@ class Bar{
 
     protected:
 
+        friend class OptParser;
+
         // Drawing buffs
-        ImlibImage buffer;
-        ImlibImage bar;
+        Image buffer;
+        Image bar;
         // reference to the container window
         XWin *window;
         std::vector<Icon*> icons;
@@ -49,8 +53,6 @@ class Bar{
         float icon_offset;
         int icon_unit;
         int icon_ansd;
-
-        int owidth, oheight;
 
         // current status
         int x, y, width, height;

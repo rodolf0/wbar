@@ -5,6 +5,8 @@
 
 #define ARG_SIZE 32
 
+class Bar;
+
 class OptParser {
     public:
 
@@ -15,6 +17,8 @@ class OptParser {
         const char *getArgument(const char *name) const;
         const char *getDefault(const char *name) const;
         void printDescrip() const;
+
+        void configure(Bar *);
 };
 
 class ConfigParser {

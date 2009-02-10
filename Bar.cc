@@ -14,7 +14,6 @@ Bar::Bar(XWin *win, const char *bpath) :
     icon_size(32), icon_anim(7), jump_factor(1.0), zoom_factor(1.8),
     zoomed_icon(-1), focused(0) {
 
-    scale();
 }
 
 Bar::~Bar() {
@@ -26,11 +25,7 @@ Bar::~Bar() {
 
 void Bar::addIcon(std::string path, std::string comm) {
 
-    icons.push_back( new Icon(path.c_str(), comm.c_str(),
-	(int)icon_offset + icon_size/2 + icons.size() * icon_unit, // x coord
-	y + (int)(0.125 * icon_size)) ); // y coord
-
-    scale();
+    icons.push_back( new Icon(path.c_str(), comm.c_str()) );
 }
 
 void Bar::scale() {
@@ -89,10 +84,17 @@ void Bar::scale() {
     y = MARGEN + (int)(up_growth>0.0? up_growth : 0.0);
     x = (int)icon_offset;
 
+    // Re organize widget position
+    for(size_t a=0; a < icons.size(); a++) {
+        icons[a]->x = icons[a]->ox = (int)(icon_offset + icon_size/2 + a * icon_unit);
+        icons[a]->y = icons[a]->oy = y + (int)(0.125 * icon_size);
+        icons[a]->size = icon_size;
+    }
+
     // Adapt container window to changes
     window->move_resize(window->x, window->y, window->w, window->h);
     window->go_transparent();
-    buffer = ImlibImage(window->w, window->h);
+    buffer = Image(window->w, window->h);
 }
 
 void Bar::transform(int mousex) { 
@@ -162,13 +164,14 @@ void Bar::transform(int mousex) {
 void Bar::render(){
     Icon *cur_ic=0;
 
-    buffer.colorClear(0, 0, 0, 0);
+    //buffer.colorClear(0, 0, 0, 0);
+    buffer.full() += window->background.full();
     buffer.subImage(x, y, width, height) |= bar.full();
 
     // Blend Icons
     for(size_t a=0; a<icons.size(); a++){
 
-        if((int)a ==  zoomed_icon)
+        if((int)a == zoomed_icon)
             continue;
 
         cur_ic = icons[a];
@@ -180,7 +183,7 @@ void Bar::render(){
     if(zoomed_icon != -1) {
         cur_ic = icons[zoomed_icon];
         buffer.subImage(cur_ic->x, cur_ic->y, 
-            cur_ic->size, cur_ic->size) |= cur_ic->icon.full();
+            cur_ic->size, cur_ic->size) |= cur_ic->render();
     }
 
     buffer.splat(window->window);
@@ -258,5 +261,6 @@ void Bar::set_focus(int focus) {
             icons[a]->size = icon_size;
         }
     }
+
     animate();
 }

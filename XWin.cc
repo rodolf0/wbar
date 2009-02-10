@@ -23,6 +23,7 @@ XWin::XWin(int xx, int yy, int ww, int hh) :
 
     argb32_visual = false;
 
+#if 0
     // ARGB32 visual
     if( XRenderQueryExtension (display, &render_event, &render_error) ) {
 
@@ -49,11 +50,15 @@ XWin::XWin(int xx, int yy, int ww, int hh) :
                 visual, AllocNone);
 
     } else {
-    
         depth = DefaultDepth(display, screen);
         visual = DefaultVisual(display, screen);
         wa.colormap = colormap = DefaultColormap(display, screen);
     }
+#else
+        depth = DefaultDepth(display, screen);
+        visual = DefaultVisual(display, screen);
+        wa.colormap = colormap = DefaultColormap(display, screen);
+#endif
 
     wa.background_pixel = ScreenOfDisplay(display, screen)->black_pixel;
     wa.border_pixel = ScreenOfDisplay(display, screen)->white_pixel;
@@ -78,12 +83,12 @@ XWin::~XWin(){
     XCloseDisplay(display);
 }
 
-ImlibImage& XWin::go_transparent() {
+Image& XWin::go_transparent() {
 
     if( argb32_visual )
-        background.colorClear(0, 0, 0, 0);
+        background = Image(w, h).colorClear(0, 0, 0, 0);
     else
-        background = ImlibImage( DefaultRootWindow(display), x, y, w, h );
+        background = Image( DefaultRootWindow(display), x, y, w, h );
 
     return background;
 }

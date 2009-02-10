@@ -1,11 +1,14 @@
 #include "Icon.h"
 
-Icon::Icon(const char *iconImg, const char *cmd, int xx, int yy) :
-    icon( 1, 1 ), ox(xx), oy(yy), x(xx), y(yy), command(cmd) {
+Icon::Icon(const char *iconImg, const char *cmd) :
+    icon( 1, 1 ), bx(0), by(0), bs(0), command(cmd) {
 
-    icon = ImlibImage( iconImg );
-
-    osize = size = icon.ow;
+    icon = Image( iconImg );
+    size = icon.ow;
 }    
+
+Image& Icon::render() {
+    return icon.full();
+}
 
 Icon::~Icon() {}

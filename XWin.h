@@ -7,10 +7,10 @@
 #include "Image.h"
 
 class Bar;
+class OptParser;
 
 class XWin {
     public:
-        friend class Bar;
 
         XWin(int x, int y, int w, int h);
         ~XWin();
@@ -44,6 +44,10 @@ class XWin {
         Visual *get_visual() { return visual; }
         Colormap get_colormap() { return colormap; }
         Drawable get_drawable() { return window; }
+        
+        int get_width() const { return w; }
+        int get_height() const { return h; }
+
 
 #define LAYER_ABOVE 6
 #define LAYER_BELOW 0
@@ -53,14 +57,18 @@ class XWin {
         bool get_event(XEvent *ev) const;
         void set_info(char *name);
 
-        ImlibImage& go_transparent();
+        Image& go_transparent();
 
     private:
+
+        friend class OptParser;
+        friend class Bar;
+
         Display     *display;
         Visual      *visual;
         Window      window;
 
-        ImlibImage  background;
+        Image  background;
 
         Colormap    colormap;
 

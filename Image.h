@@ -8,26 +8,8 @@
 
 class Image {
     public:
-        //Image(const char *path) = 0;
 
-        int width() const;
-        int height() const;
-
-        Image& subImage(int x, int y, int w, int h);
-
-        // Blend
-        Image& operator |= (const Image &i);
-        // Paste
-        Image& operator += (const Image &i);
-        // Clone
-        Image& operator =  (const Image &i);
-
-}; 
-
-class ImlibImage : public Image {
-    public:
-
-        static void  InitImlib(Display *d, Visual *v, Colormap c, Drawable dw, int cache) {
+        static void  Init(Display *d, Visual *v, Colormap c, Drawable dw, int cache) {
             imlib_context_set_display(d);
             imlib_context_set_visual(v);
             imlib_context_set_colormap(c);
@@ -36,7 +18,7 @@ class ImlibImage : public Image {
             imlib_context_set_operation(IMLIB_OP_COPY);
         }
 
-        ImlibImage(const char *path) : 
+        Image(const char *path) : 
                 sx(0), sy(0), ox(0), oy(0) {
             Imlib_Image t = imlib_context_get_image();
 
@@ -53,9 +35,9 @@ class ImlibImage : public Image {
             imlib_context_set_image(t);
         }
 
-        ImlibImage(Drawable src_d, int x, int y, int w, int h) :
+        Image(Drawable src_d, int x, int y, int w, int h) :
                 sx(0), sy(0), sw(w), sh(h),
-                ox(0), oy(0), ow(h), oh(h) {
+                ox(0), oy(0), ow(w), oh(h) {
             Drawable d = imlib_context_get_drawable();
 
             imlib_context_set_drawable(src_d);
@@ -64,13 +46,13 @@ class ImlibImage : public Image {
             imlib_context_set_drawable(d);
         }
 
-        ImlibImage(int w, int h) : 
+        Image(int w, int h) : 
             sx(0), sy(0), sw(w), sh(h),
             ox(0), oy(0), ow(w), oh(h) {
             _img = imlib_create_image(w, h);
         }
 
-        ~ImlibImage() {
+        ~Image() {
             Imlib_Image t = imlib_context_get_image();
             imlib_context_set_image(_img);
             imlib_free_image();
@@ -84,27 +66,28 @@ class ImlibImage : public Image {
             imlib_context_set_image(t);
         }
 
-        ImlibImage& full() {
+        Image& full() {
             sx = 0; sy = 0; sw = ow; sh = oh;
             return *this;
         }
 
-        ImlibImage& subImage(int x, int y, int w, int h) {
+        Image& subImage(int x, int y, int w, int h) {
             sx = x; sy = y; sw = w; sh = h;
             return *this;
         }
 
-        void colorClear(int r, int g, int b, int a) {
+        Image& colorClear(int r, int g, int b, int a) {
             Imlib_Image t = imlib_context_get_image();
 
             imlib_context_set_image(_img);
             imlib_image_clear_color(r, g, b, a);
 
             imlib_context_set_image(t);
+            return *this;
         }
 
         // Blend image
-        ImlibImage& operator |= (const ImlibImage &i) {
+        Image& operator |= (const Image &i) {
             Imlib_Image t = imlib_context_get_image();
             char b;
 
@@ -112,7 +95,7 @@ class ImlibImage : public Image {
                 imlib_context_set_blend(1);
 
             imlib_context_set_image(_img);
-            imlib_blend_image_onto_image(i._img, 1, i.sx, i.sy, i.sw, i.sh,
+            imlib_blend_image_onto_image(i._img, 0, i.sx, i.sy, i.sw, i.sh,
                 sx, sy, sw, sh);
 
             imlib_context_set_blend(b);
@@ -122,7 +105,7 @@ class ImlibImage : public Image {
         }
 
         // Add image (no blending)
-        ImlibImage& operator += (const ImlibImage &i) {
+        Image& operator += (const Image &i) {
             Imlib_Image t = imlib_context_get_image();
             char b;
 
@@ -130,7 +113,7 @@ class ImlibImage : public Image {
                 imlib_context_set_blend(0);
 
             imlib_context_set_image(_img);
-            imlib_blend_image_onto_image(i._img, 1, i.sx, i.sy, i.sw, i.sh,
+            imlib_blend_image_onto_image(i._img, 0, i.sx, i.sy, i.sw, i.sh,
                 sx, sy, sw, sh);
 
             imlib_context_set_blend(b);
@@ -139,7 +122,7 @@ class ImlibImage : public Image {
             return *this;
         }
 
-        ImlibImage& operator =  (const ImlibImage &i) {
+        Image& operator =  (const Image &i) {
             if(&i != this) {
 
                 Imlib_Image t = imlib_context_get_image();
