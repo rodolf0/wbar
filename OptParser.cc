@@ -8,6 +8,7 @@ extern "C" {
 #include <regex.h>
 };
 
+#include <X11/Xutil.h>
 #include <iostream>
 #include <fstream>
 #include "OptParser.h"
@@ -31,7 +32,7 @@ static struct _op_options {
     {"idist"        , 1, "1"            , "icon spacing"},
     {"zoomf"        , 1, "1.8"          , "icon grow factor"},
     {"jumpf"        , 1, "1"            , "icon jump factor"},
-    {"pos"          , 1, "bottom"       , "wbar position (top, left, bot-right, etc.)"},
+    {"pos"          , 1, "bottom"       , "wbar position (top / bottom / +x+y)"},
     {"balfa"        , 1, "-1"           , "bar alpha value"},
     {"falfa"        , 1, "-1"           , "lost focus bar alpha"},
     {"dblclk"       , 1, "200"          , "double click time in ms"},
@@ -45,6 +46,9 @@ static struct _op_options {
 };
 
 void OptParser::configure(Bar *wbar) {
+    int tx = 0, ty = 0, flags;
+    unsigned int tw = 0, th = 0;
+
     wbar->window->set_info( (char*)"wbar" );
     wbar->icon_dist = atoi( getArgument("idist") );
     wbar->icon_size = atoi( getArgument("isize") );
@@ -63,7 +67,10 @@ void OptParser::configure(Bar *wbar) {
     }else if( !strcmp(getArgument("pos"), "bottom") ) {
         wbar->window->x = (wbar->window->screen_width() - wbar->window->w)/2;
         wbar->window->y = wbar->window->screen_height() - wbar->window->h;
-    }else if( !strcmp(getArgument("pos"), "") ) {
+    }else if( isSet("pos") ) {
+        flags = XParseGeometry(getArgument("pos"), &tx, &ty, &tw, &th);
+        wbar->window->x = tx + ((flags & XNegative) ? wbar->window->screen_width() : 0);
+        wbar->window->y = ty + ((flags & YNegative) ? wbar->window->screen_height() : 0);
     }
 
     wbar->scale();
