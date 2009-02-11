@@ -25,11 +25,15 @@ class Bar{
         /* set bar */
         void set_focus(int focus);
 
+        int icon_index(int mouse_x) const;
+        std::string icon_cmd(int idx);
+
     protected:
 
         friend class OptParser;
 
         // Drawing buffs
+        Image cleanbuf;
         Image buffer;
         Image bar;
         // reference to the container window

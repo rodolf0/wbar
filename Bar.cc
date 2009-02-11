@@ -10,7 +10,7 @@
 
 Bar::Bar(XWin *win, const char *bpath) :
     // Initialization
-    buffer(1, 1), bar(bpath), window(win), icon_dist(1), 
+    cleanbuf(1, 1), buffer(1, 1), bar(bpath), window(win), icon_dist(1), 
     icon_size(32), icon_anim(7), jump_factor(1.0), zoom_factor(1.8),
     zoomed_icon(-1), focused(0) {
 
@@ -94,7 +94,6 @@ void Bar::scale() {
     // Adapt container window to changes
     window->move_resize(window->x, window->y, window->w, window->h);
     window->go_transparent();
-    buffer = Image(window->w, window->h);
 }
 
 void Bar::transform(int mousex) { 
@@ -164,26 +163,39 @@ void Bar::transform(int mousex) {
 void Bar::render(){
     Icon *cur_ic=0;
 
-    //buffer.colorClear(0, 0, 0, 0);
-    buffer.full() += window->background.full();
-    buffer.subImage(x, y, width, height) |= bar.full();
-
-    // Blend Icons
+    // cleaning
     for(size_t a=0; a<icons.size(); a++){
-
-        if((int)a == zoomed_icon)
-            continue;
 
         cur_ic = icons[a];
 
-        buffer.subImage(cur_ic->x, cur_ic->y, 
-            cur_ic->size, cur_ic->size) |= cur_ic->icon.full();
+        if(cur_ic->size != cur_ic->bs || 
+                cur_ic->x != cur_ic->bx ||
+                cur_ic->y != cur_ic->by || 
+                (a>0 && icons[a-1]->bx + icons[a-1]->bs >= cur_ic->x) ) {
+
+            buffer.subImage(cur_ic->bx, cur_ic->by,
+                cur_ic->bs, cur_ic->bs) += cleanbuf.subImage(
+                    cur_ic->bx, cur_ic->by, cur_ic->bs, cur_ic->bs);
+
+            buffer.subImage(cur_ic->x, cur_ic->y,
+                cur_ic->size, cur_ic->size) += cleanbuf.subImage(
+                    cur_ic->x, cur_ic->y, cur_ic->size, cur_ic->size);
+        }
     }
 
-    if(zoomed_icon != -1) {
-        cur_ic = icons[zoomed_icon];
-        buffer.subImage(cur_ic->x, cur_ic->y, 
-            cur_ic->size, cur_ic->size) |= cur_ic->render();
+    // blending
+    for(size_t a=0; a<icons.size(); a++){
+
+        cur_ic = icons[a];
+
+        if(cur_ic->size != cur_ic->bs || 
+                cur_ic->x != cur_ic->bx ||
+                cur_ic->y != cur_ic->by || 
+                (a>0 && icons[a-1]->bx + icons[a-1]->bs >= cur_ic->x) ) {
+
+            buffer.subImage(cur_ic->x, cur_ic->y,
+                cur_ic->size, cur_ic->size) |= cur_ic->icon.full();
+        }
     }
 
     buffer.splat(window->window);
@@ -221,6 +233,10 @@ void Bar::animate() {
         cur_ic->vx = (cur_ic->x - cur_ic->bx) / (float)anim_time;
         cur_ic->vy = (cur_ic->y - cur_ic->by) / (float)anim_time;
         cur_ic->vs = (cur_ic->size - cur_ic->bs) / (float)anim_time;
+
+        cur_ic->cx = cur_ic->bx;
+        cur_ic->cy = cur_ic->by;
+        cur_ic->cs = cur_ic->bs;
     }
 
     gettimeofday(&tv0, NULL);
@@ -235,9 +251,13 @@ void Bar::animate() {
         for(size_t j = 0; j< icons.size(); j++){
             cur_ic = icons[j];
 
-            cur_ic->x = cur_ic->bx + (int)(t * cur_ic->vx);
-            cur_ic->y = cur_ic->by + (int)(t * cur_ic->vy);
-            cur_ic->size = cur_ic->bs + (int)(t * cur_ic->vs);
+            cur_ic->bx = cur_ic->x;
+            cur_ic->by = cur_ic->y;
+            cur_ic->bs = cur_ic->size;
+
+            cur_ic->x = cur_ic->cx + (int)(t * cur_ic->vx);
+            cur_ic->y = cur_ic->cy + (int)(t * cur_ic->vy);
+            cur_ic->size = cur_ic->cs + (int)(t * cur_ic->vs);
         }
 
         render();
@@ -261,6 +281,25 @@ void Bar::set_focus(int focus) {
             icons[a]->size = icon_size;
         }
     }
+    cleanbuf = window->background.full();
+    cleanbuf.subImage(x, y, width, height) |= bar.full();
+    buffer = cleanbuf;
 
     animate();
+}
+
+int Bar::icon_index(int mouse_x) const {
+    for(size_t a=0; a < icons.size(); a++)
+        if(mouse_x >= icons[a]->x && 
+                mouse_x < icons[a]->x + icons[a]->size)
+            return a;
+
+    return -1;
+}
+
+std::string Bar::icon_cmd(int index) {
+    if(index >= 0 && index < (int)icons.size())
+        return icons[index]->command;
+    else
+        return NULL;
 }

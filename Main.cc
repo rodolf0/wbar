@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) try  {
 
     unsigned int dblclk_tm, butpress;
     unsigned long dblclk0=0, sigexit = 0;
+    int inum;
 
     OptParser *oParser;
     ConfigParser *cParser;
@@ -54,6 +55,7 @@ int main(int argc, char *argv[]) try  {
     delete oParser;
 
     wwin->map();
+    wbar->set_focus(0);
 
     while( !sigexit ) {
 
@@ -76,6 +78,36 @@ int main(int argc, char *argv[]) try  {
             case MotionNotify:
             case Expose:
                 wbar->refresh( ev.xmotion.x );
+                break;
+
+            case ButtonPress:
+                if( ev.xbutton.button == 1 && butpress != 0 )
+                    if( (inum = wbar->icon_index(ev.xbutton.x)) !=-1 )
+                        ;//wbar->iconDown(inum);
+
+                break;
+
+            case ButtonRelease:
+                switch(ev.xbutton.button){
+                    case 3:
+                        execvp(argv[0], argv);
+                        break;
+                    
+                    case 1:
+                        if(butpress!=0)
+                            ;//wbar->iconUp(inum);
+
+                        inum = wbar->icon_index(ev.xbutton.x);
+
+                        /* Double click time 200 ms */
+                        if( (ev.xbutton.time - dblclk0 <dblclk_tm || dblclk_tm==0) && inum != -1 ) {
+                            if(fork()==0)
+                                execlp("sh", "sh", "-c", wbar->icon_cmd(inum).c_str(), NULL);
+                        } else
+                            dblclk0 = ev.xbutton.time;
+
+                    break;
+                }
                 break;
         }
     

@@ -26,6 +26,7 @@ class Icon{
         int size;
         // animation
         int bx, by, bs;
+        int cx, cy, cs;
         float vx, vy, vs;
 
         std::string command;
