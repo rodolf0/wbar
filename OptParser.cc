@@ -69,8 +69,11 @@ void OptParser::configure(Bar *wbar) {
         wbar->window->y = wbar->window->screen_height() - wbar->window->h;
     }else if( isSet("pos") ) {
         flags = XParseGeometry(getArgument("pos"), &tx, &ty, &tw, &th);
-        wbar->window->x = tx + ((flags & XNegative) ? wbar->window->screen_width() : 0);
-        wbar->window->y = ty + ((flags & YNegative) ? wbar->window->screen_height() : 0);
+
+        wbar->window->x = tx + ((flags & XNegative) ? 
+                wbar->window->screen_width() - wbar->window->w : 0);
+        wbar->window->y = ty + ((flags & YNegative) ? 
+                wbar->window->screen_height() - wbar->window->h : 0);
     }
 
     wbar->scale();
