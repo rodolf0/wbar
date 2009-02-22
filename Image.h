@@ -6,6 +6,11 @@
 #include <string>
 #include <iostream>
 
+#if 0
+#include <cairo.h>
+#include <cairo-xlib.h>
+#endif
+
 class Image {
     public:
 
@@ -90,12 +95,11 @@ class Image {
         Image& operator |= (const Image &i) {
             Imlib_Image t = imlib_context_get_image();
             char b;
-
             if( !(b = imlib_context_get_blend()) )
                 imlib_context_set_blend(1);
 
             imlib_context_set_image(_img);
-            imlib_blend_image_onto_image(i._img, 0, i.sx, i.sy, i.sw, i.sh,
+            imlib_blend_image_onto_image(i._img, 1, i.sx, i.sy, i.sw, i.sh,
                 sx, sy, sw, sh);
 
             imlib_context_set_blend(b);
@@ -113,7 +117,7 @@ class Image {
                 imlib_context_set_blend(0);
 
             imlib_context_set_image(_img);
-            imlib_blend_image_onto_image(i._img, 0, i.sx, i.sy, i.sw, i.sh,
+            imlib_blend_image_onto_image(i._img, 1, i.sx, i.sy, i.sw, i.sh,
                 sx, sy, sw, sh);
 
             imlib_context_set_blend(b);
@@ -151,12 +155,48 @@ class Image {
             imlib_context_set_drawable(dst_d);
             imlib_context_set_image(_img);
             if( !(b = imlib_context_get_blend()) )
-                imlib_context_set_blend(0);
+                imlib_context_set_blend(1);
 
+#if 1
             imlib_render_image_on_drawable(0, 0);
+#else
+            cairo_surface_t *res = cairo_image_surface_create_for_data(
+                (unsigned char*)imlib_image_get_data_for_reading_only(),
+                CAIRO_FORMAT_ARGB32, ow, oh, sizeof(DATA32) * ow);
+
+            cairo_surface_t * dwb = cairo_xlib_surface_create(
+                imlib_context_get_display(), dst_d, 
+                imlib_context_get_visual(), ow, oh);
+
+            // create a context for the target
+            cairo_t *ctx = cairo_create(dwb);
+
+            /*
+            cairo_set_source_rgba(ctx, 1, 1, 1, 1);
+            cairo_rectangle(ctx, 0, 0, ow, oh);
+            cairo_fill(ctx);
+            */
+
+            cairo_set_source_surface(ctx, res, 0, 0);
+            cairo_set_operator(ctx, CAIRO_OPERATOR_SOURCE);
+            cairo_paint(ctx);
+
+            cairo_destroy(ctx);
+            cairo_surface_destroy(res);
+            cairo_surface_destroy(dwb);
+#endif
 
             imlib_context_set_blend(b);
             imlib_context_set_drawable(d);
+            imlib_context_set_image(t);
+        }
+
+        void save(const char *path) {
+            Imlib_Image t = imlib_context_get_image();
+
+            imlib_context_set_image(_img);
+            imlib_save_image(path);
+
             imlib_context_set_image(t);
         }
 

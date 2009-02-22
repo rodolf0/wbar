@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) try  {
 
     unsigned int dblclk_tm, butpress;
     unsigned long dblclk0=0, sigexit = 0;
-    int inum;
+    int inum = -1;
 
     OptParser *oParser;
     ConfigParser *cParser;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) try  {
             case ButtonPress:
                 if( ev.xbutton.button == 1 && butpress != 0 )
                     if( (inum = wbar->icon_index(ev.xbutton.x)) !=-1 )
-                        ;//wbar->iconDown(inum);
+                        wbar->icon_pressure(inum, 2);
 
                 break;
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) try  {
                     
                     case 1:
                         if(butpress!=0)
-                            ;//wbar->iconUp(inum);
+                            wbar->icon_pressure(inum, -2);
 
                         inum = wbar->icon_index(ev.xbutton.x);
 

@@ -162,7 +162,7 @@ void Bar::transform(int mousex) {
 
 void Bar::render(){
     Icon *cur_ic=0;
-
+#if 0
     // cleaning
     for(size_t a=0; a<icons.size(); a++){
 
@@ -199,6 +199,21 @@ void Bar::render(){
     }
 
     buffer.splat(window->window);
+#else
+    buffer.colorClear(0, 0, 0, 0);
+    buffer.subImage(x, y, width, height) |= bar.full();
+    for(size_t a=0; a<icons.size(); a++){
+
+        cur_ic = icons[a];
+
+            buffer.subImage(cur_ic->x, cur_ic->y,
+                cur_ic->size, cur_ic->size) |= cur_ic->icon.full();
+    }
+
+    buffer.setAlpha(0);
+    buffer.splat(window->window);
+    buffer.setAlpha(1);
+#endif
 }
 
 void Bar::refresh(int mouse_x){
@@ -302,4 +317,21 @@ std::string Bar::icon_cmd(int index) {
         return icons[index]->command;
     else
         return NULL;
+}
+
+void Bar::icon_pressure(int i_num, int offs) {
+    Icon *cur_ic;
+
+    if(i_num<0 || i_num>=(int)icons.size()) return;
+
+    cur_ic = icons[i_num];
+
+    cur_ic->bx = cur_ic->x;
+    cur_ic->by = cur_ic->y;
+    cur_ic->bs = cur_ic->size;
+
+    cur_ic->x += offs;
+    cur_ic->y += offs;
+
+    render();
 }

@@ -25,6 +25,8 @@ class Bar{
         /* set bar */
         void set_focus(int focus);
 
+        void icon_pressure(int inum, int x);
+
         int icon_index(int mouse_x) const;
         std::string icon_cmd(int idx);
 
