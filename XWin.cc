@@ -23,7 +23,7 @@ XWin::XWin(int xx, int yy, int ww, int hh) :
 
     argb32_visual = false;
 
-#if 0
+#if 1
     // ARGB32 visual
     if( XRenderQueryExtension (display, &render_event, &render_error) ) {
 
@@ -95,6 +95,7 @@ Image& XWin::go_transparent() {
 
 bool XWin::get_event(XEvent *ev) const {
 
+#define CATCH_ALL_EVENTS
 #ifndef CATCH_ALL_EVENTS
     int qlen;
 

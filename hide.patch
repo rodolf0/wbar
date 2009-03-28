@@ -1,0 +1,91 @@
+diff --git a/Bar.cc b/Bar.cc
+index 20af7be..5d67c6e 100644
+--- a/Bar.cc
++++ b/Bar.cc
+@@ -63,7 +63,7 @@ void Bar::scale() {
+ #endif
+ 
+     // bar dimensions
+-    width = icon_unit * (icons.size() + 1) - 2 * icon_dist;
++    ow = width = icon_unit * (icons.size() + 1) - 2 * icon_dist;
+     height=(int)(icon_size * 1.25);
+ 
+     // Space needed for growing
+@@ -81,14 +81,16 @@ void Bar::scale() {
+         (int)((dn_growth>0.0? dn_growth : 0.0));
+ 
+     // Initial Bar position
+-    y = MARGEN + (int)(up_growth>0.0? up_growth : 0.0);
+-    x = (int)icon_offset;
++    oy = y = MARGEN + (int)(up_growth>0.0? up_growth : 0.0);
++    ox = x = (int)icon_offset;
+ 
+     // Re organize widget position
+     for(size_t a=0; a < icons.size(); a++) {
+-        icons[a]->x = icons[a]->ox = (int)(icon_offset + icon_size/2 + a * icon_unit);
+-        icons[a]->y = icons[a]->oy = y + (int)(0.125 * icon_size);
+-        icons[a]->size = icon_size;
++        icons[a]->x = icons[a]->bx = icons[a]->ox = 
++            (int)(icon_offset + icon_size/2 + a * icon_unit);
++        icons[a]->y = icons[a]->by = icons[a]->oy = 
++            y + (int)(0.125 * icon_size);
++        icons[a]->size = icons[a]->bs = icon_size;
+     }
+ 
+     // Adapt container window to changes
+@@ -253,6 +255,9 @@ void Bar::animate() {
+         cur_ic->cy = cur_ic->by;
+         cur_ic->cs = cur_ic->bs;
+     }
++    vx = (x - bx) / (float)anim_time;
++    vy = (y - by) / (float)anim_time;
++    vw = (width - bw) / (float)anim_time;
+ 
+     gettimeofday(&tv0, NULL);
+ 
+@@ -275,6 +280,10 @@ void Bar::animate() {
+             cur_ic->size = cur_ic->cs + (int)(t * cur_ic->vs);
+         }
+ 
++        x = bx + (int)(t * vx);
++        y = by + (int)(t * vy);
++        width = bw + (int)(t * vw);
++
+         render();
+     }
+ }
+@@ -282,7 +291,9 @@ void Bar::animate() {
+ void Bar::set_focus(int focus) {
+     if( focus ) {
+         focused = 1;
++        bx = x; by = y; bw = width;
+         x=0;
++        y = oy;
+         width = window->w;
+     } else {
+         focused = 0;
+@@ -292,9 +303,10 @@ void Bar::set_focus(int focus) {
+ 
+         for(size_t a=0; a<icons.size(); a++) {
+             icons[a]->x = icons[a]->ox;
+-            icons[a]->y = icons[a]->oy;
++            icons[a]->y = icons[a]->oy + icon_size;
+             icons[a]->size = icon_size;
+         }
++        y += icon_size;
+     }
+     cleanbuf = window->background.full();
+     cleanbuf.subImage(x, y, width, height) |= bar.full();
+diff --git a/Bar.h b/Bar.h
+index 9c563d6..c7f30d0 100644
+--- a/Bar.h
++++ b/Bar.h
+@@ -62,6 +62,8 @@ class Bar{
+ 
+         // current status
+         int x, y, width, height;
++        int bx, by, bw, ox, oy, ow;
++        float vx, vy, vw;
+         int zoomed_icon;
+         int focused;
+ 
