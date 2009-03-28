@@ -1,5 +1,5 @@
 diff --git a/Bar.cc b/Bar.cc
-index 20af7be..5d67c6e 100644
+index 20af7be..1ba9963 100644
 --- a/Bar.cc
 +++ b/Bar.cc
 @@ -63,7 +63,7 @@ void Bar::scale() {
@@ -54,7 +54,7 @@ index 20af7be..5d67c6e 100644
          render();
      }
  }
-@@ -282,7 +291,9 @@ void Bar::animate() {
+@@ -282,8 +291,11 @@ void Bar::animate() {
  void Bar::set_focus(int focus) {
      if( focus ) {
          focused = 1;
@@ -62,9 +62,11 @@ index 20af7be..5d67c6e 100644
          x=0;
 +        y = oy;
          width = window->w;
++        window->raise();
      } else {
          focused = 0;
-@@ -292,9 +303,10 @@ void Bar::set_focus(int focus) {
+         x = (int)icon_offset;
+@@ -292,9 +304,11 @@ void Bar::set_focus(int focus) {
  
          for(size_t a=0; a<icons.size(); a++) {
              icons[a]->x = icons[a]->ox;
@@ -73,14 +75,15 @@ index 20af7be..5d67c6e 100644
              icons[a]->size = icon_size;
          }
 +        y += icon_size;
++        window->lower();
      }
      cleanbuf = window->background.full();
      cleanbuf.subImage(x, y, width, height) |= bar.full();
 diff --git a/Bar.h b/Bar.h
-index 9c563d6..c7f30d0 100644
+index 9c563d6..39873bc 100644
 --- a/Bar.h
 +++ b/Bar.h
-@@ -62,6 +62,8 @@ class Bar{
+@@ -62,12 +62,15 @@ class Bar{
  
          // current status
          int x, y, width, height;
@@ -89,3 +92,72 @@ index 9c563d6..c7f30d0 100644
          int zoomed_icon;
          int focused;
  
+         void transform(int mousex);
+         void render();
+         void animate();
++    public:
+         void scale();
+ };
+ 
+diff --git a/Main.cc b/Main.cc
+index 100ff19..4b3afd3 100644
+--- a/Main.cc
++++ b/Main.cc
+@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) try  {
+ 
+     wwin->map();
+     wbar->set_focus(0);
++    wbar->scale();
+ 
+     while( !sigexit ) {
+ 
+diff --git a/Makefile b/Makefile
+index 039da02..f5ca0fb 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ TARGET=wbar
+-CXXFLAGS=`imlib2-config --cflags` -Wall -O2 #-DCOS_ZOOM #-DLINEAR_TRASL #-DNO_EXPAND #-DAVGFILTER
+-LDFLAGS=`imlib2-config --libs` -lXrender -Wl,-O2
++CXXFLAGS=`imlib2-config --cflags` -Wall -O3 -march=core2 #-DCOS_ZOOM #-DLINEAR_TRASL #-DNO_EXPAND #-DAVGFILTER
++LDFLAGS=`imlib2-config --libs` -lXrender -Wl,-O3
+ PREFIX=/usr/share/wbar
+ 
+ 	
+diff --git a/XWin.cc b/XWin.cc
+index 24c9ffe..35d2c1b 100644
+--- a/XWin.cc
++++ b/XWin.cc
+@@ -144,9 +144,9 @@ void XWin::set_toolbar_properties(int wlayer) {
+     Atom a, prop;
+     long lprop[5] = { 0, 0, 0, 0, 0 };
+ 
+-    // set dock type (_NET_WM_WINDOW_TYPE_DESKTOP / NORMAL)
++    // set dock type (_NET_WM_WINDOW_TYPE_DESKTOP / NORMAL / DOCK)
+     a = XInternAtom(display, "_NET_WM_WINDOW_TYPE", True);
+-    prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DOCK", True);
++    prop = XInternAtom(display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
+     XChangeProperty(display, window, a, XA_ATOM, 32, PropModeReplace, (unsigned char *) &prop, 1);
+ 
+     // no decorations
+@@ -172,6 +172,7 @@ void XWin::set_toolbar_properties(int wlayer) {
+ 	XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
+ 
+     // set win layer
++    /*
+     if( wlayer == LAYER_BELOW ) {
+         prop = XInternAtom(display, "_NET_WM_STATE_BELOW", True);
+         XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
+@@ -181,9 +182,10 @@ void XWin::set_toolbar_properties(int wlayer) {
+     }
+     a = XInternAtom(display, "_WIN_LAYER", True);
+ 	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &wlayer, 1);
++    */
+ 
+     // set opacity
+-	//prop = XInternAtom(display, "_NET_WM_WINDOW_OPACITY", True);
+-    //wopacity = (int)(0xFFFFFFFF * opacity);
++	//a = XInternAtom(display, "_NET_WM_WINDOW_OPACITY", True);
++    //int wopacity = (int)(0xFFFFFFFF * 1.0);
+ 	//XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &wopacity, 1);
+ }
