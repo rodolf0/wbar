@@ -210,9 +210,10 @@ void Bar::render(){
                 cur_ic->size, cur_ic->size) |= cur_ic->icon.full();
     }
 
-    buffer.setAlpha(0);
+    // esto causa flickering al entrar y salir
+    //buffer.setAlpha(0);
     buffer.splat(window->window);
-    buffer.setAlpha(1);
+    //buffer.setAlpha(1);
 #endif
 }
 
@@ -228,12 +229,12 @@ void Bar::refresh(int mouse_x){
 
         if( !focused )
             set_focus( 1 );
+        else
+            render();
 
     } else // out of the bar
         if(focused)
             set_focus( 0 );
-
-    render();
 }
 
 void Bar::animate() {
@@ -296,9 +297,13 @@ void Bar::set_focus(int focus) {
             icons[a]->size = icon_size;
         }
     }
+#if 0
     cleanbuf = window->background.full();
     cleanbuf.subImage(x, y, width, height) |= bar.full();
     buffer = cleanbuf;
+#else
+    buffer = Image(window->w, window->h);
+#endif
 
     animate();
 }
