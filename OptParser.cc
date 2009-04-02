@@ -77,6 +77,9 @@ void OptParser::configure(Bar *wbar) {
     }
 
     wbar->scale();
+
+    if( isSet("startdelay") )
+        sleep( atoi(getArgument("startdelay")) );
 }
 
 OptParser::OptParser(int argc, char *argv[]) {
