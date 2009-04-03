@@ -1,5 +1,5 @@
 diff --git a/Bar.cc b/Bar.cc
-index 20af7be..8c18489 100644
+index 2d8a2a1..8a52074 100644
 --- a/Bar.cc
 +++ b/Bar.cc
 @@ -63,7 +63,7 @@ void Bar::scale() {
@@ -33,7 +33,7 @@ index 20af7be..8c18489 100644
      }
  
      // Adapt container window to changes
-@@ -253,6 +255,9 @@ void Bar::animate() {
+@@ -254,6 +256,9 @@ void Bar::animate() {
          cur_ic->cy = cur_ic->by;
          cur_ic->cs = cur_ic->bs;
      }
@@ -43,7 +43,7 @@ index 20af7be..8c18489 100644
  
      gettimeofday(&tv0, NULL);
  
-@@ -275,6 +280,10 @@ void Bar::animate() {
+@@ -276,6 +281,10 @@ void Bar::animate() {
              cur_ic->size = cur_ic->cs + (int)(t * cur_ic->vs);
          }
  
@@ -54,7 +54,7 @@ index 20af7be..8c18489 100644
          render();
      }
  }
-@@ -282,8 +291,11 @@ void Bar::animate() {
+@@ -283,8 +292,11 @@ void Bar::animate() {
  void Bar::set_focus(int focus) {
      if( focus ) {
          focused = 1;
@@ -66,7 +66,7 @@ index 20af7be..8c18489 100644
      } else {
          focused = 0;
          x = (int)icon_offset;
-@@ -292,9 +304,11 @@ void Bar::set_focus(int focus) {
+@@ -293,9 +305,11 @@ void Bar::set_focus(int focus) {
  
          for(size_t a=0; a<icons.size(); a++) {
              icons[a]->x = icons[a]->ox;
@@ -77,8 +77,8 @@ index 20af7be..8c18489 100644
 +        y += icon_size * hide_factor;
 +        window->lower();
      }
+ #if 0
      cleanbuf = window->background.full();
-     cleanbuf.subImage(x, y, width, height) |= bar.full();
 diff --git a/Bar.h b/Bar.h
 index 9c563d6..8436777 100644
 --- a/Bar.h
