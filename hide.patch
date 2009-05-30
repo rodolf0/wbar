@@ -173,8 +173,8 @@ index 24c9ffe..35d2c1b 100644
          XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
 @@ -181,9 +182,10 @@ void XWin::set_toolbar_properties(int wlayer) {
      }
-     a = XInternAtom(display, "_WIN_LAYER", True);
- 	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &wlayer, 1);
+     //a = XInternAtom(display, "_WIN_LAYER", True);
+ 	//XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &wlayer, 1);
 +    */
  
      // set opacity

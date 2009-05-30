@@ -179,8 +179,8 @@ void XWin::set_toolbar_properties(int wlayer) {
         prop = XInternAtom(display, "_NET_WM_STATE_ABOVE", True);
         XChangeProperty(display, window, a, XA_ATOM, 32, PropModeAppend, (unsigned char *) &prop, 1);
     }
-    a = XInternAtom(display, "_WIN_LAYER", True);
-	XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &wlayer, 1);
+    //a = XInternAtom(display, "_WIN_LAYER", True);
+	//XChangeProperty(display, window, a, XA_CARDINAL, 32, PropModeAppend, (unsigned char *) &wlayer, 1);
 
     // set opacity
 	//prop = XInternAtom(display, "_NET_WM_WINDOW_OPACITY", True);
