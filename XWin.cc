@@ -95,7 +95,7 @@ Image& XWin::go_transparent() {
 
 bool XWin::get_event(XEvent *ev) const {
 
-#define CATCH_ALL_EVENTS
+//#define CATCH_ALL_EVENTS
 #ifndef CATCH_ALL_EVENTS
     int qlen;
 
