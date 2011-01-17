@@ -8,33 +8,33 @@
 class Bar;
 
 class OptParser {
-    public:
+  public:
 
-        OptParser(int argc, char *argv[]);
+    OptParser(int argc, char *argv[]);
 
-        int isSet(const char *name) const;
-        int takesArg(const char *name) const;
-        const char *getArgument(const char *name) const;
-        const char *getDefault(const char *name) const;
-        void printDescrip() const;
+    int isSet(const char *name) const;
+    int takesArg(const char *name) const;
+    const char *getArgument(const char *name) const;
+    const char *getDefault(const char *name) const;
+    void printDescrip() const;
 
-        void configure(Bar *);
+    void configure(Bar *);
 };
 
 class ConfigParser {
-    public:
+  public:
 
-        ConfigParser(const char *cfg);
+    ConfigParser(const char *cfg);
 
-        const char *getWidget(int index) const;
-        const char *getCommand(int index) const;
-        const char *getCaption(int index) const;
-        int widgetCount() const;
+    const char *getWidget(int index) const;
+    const char *getCommand(int index) const;
+    const char *getCaption(int index) const;
+    int widgetCount() const;
 
-    private:
-        std::vector<std::string> widget;
-        std::vector<std::string> command;
-        std::vector<std::string> caption;
+  private:
+    std::vector<std::string> widget;
+    std::vector<std::string> command;
+    std::vector<std::string> caption;
 };
 
 #endif /* _OPTPARSER_ */

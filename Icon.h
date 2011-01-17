@@ -7,29 +7,29 @@
 class Bar;
 
 class Icon{
-    public:
+  public:
 
-        Icon(const char *iconImg, const char *cmd);
-        ~Icon();
+    Icon(const char *iconImg, const char *cmd);
+    ~Icon();
 
-        Image& render();
+    Image& render();
 
-    protected:
-        friend class Bar;
+  protected:
+    friend class Bar;
 
-        Image icon;
+    Image icon;
 
-        // original state
-        int ox, oy;
-        // current state
-        int x, y;
-        int size;
-        // animation
-        int bx, by, bs;
-        int cx, cy, cs;
-        float vx, vy, vs;
+    // original state
+    int ox, oy;
+    // current state
+    int x, y;
+    int size;
+    // animation
+    int bx, by, bs;
+    int cx, cy, cs;
+    float vx, vy, vs;
 
-        std::string command;
+    std::string command;
 };
 
 #endif /* _ICON_H_ */
