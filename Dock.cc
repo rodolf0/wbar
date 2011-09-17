@@ -1,27 +1,20 @@
 #include "Dock.h"
 
-Dock::Dock(CanvasEngine &ce, LayoutStrategy &ls) :
-    Xwindow(Rect(0, 0, 1, 1),
-            PointerMotionMask | ExposureMask | ButtonPressMask |
-            ButtonReleaseMask | LeaveWindowMask | EnterWindowMask),
-    layout(ls), canvas_engine(ce) {
-  // setup
-}
+Dock::Dock(Xwindow &w, Image &bg, LayoutStrategy &ls) :
+    XEventHandler(w), dock_background(bg), layout(ls) { }
 
-void Dock::addWidget(const Widget &w) {
-  widgets.push_back(w);
-  layout.resize(widgets.size());
-}
 
 void Dock::onMouseEnter(const XCrossingEvent &e) {
   layout.focus(Point(e.x, e.y));
   render();
 }
 
+
 void Dock::onMouseLeave(const XCrossingEvent &e) {
   layout.unfocus();
   render();
 }
+
 
 void Dock::onMouseMove(const XMotionEvent &e) {
   const Point p(e.x, e.y);
@@ -34,15 +27,17 @@ void Dock::onMouseMove(const XMotionEvent &e) {
   }
 }
 
+
 void Dock::onMouseDown(const XButtonEvent &e) {
 }
+
 
 void Dock::onMouseUp(const XButtonEvent &e) {
 }
 
 
 void Dock::render() {
-
+  //CanvasEngine &c = CanvasEngine::get();
 }
 
 /* vim: set sw=2 sts=2 : */

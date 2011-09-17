@@ -10,7 +10,6 @@ void showHelp();
 int main(int argc, char *argv[]) {
 
   OptionParser optparser(argc, argv);
-
   if (optparser.getBool("help")) {
     showHelp();
     return 0;
@@ -18,18 +17,22 @@ int main(int argc, char *argv[]) {
 
   ConfigReader cfgreader(optparser.getString("config"));
 
-  EvasEngine canvasEngine;
-  WaveLayout layoutStrategy;
-  Dock dock(canvasEngine, layoutStrategy);
+  WaveLayout layout(cfgreader.sections.size() - 1);
+  Xwindow window; // (layout.frameSize());
+  Dock dock(window,
+            CanvasEngine::get().addImage("background.png", layout.dockLayout()),
+            layout);
 
+  std::vector<Widget*> widgets;
   for (ConfigReader::SectionIterator si = cfgreader.sections.begin();
        si != cfgreader.sections.end(); si++) {
-    Widget *w = new LauncherWidget(ExecuteCommand(si->getString("command")));
-    dock.addWidget(*w);
+    const size_t idx = std::distance(si, cfgreader.sections.begin());
+    widgets.push_back(new LauncherWidget(
+        CanvasEngine::get().addImage("widget.png", layout.widgetLayout(idx)),
+        ExecuteCommand(si->getString("command"))));
   }
 
-  dock.eventLoop();
-
+  //dock.eventLoop();
   return 0;
 }
 

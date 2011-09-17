@@ -16,7 +16,7 @@ class ConfigReader {
   private:
   public:
 
-    typedef std::list<ConfigSection>::const_iterator SectionIterator;
+    typedef std::list<ConfigSection>::iterator SectionIterator;
     std::list<ConfigSection> sections;
 
     ConfigReader(const std::string &path);

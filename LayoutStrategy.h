@@ -8,7 +8,6 @@ class LayoutStrategy {
   public:
     virtual ~LayoutStrategy() = 0;
 
-    virtual void resize(size_t num_widgets);
     virtual void unfocus();
     virtual void focus(const Point &p);
 
@@ -22,15 +21,18 @@ class LayoutStrategy {
 class WaveLayout : public LayoutStrategy {
   public:
 
-    WaveLayout(size_t widget_size = 32, size_t num_anim = 3,
-               float zoom_factor = 1.8, float jump_factor = 1.0);
+    WaveLayout(size_t num_widgets, size_t widget_size = 32,
+               size_t num_anim = 3, float zoom_factor = 1.8,
+               float jump_factor = 1.0);
 
-    void resize(size_t num_widgets);
     void unfocus();
     void focus(const Point &p);
 
     int widgetAt(const Point &x) const;
     bool atHoverZone(const Point &x) const;
+
+    const RectLayout & widgetLayout(size_t idx) const;
+    const RectLayout & dockLayout() const;
 
     Size frameSize() const;
 
@@ -55,7 +57,7 @@ class WaveLayout : public LayoutStrategy {
     float _dngrowth() const;
 
     std::vector<Point> position;
-    std::vector<Rect> bounds;
+    std::vector<RectLayout> bounds;
 };
 
 

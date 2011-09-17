@@ -5,16 +5,25 @@
 #include "Geometry.h"
 
 class Xwindow {
-  private:
-    Display *d;
-    Window w;
-    size_t pos_x, pos_y;
-    size_t  width, height;
-    unsigned long ev_mask;
-
   public:
-    Xwindow(const Rect &r, unsigned long evmask);
-    virtual ~Xwindow() = 0;
+    Xwindow();
+    virtual ~Xwindow();
+    virtual void setGeometry();
+    Window getWindow() const;
+
+    static Display * getDisplay();
+
+  protected:
+    static Display *display;
+    Window window;
+    RectLayout layout;
+};
+
+
+class XEventHandler {
+  public:
+    XEventHandler(Xwindow &w);
+    virtual ~XEventHandler() = 0;
 
     virtual void onExposure(const XExposeEvent &e);
     virtual void onMouseMove(const XMotionEvent &e);
@@ -23,7 +32,11 @@ class Xwindow {
     virtual void onMouseEnter(const XCrossingEvent &e);
     virtual void onMouseLeave(const XCrossingEvent &e);
 
+    static unsigned long eventMask();
     virtual void eventLoop();
+
+  protected:
+    Xwindow &window;
 };
 
 #endif /* _XWINDOW_ */

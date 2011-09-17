@@ -1,25 +1,19 @@
 #ifndef _DOCK_
 #define _DOCK_
 
-#include <vector>
 #include "LayoutStrategy.h"
-#include "Xwindow.h"
 #include "CanvasEngine.h"
-#include "Widget.h"
+#include "Xwindow.h"
 
-class Dock : public Xwindow {
+class Dock : public XEventHandler {
   private:
-    std::vector<Widget> widgets;
+    Image &dock_background;
     LayoutStrategy &layout;
-    CanvasEngine &canvas_engine;
+    void render();
 
   public:
-    Dock(CanvasEngine &ce, LayoutStrategy &ls);
+    Dock(Xwindow &w, Image &bg, LayoutStrategy &ls);
     ~Dock();
-
-    void addWidget(const Widget &w);
-    void removeWidget(const Widget &w);
-    void render();
 
     void onExposure(const XExposeEvent &e);
     void onMouseMove(const XMotionEvent &e);

@@ -1,26 +1,22 @@
 #include <cmath>
 #include "LayoutStrategy.h"
 
-WaveLayout::WaveLayout(size_t widget_size, size_t num_anim,
-                       float zoom_factor, float jump_factor) :
+WaveLayout::WaveLayout(size_t num_widgets, size_t widget_size,
+                       size_t num_anim, float zoom_factor, float jump_factor) :
     widget_size(widget_size), widget_dist(1), num_animated(num_anim),
     zoom_factor(zoom_factor), jump_factor(jump_factor), position(), bounds() {
-}
 
-void WaveLayout::resize(size_t num) {
-  position.clear();
-  bounds.clear();
-  for (size_t i = 0; i < num; i++) {
+  for (size_t i = 0; i < num_widgets; i++) {
     Point p(widget_offset() + widget_size/2 + i * widget_unit(),
             bar_y() + (size_t)(widget_size * 0.125));
     position.push_back(p);
-    bounds.push_back(Rect(p.x, p.y, widget_size, widget_size));
+    bounds.push_back(RectLayout(p.x, p.y, widget_size, widget_size));
   }
 }
 
 void WaveLayout::unfocus() {
   for (size_t i = 0; i < position.size(); i++) {
-    Rect &w = bounds[i];
+    RectLayout &w = bounds[i];
     w.x = position[i].x;
     w.y = position[i].y;
     w.width = w.height = widget_size;
@@ -34,7 +30,7 @@ void WaveLayout::focus(const Point &p) {
   int rx = relativex - widget_unit()/2;
 
   for (size_t i = 0; i < bounds.size(); i++, rx -= widget_unit()) {
-    Rect &w = bounds[i];
+    RectLayout &w = bounds[i];
     if (std::abs(i - focused) > side_num_anim()) {
       w.width = w.height = widget_size;
       w.x = position[i].x + side_num_anim()*scaled_unit()*((int)i<focused?1:-1);
@@ -49,7 +45,7 @@ void WaveLayout::focus(const Point &p) {
 }
 
 int WaveLayout::widgetAt(const Point &p) const {
-  for (std::vector<Rect>::const_iterator widget = bounds.begin();
+  for (std::vector<RectLayout>::const_iterator widget = bounds.begin();
        widget != bounds.end(); widget++) {
     if (p.x >= widget->x && p.x < widget->x + widget->width)
       return std::distance(widget, bounds.begin());

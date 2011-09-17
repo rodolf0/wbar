@@ -1,10 +1,27 @@
 #include "Xwindow.h"
 
-void Xwindow::eventLoop() {
+Display *Xwindow::display = NULL;
+
+
+Xwindow::Xwindow() {
+  if (!display)
+    display = XOpenDisplay(NULL);
+
+  // TODO: replace w/XCreateWindow
+  window = XCreateSimpleWindow(display, DefaultRootWindow(display),
+                               0, 0, 1, 1, /* pos, dimensions */
+                               0 /* border width */, 0 /* border pix */, 0);
+}
+
+
+XEventHandler::XEventHandler(Xwindow &w) : window(w) { }
+
+
+void XEventHandler::eventLoop() {
   bool process_events = true;
   while (process_events) {
     XEvent ev;
-    XWindowEvent(this->d, this->w, this->ev_mask, &ev);
+    XWindowEvent(window.getDisplay(), window.getWindow(), eventMask(), &ev);
 
     switch (ev.type) {
       case EnterNotify:
@@ -34,5 +51,12 @@ void Xwindow::eventLoop() {
     }
   }
 }
+
+
+unsigned long XEventHandler::eventMask() {
+  return PointerMotionMask | ExposureMask | ButtonPressMask |
+         ButtonReleaseMask | LeaveWindowMask | EnterWindowMask;
+}
+
 
 /* vim: set sw=2 sts=2 : */
