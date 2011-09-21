@@ -19,16 +19,20 @@ class Image {
 class CanvasEngine {
   public:
 
+    static void init(Xwindow &frame);
     static CanvasEngine & get();
-    static void init();
 
     virtual Image & addImage(const std::string &path, const Layout &l);
+    virtual void render();
 
     virtual ~CanvasEngine();
 
-  private:
-    CanvasEngine(Xwindow &canvas);
-    static CanvasEngine &canvas_engine;
+  protected:
+    CanvasEngine(Xwindow &frame);
+    static CanvasEngine *instance;
+
+    Evas *canvas;
+
     std::map<std::string, Image> image_objects;
 };
 

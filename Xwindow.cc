@@ -3,25 +3,59 @@
 Display *Xwindow::display = NULL;
 
 
-Xwindow::Xwindow() {
+Xwindow::Xwindow(const Point &position, const Size &size) :
+    position(position), dimensions(size) {
   if (!display)
     display = XOpenDisplay(NULL);
 
   // TODO: replace w/XCreateWindow
   window = XCreateSimpleWindow(display, DefaultRootWindow(display),
-                               0, 0, 1, 1, /* pos, dimensions */
+                               position.x, position.y, dimensions.x, dimensions.y,
                                0 /* border width */, 0 /* border pix */, 0);
 }
 
 
-XEventHandler::XEventHandler(Xwindow &w) : window(w) { }
+Xwindow::~Xwindow() {}
 
 
-void XEventHandler::eventLoop() {
+Display * Xwindow::getDisplay() {
+  return display;
+}
+
+
+Window Xwindow::getWindow() const {
+  return window;
+}
+
+
+void Xwindow::setGeometry(int x, int y, int w, int h) {
+  position.x = x; position.y = y;
+  dimensions.x = w; dimensions.y = w;
+}
+
+void Xwindow::map() const {
+  XMapWindow(display, window);
+}
+
+size_t Xwindow::width() const {
+  return dimensions.x;
+}
+
+size_t Xwindow::height() const {
+  return dimensions.y;
+}
+
+
+XEventHandler::~XEventHandler() {}
+
+void XEventHandler::eventLoop(Xwindow &w) {
   bool process_events = true;
+
+  XSelectInput(w.getDisplay(), w.getWindow(), eventMask());
+
   while (process_events) {
     XEvent ev;
-    XWindowEvent(window.getDisplay(), window.getWindow(), eventMask(), &ev);
+    XWindowEvent(w.getDisplay(), w.getWindow(), eventMask(), &ev);
 
     switch (ev.type) {
       case EnterNotify:

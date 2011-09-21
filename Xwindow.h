@@ -6,37 +6,39 @@
 
 class Xwindow {
   public:
-    Xwindow();
+    Xwindow(const Point &position, const Size &size);
     virtual ~Xwindow();
-    virtual void setGeometry();
-    Window getWindow() const;
 
+    virtual void setGeometry(int x, int y, int w, int h);
+    virtual void map() const;
+
+    Window getWindow() const;
     static Display * getDisplay();
+
+    size_t width() const;
+    size_t height() const;
 
   protected:
     static Display *display;
     Window window;
-    RectLayout layout;
+    Point position;
+    Size dimensions;
 };
 
 
 class XEventHandler {
   public:
-    XEventHandler(Xwindow &w);
     virtual ~XEventHandler() = 0;
 
-    virtual void onExposure(const XExposeEvent &e);
-    virtual void onMouseMove(const XMotionEvent &e);
-    virtual void onMouseDown(const XButtonEvent &e);
-    virtual void onMouseUp(const XButtonEvent &e);
-    virtual void onMouseEnter(const XCrossingEvent &e);
-    virtual void onMouseLeave(const XCrossingEvent &e);
+    virtual void onExposure(const XExposeEvent &e) = 0;
+    virtual void onMouseMove(const XMotionEvent &e) = 0;
+    virtual void onMouseDown(const XButtonEvent &e) = 0;
+    virtual void onMouseUp(const XButtonEvent &e) = 0;
+    virtual void onMouseEnter(const XCrossingEvent &e) = 0;
+    virtual void onMouseLeave(const XCrossingEvent &e) = 0;
 
     static unsigned long eventMask();
-    virtual void eventLoop();
-
-  protected:
-    Xwindow &window;
+    virtual void eventLoop(Xwindow &w);
 };
 
 #endif /* _XWINDOW_ */
