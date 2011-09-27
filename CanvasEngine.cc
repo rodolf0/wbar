@@ -1,5 +1,6 @@
 #include "CanvasEngine.h"
-#include <Evas_Engine_GL_X11.h>
+//#include <Evas_Engine_GL_X11.h>
+#include <Evas_Engine_Software_X11.h>
 
 
 CanvasEngine *CanvasEngine::instance = NULL;
@@ -19,7 +20,7 @@ void CanvasEngine::init(Xwindow &frame) {
 
 
 CanvasEngine::CanvasEngine(Xwindow &frame) {
-  Evas_Engine_Info_GL_X11 *einfo;
+  Evas_Engine_Info_Software_X11 *einfo;
   int32_t method;
 
   evas_init();
@@ -34,34 +35,48 @@ CanvasEngine::CanvasEngine(Xwindow &frame) {
   evas_output_size_set(canvas, frame.width(), frame.height());
   evas_output_viewport_set(canvas, 0, 0, frame.width(), frame.height());
 
-  if (!(einfo = (Evas_Engine_Info_GL_X11 *)evas_engine_info_get(canvas))) {
+  if (!(einfo = (Evas_Engine_Info_Software_X11 *)evas_engine_info_get(canvas))) {
     evas_free(canvas);
     throw "ERROR: could not get evas engine info!";
   }
 
-  einfo->info.display = frame.getDisplay();
+  einfo->info.connection = frame.getDisplay();
+  einfo->info.visual = frame.getVisual();
+  einfo->info.colormap = frame.getColormap();
   einfo->info.drawable = frame.getWindow();
-  evas_engine_info_set(canvas, (Evas_Engine_Info *)einfo);
+  einfo->info.depth = frame.getDepth();
+
+  if (!evas_engine_info_set(canvas, (Evas_Engine_Info *)einfo)) {
+    evas_free(canvas);
+    throw "ERROR: failed to set evas engine info.";
+  }
 }
 
 
 CanvasEngine::~CanvasEngine() {
-  //evas_object_del(img)
+  //TODO: evas_object_del(img)
   evas_free(canvas);
 }
 
 
-Image & CanvasEngine::addImage(const std::string &path, const Layout &l) {
+void CanvasEngine::addImage(const std::string &path, const Layout &l) {
   Evas_Object *img = evas_object_image_filled_add(canvas);
   evas_object_image_file_set(img, path.c_str(), NULL);
   if (evas_object_image_load_error_get(img) != EVAS_LOAD_ERROR_NONE)
     throw "ERROR: failed to load image.";
-
+  //evas_object_image_smooth_scale_set(img, EINA_FALSE);
+  image_objects[img] = &l;
+  evas_object_show(img);
 }
 
 
 void CanvasEngine::render() {
-  //evas_object_resize(img, w, h)
-  //evas_object_move(img, x, y)
-  //evas_object_show(img)
+
+  for (std::map<Evas_Object *, const Layout *>::iterator img = image_objects.begin();
+       img != image_objects.end(); img++) {
+
+    img->second->transform(img->first);
+  }
+
+  evas_render(canvas);
 }

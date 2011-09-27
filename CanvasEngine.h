@@ -5,15 +5,7 @@
 #include <string>
 #include <Evas.h>
 #include "Xwindow.h"
-
-
-class Image {
-  public:
-    Layout &layout;
-
-  private:
-    Image(Layout &l);
-};
+#include "CanvasLayouts.h"
 
 
 class CanvasEngine {
@@ -22,7 +14,7 @@ class CanvasEngine {
     static void init(Xwindow &frame);
     static CanvasEngine & get();
 
-    virtual Image & addImage(const std::string &path, const Layout &l);
+    virtual void addImage(const std::string &path, const Layout &l);
     virtual void render();
 
     virtual ~CanvasEngine();
@@ -32,10 +24,8 @@ class CanvasEngine {
     static CanvasEngine *instance;
 
     Evas *canvas;
-
-    std::map<std::string, Image> image_objects;
+    std::map<Evas_Object *, const Layout *> image_objects;
 };
-
 
 #endif /* _CANVASENGINE_ */
 

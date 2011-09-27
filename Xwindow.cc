@@ -1,49 +1,121 @@
+#include <X11/extensions/Xrender.h>
 #include "Xwindow.h"
 
 Display *Xwindow::display = NULL;
+size_t Xwindow::win_count = 0;
 
+Visual * Xwindow::findARGB32Visual() {
+  Visual *v = NULL;
+  int event_base, error_base;
 
-Xwindow::Xwindow(const Point &position, const Size &size) :
-    position(position), dimensions(size) {
-  if (!display)
-    display = XOpenDisplay(NULL);
+  if (XRenderQueryExtension(display, &event_base, &error_base)) {
+    XVisualInfo vi_template, *xvi;
+    int num_vi;
 
-  // TODO: replace w/XCreateWindow
-  window = XCreateSimpleWindow(display, DefaultRootWindow(display),
-                               position.x, position.y, dimensions.x, dimensions.y,
-                               0 /* border width */, 0 /* border pix */, 0);
+    vi_template.screen = DefaultScreen(display);
+    vi_template.depth = 32;
+    vi_template.c_class = TrueColor;
+
+    xvi = XGetVisualInfo(display,
+                         VisualScreenMask | VisualDepthMask | VisualClassMask,
+                         &vi_template, &num_vi);
+
+    for (int i = 0; i < num_vi; i++) {
+      XRenderPictFormat *fmt = XRenderFindVisualFormat(display, xvi[i].visual);
+      if (fmt->type == PictTypeDirect && fmt->direct.alphaMask) {
+        v = xvi[i].visual;
+        break;
+      }
+    }
+
+    XFree(xvi);
+  }
+  return v;
 }
 
 
-Xwindow::~Xwindow() {}
-
-
-Display * Xwindow::getDisplay() {
-  return display;
+// get event on window deletion
+void Xwindow::registerDelete() const {
+  Atom delwin = XInternAtom(display, "WM_DELETE_WINDOW", False);
+  XSetWMProtocols(display, window, &delwin, 1);
 }
 
 
-Window Xwindow::getWindow() const {
-  return window;
+Xwindow::Xwindow(const Size &size) {
+  if (win_count == 0)
+    if (!(display = XOpenDisplay(NULL)))
+      throw "ERROR: XOpenDisplay failed.";
+
+  if (!(visual = findARGB32Visual()))
+    // TODO: close display
+    throw "ERROR: couldn't find ARGB32 visual.";
+
+  depth = 32;
+  colormap = XCreateColormap(display,
+                             RootWindow(display, DefaultScreen(display)),
+                             visual, AllocNone);
+
+  XSetWindowAttributes wa = {
+    .colormap = colormap,
+    .background_pixel = ScreenOfDisplay(display, DefaultScreen(display))->black_pixel,
+    .border_pixel = ScreenOfDisplay(display, DefaultScreen(display))->white_pixel };
+
+  if (!(window = XCreateWindow(display, DefaultRootWindow(display), 0, 0,
+                               size.x, size.y, 0, depth, InputOutput, visual,
+                               CWBackPixel|CWBorderPixel|CWColormap, &wa)))
+    // TODO: free colormap and close display
+    throw "ERRRO: XCreateWindow failed.";
+
+  registerDelete();
+  win_count++;
 }
 
 
-void Xwindow::setGeometry(int x, int y, int w, int h) {
-  position.x = x; position.y = y;
-  dimensions.x = w; dimensions.y = w;
+Xwindow::~Xwindow() {
+  win_count--;
+  XDestroyWindow(display, window);
+  XFreeColormap(display, colormap);
+  if (win_count == 0)
+    XCloseDisplay(display);
 }
 
-void Xwindow::map() const {
-  XMapWindow(display, window);
+
+Display * Xwindow::getDisplay() { return display; }
+Window Xwindow::getWindow() const { return window; }
+int Xwindow::getDepth() const { return depth; }
+Colormap Xwindow::getColormap() const { return colormap; }
+Visual * Xwindow::getVisual() const { return visual; }
+int Xwindow::getScreen() const { return DefaultScreen(display); }
+
+void Xwindow::move(const Point &pos) const {
+  XMoveWindow(display, window, pos.x, pos.y);
 }
+void Xwindow::resize(const Size &size) const {
+  XResizeWindow(display, window, size.x, size.y);
+}
+
+void Xwindow::map() const { XMapWindow(display, window); }
+void Xwindow::hide() const { XUnmapWindow(display, window); }
+
 
 size_t Xwindow::width() const {
-  return dimensions.x;
+  int x, y;
+  unsigned int w, h, bw, depth;
+  Window root;
+  XGetGeometry(display, window, &root,
+               &x, &y, &w, &h, &bw, &depth);
+  return w;
 }
 
 size_t Xwindow::height() const {
-  return dimensions.y;
+  int x, y;
+  unsigned int w, h, bw, depth;
+  Window root;
+  XGetGeometry(display, window, &root,
+               &x, &y, &w, &h, &bw, &depth);
+  return h;
 }
+
 
 
 XEventHandler::~XEventHandler() {}

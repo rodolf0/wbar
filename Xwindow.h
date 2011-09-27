@@ -6,23 +6,38 @@
 
 class Xwindow {
   public:
-    Xwindow(const Point &position, const Size &size);
+    Xwindow(const Size &size);
     virtual ~Xwindow();
 
-    virtual void setGeometry(int x, int y, int w, int h);
+    virtual void resize(const Size &size) const;
+    virtual void move(const Point &pos) const;
     virtual void map() const;
+    virtual void hide() const;
+    //virtual void hints();
 
     Window getWindow() const;
     static Display * getDisplay();
+    int getDepth() const;
+    Colormap getColormap() const;
+    Visual * getVisual() const;
+    int getScreen() const;
+
 
     size_t width() const;
     size_t height() const;
 
+
   protected:
-    static Display *display;
     Window window;
-    Point position;
-    Size dimensions;
+    Colormap colormap;
+    Visual *visual;
+    int depth;
+
+    void registerDelete() const;
+
+    static Display *display;
+    static size_t win_count;
+    static Visual * findARGB32Visual();
 };
 
 

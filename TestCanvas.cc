@@ -1,17 +1,20 @@
 #include <iostream>
 #include "Xwindow.h"
 #include "CanvasEngine.h"
-#include "Geometry.h"
 
 
 class Test : public XEventHandler {
   public:
+    Rect &rect;
+
+    Test(Rect &r) : rect(r) {}
 
     void onExposure(const XExposeEvent &e) {
       CanvasEngine::get().render();
     }
     void onMouseMove(const XMotionEvent &e) {
-      std::cout << "mm. x=" << e.x << ", y=" << e.y << std::endl;
+      rect.x += 1;
+      CanvasEngine::get().render();
     }
     void onMouseDown(const XButtonEvent &e) {
       std::cout << "mouse down" << std::endl;
@@ -26,18 +29,17 @@ class Test : public XEventHandler {
 int main(int argc, char *argv[]) {
 
   try {
-    Xwindow w(Point(20, 20), Size(300, 100));
-    RectLayout l(0, 0, 300, 100);
+    Xwindow w(Size(300, 100));
+    Rect r(100, 0, 48, 48);
+    RectLayout rl(r);
 
     CanvasEngine::init(w);
-
-    CanvasEngine::get().addImage("assets/dock.png", l);
+    CanvasEngine::get().addImage("assets/firefox.png", rl);
 
     w.map();
+    w.move(Point(10, 10));
 
-    Test t;
-
-    t.eventLoop(w);
+    Test(r).eventLoop(w);
 
   } catch (const char *c) {
     std::cout << c << std::endl;
