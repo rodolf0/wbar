@@ -45,6 +45,8 @@ CanvasEngine::CanvasEngine(Xwindow &frame) {
   einfo->info.colormap = frame.getColormap();
   einfo->info.drawable = frame.getWindow();
   einfo->info.depth = frame.getDepth();
+	einfo->info.destination_alpha = 1;
+	einfo->info.debug = 0;
 
   if (!evas_engine_info_set(canvas, (Evas_Engine_Info *)einfo)) {
     evas_free(canvas);
@@ -65,6 +67,7 @@ void CanvasEngine::addImage(const std::string &path, const Layout *l) {
   if (evas_object_image_load_error_get(img) != EVAS_LOAD_ERROR_NONE)
     throw "ERROR: failed to load image.";
 	evas_object_image_smooth_scale_set(img, EINA_FALSE);
+	evas_object_image_alpha_set(img, EINA_TRUE);
   image_objects[img] = l;
   evas_object_show(img);
 }

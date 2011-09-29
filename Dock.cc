@@ -8,6 +8,7 @@ Dock::~Dock() {}
 
 void Dock::onExposure(const XExposeEvent &e) {
   layout.focus(Point(e.x, e.y));
+	//evas_damage_rectangle_add(evas, x, y, w, h);
   CanvasEngine::get().render();
 }
 

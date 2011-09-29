@@ -37,7 +37,7 @@ class Xwindow {
 
     static Display *display;
     static size_t win_count;
-    static Visual * findARGB32Visual();
+    static Visual * findARGB32Visual(int screen);
 };
 
 

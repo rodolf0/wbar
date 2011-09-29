@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   //ConfigReader cfgreader(optparser.getString("config"));
 
   //WaveLayout layout(cfgreader.sections.size() - 1);
-  WaveLayout layout(10);
+  WaveLayout layout(15);
   Xwindow window(layout.frameSize());
   CanvasEngine::init(window);
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   std::vector<LayedWidget> widgets;
 
   //for (size_t idx = 0; idx < cfgreader.sections.size(); idx++) {
-  for (size_t idx = 0; idx < 10; idx++) {
+  for (size_t idx = 0; idx < 15; idx++) {
     widgets.push_back(LayedWidget(new LauncherWidget(ExecuteCommand("")),
                                   new RectLayout(layout.widgetLayout(idx))));
     CanvasEngine::get().addImage("assets/firefox.png", widgets.back().second);

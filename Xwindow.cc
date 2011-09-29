@@ -1,10 +1,12 @@
 #include <X11/extensions/Xrender.h>
 #include "Xwindow.h"
 
+#include <iostream>
+
 Display *Xwindow::display = NULL;
 size_t Xwindow::win_count = 0;
 
-Visual * Xwindow::findARGB32Visual() {
+Visual * Xwindow::findARGB32Visual(int screen) {
   Visual *v = NULL;
   int event_base, error_base;
 
@@ -12,7 +14,7 @@ Visual * Xwindow::findARGB32Visual() {
     XVisualInfo vi_template, *xvi;
     int num_vi;
 
-    vi_template.screen = DefaultScreen(display);
+    vi_template.screen = screen;
     vi_template.depth = 32;
     vi_template.c_class = TrueColor;
 
@@ -27,7 +29,6 @@ Visual * Xwindow::findARGB32Visual() {
         break;
       }
     }
-
     XFree(xvi);
   }
   return v;
@@ -46,25 +47,38 @@ Xwindow::Xwindow(const Size &size) {
     if (!(display = XOpenDisplay(NULL)))
       throw "ERROR: XOpenDisplay failed.";
 
-  if (!(visual = findARGB32Visual()))
-    // TODO: close display
-    throw "ERROR: couldn't find ARGB32 visual.";
-
-  depth = 32;
-  colormap = XCreateColormap(display,
-                             RootWindow(display, DefaultScreen(display)),
-                             visual, AllocNone);
+  int screen = DefaultScreen(display);
+  Window root = RootWindow(display, screen);
 
   XSetWindowAttributes wa = {
-    .colormap = colormap,
-    .background_pixel = ScreenOfDisplay(display, DefaultScreen(display))->black_pixel,
-    .border_pixel = ScreenOfDisplay(display, DefaultScreen(display))->white_pixel };
+    .backing_store = NotUseful,
+    .border_pixel = 0,
+    .background_pixmap = None,
+    .bit_gravity = ForgetGravity,
+    //.override_redirect = 1,
+  };
 
-  if (!(window = XCreateWindow(display, DefaultRootWindow(display), 0, 0,
+  if ((visual = findARGB32Visual(screen))) {
+    depth = 32;
+    wa.colormap = XCreateColormap(display, root, visual, AllocNone);
+  } else {
+    throw "ERRRO: No ARGB32 visual.";
+    //visual = DefaultVisual(display, screen);
+    //depth = DefaultDepth(display, screen);
+    //wa.colormap = DefaultColormap(display, screen);
+    // Signal copying background... no real transparency
+    // http://svn.exactcode.de/macosd/trunk/bin/PBBEvas.cc
+  }
+
+  if (!(window = XCreateWindow(display, root, 0, 0,
                                size.x, size.y, 0, depth, InputOutput, visual,
-                               CWBackPixel|CWBorderPixel|CWColormap, &wa)))
-    // TODO: free colormap and close display
+                               //CWOverrideRedirect |
+                               CWBackingStore | CWColormap | CWBackPixmap |
+                               CWBorderPixel | CWBitGravity, &wa))) {
+    XFreeColormap(display, colormap);
+    XCloseDisplay(display);
     throw "ERRRO: XCreateWindow failed.";
+  }
 
   registerDelete();
   win_count++;
@@ -86,6 +100,7 @@ int Xwindow::getDepth() const { return depth; }
 Colormap Xwindow::getColormap() const { return colormap; }
 Visual * Xwindow::getVisual() const { return visual; }
 int Xwindow::getScreen() const { return DefaultScreen(display); }
+
 
 void Xwindow::move(const Point &pos) const {
   XMoveWindow(display, window, pos.x, pos.y);
