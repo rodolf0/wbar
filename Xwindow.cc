@@ -1,8 +1,6 @@
 #include <X11/extensions/Xrender.h>
 #include "Xwindow.h"
 
-#include <iostream>
-
 Display *Xwindow::display = NULL;
 size_t Xwindow::win_count = 0;
 

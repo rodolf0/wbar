@@ -35,9 +35,9 @@ void WaveLayout::focus(const Point &p) {
 
   for (size_t i = 0; i < bounds.size(); i++, rx -= widget_unit()) {
     Rect &w = bounds[i];
-    if (std::abs(i - focused) > side_num_anim()) {
+    if (std::abs((int)i - focused) > side_num_anim()) {
       w.width = w.height = widget_size;
-      w.x = position[i].x + side_num_anim()*scaled_unit()*((int)i<focused?1:-1);
+      w.x = position[i].x + side_num_anim()*scaled_unit()*((int)i<focused?-1:1);
       w.y = position[i].y;
     } else {
       w.width = w.height =
