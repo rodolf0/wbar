@@ -7,12 +7,13 @@
 
 class Dock : public XEventHandler {
   private:
-    Image &dock_background;
+    //Image &dock_background;
     LayoutStrategy &layout;
     void render();
 
   public:
-    Dock(Xwindow &w, Image &bg, LayoutStrategy &ls);
+    //Dock(Image &bg, LayoutStrategy &ls); // std::vector<Widget *> &widgets
+    Dock(LayoutStrategy &ls); // std::vector<Widget *> &widgets
     ~Dock();
 
     void onExposure(const XExposeEvent &e);

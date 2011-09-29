@@ -1,18 +1,25 @@
 #include "Dock.h"
 
-Dock::Dock(Xwindow &w, Image &bg, LayoutStrategy &ls) :
-    XEventHandler(w), dock_background(bg), layout(ls) { }
+Dock::Dock(LayoutStrategy &ls) : layout(ls) { }
+//Dock::Dock(Image &bg, LayoutStrategy &ls) :
+    //dock_background(bg), layout(ls) { }
 
+Dock::~Dock() {}
+
+void Dock::onExposure(const XExposeEvent &e) {
+  layout.focus(Point(e.x, e.y));
+  CanvasEngine::get().render();
+}
 
 void Dock::onMouseEnter(const XCrossingEvent &e) {
   layout.focus(Point(e.x, e.y));
-  render();
+  CanvasEngine::get().render();
 }
 
 
 void Dock::onMouseLeave(const XCrossingEvent &e) {
   layout.unfocus();
-  render();
+  CanvasEngine::get().render();
 }
 
 
@@ -20,24 +27,20 @@ void Dock::onMouseMove(const XMotionEvent &e) {
   const Point p(e.x, e.y);
   if (layout.atHoverZone(p)) {
     layout.focus(p);
-    render();
   } else {
     layout.unfocus();
-    render();
   }
+  CanvasEngine::get().render();
 }
 
 
 void Dock::onMouseDown(const XButtonEvent &e) {
+  int idx = layout.widgetAt(Point(e.x, e.y));
 }
 
 
 void Dock::onMouseUp(const XButtonEvent &e) {
-}
-
-
-void Dock::render() {
-  //CanvasEngine &c = CanvasEngine::get();
+  int idx = layout.widgetAt(Point(e.x, e.y));
 }
 
 /* vim: set sw=2 sts=2 : */

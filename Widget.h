@@ -7,12 +7,14 @@
 class Widget {
   public:
     virtual ~Widget() = 0;
+    virtual void action() const = 0;
 };
 
 
 class LauncherWidget : public Widget {
   public:
-    LauncherWidget(Image &i, const Command &comm);
+    LauncherWidget(const Command &comm);
+    void action() const;
 };
 
 #endif /* _WIDGET_ */

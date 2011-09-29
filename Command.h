@@ -12,7 +12,6 @@ class Command {
 class ExecuteCommand : public Command {
   public:
     ExecuteCommand(const std::string &comm);
-    void operator()();
 };
 
 #endif /* _COMMAND_ */

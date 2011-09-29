@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     RectLayout rl(r);
 
     CanvasEngine::init(w);
-    CanvasEngine::get().addImage("assets/firefox.png", rl);
+    CanvasEngine::get().addImage("assets/firefox.png", &rl);
 
     w.map();
     w.move(Point(10, 10));

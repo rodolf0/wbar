@@ -14,7 +14,7 @@ class CanvasEngine {
     static void init(Xwindow &frame);
     static CanvasEngine & get();
 
-    virtual void addImage(const std::string &path, const Layout &l);
+    virtual void addImage(const std::string &path, const Layout *l);
     virtual void render();
 
     virtual ~CanvasEngine();

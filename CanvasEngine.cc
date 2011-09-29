@@ -59,24 +59,21 @@ CanvasEngine::~CanvasEngine() {
 }
 
 
-void CanvasEngine::addImage(const std::string &path, const Layout &l) {
+void CanvasEngine::addImage(const std::string &path, const Layout *l) {
   Evas_Object *img = evas_object_image_filled_add(canvas);
   evas_object_image_file_set(img, path.c_str(), NULL);
   if (evas_object_image_load_error_get(img) != EVAS_LOAD_ERROR_NONE)
     throw "ERROR: failed to load image.";
-  //evas_object_image_smooth_scale_set(img, EINA_FALSE);
-  image_objects[img] = &l;
+	evas_object_image_smooth_scale_set(img, EINA_FALSE);
+  image_objects[img] = l;
   evas_object_show(img);
 }
 
 
 void CanvasEngine::render() {
-
   for (std::map<Evas_Object *, const Layout *>::iterator img = image_objects.begin();
        img != image_objects.end(); img++) {
-
     img->second->transform(img->first);
   }
-
   evas_render(canvas);
 }
