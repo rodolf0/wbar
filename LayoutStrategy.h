@@ -21,8 +21,8 @@ class LayoutStrategy {
 class WaveLayout : public LayoutStrategy {
   public:
 
-    WaveLayout(size_t num_widgets, size_t widget_size = 32,
-               size_t num_anim = 3, float zoom_factor = 1.8,
+    WaveLayout(int num_widgets, int widget_size = 32,
+               int num_anim = 5, float zoom_factor = 1.8,
                float jump_factor = 1.0);
 
     void unfocus();
@@ -31,27 +31,28 @@ class WaveLayout : public LayoutStrategy {
     int widgetAt(const Point &x) const;
     bool atHoverZone(const Point &x) const;
 
-    const Rect & widgetLayout(size_t idx) const;
+    const Rect & widgetLayout(int idx) const;
     const Rect & dockLayout() const;
 
     Size frameSize() const;
 
   private:
-    size_t widget_size;
-    size_t widget_dist;
-    size_t num_animated;
+    int widget_size;
+    int widget_dist;
+    int num_animated;
     float zoom_factor;
     float jump_factor;
 
-    size_t widget_unit() const;
-    float scaled_unit() const;
-    size_t side_num_anim() const;
-    size_t widget_offset() const;
+    int widget_unit() const;
+    //float scaled_unit() const;
+    int side_num_anim() const;
+    //int widget_offset() const;
+    int widget_growth() const;
 
-    size_t bar_x() const;
-    size_t bar_y() const;
-    size_t bar_width() const;
-    size_t bar_height() const;
+    int bar_x() const;
+    int bar_y() const;
+    int expanded_width() const;
+    int bar_height() const;
 
     float _upgrowth() const;
     float _dngrowth() const;

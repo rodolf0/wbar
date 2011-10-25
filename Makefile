@@ -1,6 +1,6 @@
 TARGET=Wbar
 
-CXXFLAGS=-O0 -ggdb -Wall -Weffc++ `pkg-config x11 xrender evas --cflags`
+CXXFLAGS=-include cstddef -O0 -ggdb -Wall -Weffc++ `pkg-config x11 xrender evas --cflags`
 LDFLAGS=`pkg-config x11 xrender evas --libs`
 
 OBJECTS = \
