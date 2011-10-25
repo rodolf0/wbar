@@ -22,7 +22,7 @@ class WaveLayout : public LayoutStrategy {
   public:
 
     WaveLayout(int num_widgets, int widget_size = 32,
-               int num_anim = 5, float zoom_factor = 1.8,
+               int num_anim = 3, float zoom_factor = 1.8,
                float jump_factor = 1.0);
 
     void unfocus();
@@ -51,7 +51,6 @@ class WaveLayout : public LayoutStrategy {
 
     int bar_x() const;
     int bar_y() const;
-    int expanded_width() const;
     int bar_height() const;
 
     float _upgrowth() const;

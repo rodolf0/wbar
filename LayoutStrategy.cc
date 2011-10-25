@@ -36,14 +36,14 @@ void WaveLayout::focus(const Point &p) {
     Rect &w = bounds[i];
     if (std::abs((int)i - focused) > side_num_anim()) {
       w.width = w.height = widget_size;
-      w.x = position[i].x + widget_growth() * ((int)i<focused?-1:1);
+      w.x = position[i].x + widget_growth() * ((int)i<focused?-1:1) / 2.0;
       w.y = position[i].y;
     } else {
       float cos2 = std::cos(rx * M_PI/widget_unit()/num_animated);
       w.width = w.height = widget_size * (1.0 + (zoom_factor-1.0) * cos2);
 
       w.x = position[i].x - (w.width - widget_size) / 2.0 -
-            rx * 2.0 * widget_growth() / widget_unit() / num_animated;
+            rx * widget_growth() / widget_unit() / num_animated;
 
       w.y = position[i].y - jump_factor * (w.height - widget_size);
     }
@@ -69,7 +69,7 @@ bool WaveLayout::atHoverZone(const Point &p) const {
 
 #define MARGEN 4
 Size WaveLayout::frameSize() const {
-  return Size(expanded_width() + widget_size,
+  return Size(widget_growth() + widget_unit() * (bounds.size() + 1),
               bar_height() + 2 * MARGEN + (int)(_upgrowth() + _dngrowth()));
 }
 
@@ -85,7 +85,6 @@ const Rect & WaveLayout::dockLayout() const {
 
 
 ///// WaveLayout private helpers ///// TODO: verify inlining or cache
-
 
 int WaveLayout::widget_unit() const {
   return widget_size + widget_dist;
@@ -103,12 +102,8 @@ int WaveLayout::widget_growth() const {
   for (float i = 0.0; i < num_animated; i+=1.0)
     wo += std::sin(M_PI * (i + 0.5) / (float)num_animated);
 
-  return widget_unit() * (zoom_factor * wo - (float)num_animated);
-  //TODO: check zoom < 1.0 -> return 0.0
-}
-
-int WaveLayout::expanded_width() const {
-  return widget_growth() + widget_unit() * bounds.size();
+  return widget_unit() * (zoom_factor < 1.0 ? 0.0 : zoom_factor - 1.0) *  wo;
+  //return widget_unit() * (zoom_factor * wo - (float)num_animated);
 }
 
 int WaveLayout::bar_height() const {
