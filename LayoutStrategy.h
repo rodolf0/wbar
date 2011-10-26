@@ -44,9 +44,6 @@ class WaveLayout : public LayoutStrategy {
     float jump_factor;
 
     int widget_unit() const;
-    //float scaled_unit() const;
-    int side_num_anim() const;
-    //int widget_offset() const;
     int widget_growth() const;
 
     int bar_x() const;

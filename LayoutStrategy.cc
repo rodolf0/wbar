@@ -5,7 +5,7 @@ LayoutStrategy::~LayoutStrategy() {}
 
 WaveLayout::WaveLayout(int num_widgets, int widget_size,
                        int num_anim, float zoom_factor, float jump_factor) :
-    widget_size(widget_size), widget_dist(1), num_animated(num_anim),
+    widget_size(widget_size), widget_dist(5), num_animated(num_anim),
     zoom_factor(zoom_factor), jump_factor(jump_factor), position(), bounds() {
 
   for (int i = 0; i < num_widgets; i++) {
@@ -34,9 +34,9 @@ void WaveLayout::focus(const Point &p) {
 
   for (int i = 0; i < bounds.size(); i++, rx -= widget_unit()) {
     Rect &w = bounds[i];
-    if (std::abs((int)i - focused) > side_num_anim()) {
+    if (std::abs(rx) > widget_unit() * num_animated/2) {
       w.width = w.height = widget_size;
-      w.x = position[i].x + widget_growth() * ((int)i<focused?-1:1) / 2.0;
+      w.x = position[i].x + widget_growth() / (i<focused ? -2.0 : 2.0);
       w.y = position[i].y;
     } else {
       float cos2 = std::cos(rx * M_PI/widget_unit()/num_animated);
@@ -90,10 +90,6 @@ int WaveLayout::widget_unit() const {
   return widget_size + widget_dist;
 }
 
-int WaveLayout::side_num_anim() const {
-  return (num_animated - 1) / 2;
-}
-
 int WaveLayout::widget_growth() const {
   // computed by taking the size of evenly distributed widgets (num_animated)
   // inside a cos-function wrapper: shifted and scaled so that scale ranges
@@ -103,7 +99,6 @@ int WaveLayout::widget_growth() const {
     wo += std::sin(M_PI * (i + 0.5) / (float)num_animated);
 
   return widget_unit() * (zoom_factor < 1.0 ? 0.0 : zoom_factor - 1.0) *  wo;
-  //return widget_unit() * (zoom_factor * wo - (float)num_animated);
 }
 
 int WaveLayout::bar_height() const {
@@ -111,7 +106,6 @@ int WaveLayout::bar_height() const {
 }
 
 int WaveLayout::bar_x() const {
-  //return widget_offset();
 }
 
 int WaveLayout::bar_y() const {
