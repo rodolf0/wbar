@@ -56,7 +56,11 @@ CanvasEngine::CanvasEngine(Xwindow &frame) {
 
 
 CanvasEngine::~CanvasEngine() {
-  //TODO: evas_object_del(img)
+  for (std::map<Evas_Object *, const Layout *>::iterator img =
+        image_objects.begin(); img != image_objects.end(); img++) {
+    evas_object_del(img->first);
+  }
+  image_objects.clear();
   evas_free(canvas);
 }
 
@@ -74,8 +78,8 @@ void CanvasEngine::addImage(const std::string &path, const Layout *l) {
 
 
 void CanvasEngine::render() {
-  for (std::map<Evas_Object *, const Layout *>::iterator img = image_objects.begin();
-       img != image_objects.end(); img++) {
+  for (std::map<Evas_Object *, const Layout *>::iterator img =
+        image_objects.begin(); img != image_objects.end(); img++) {
     img->second->transform(img->first);
   }
   evas_render(canvas);
