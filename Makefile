@@ -4,15 +4,19 @@ CXXFLAGS=-include cstddef -O0 -ggdb -Wall -Weffc++ `pkg-config x11 xrender evas 
 LDFLAGS=`pkg-config x11 xrender evas --libs`
 
 OBJECTS = \
+	Wbar.o \
+	OptionParser.o \
 	CanvasEngine.o \
 	CanvasLayouts.o \
-	Command.o \
-	Dock.o \
-	Geometry.o \
 	LayoutStrategy.o \
-	Wbar.o \
-	Widget.o \
+	Geometry.o \
 	Xwindow.o \
+	Dock.o \
+	Command.o \
+	Widget.o
+
+
+#all: test-options
 
 
 $(TARGET): $(OBJECTS)
@@ -21,11 +25,6 @@ $(TARGET): $(OBJECTS)
 %.o: %.cc
 	clang++ $(CXXFLAGS) -c $^
 
-
-check:
-	clang++ -fsyntax-only -Wall -Weffc++ `pkg-config x11 xrender evas --cflags` $(OBJECTS:.o=.cc)
-
-
 clean:
 	rm -f *.o $(TARGET)
 
@@ -33,3 +32,6 @@ clean:
 TEST_CFLAGS=-O0 -gdb -Wall `pkg-config x11 xrender evas evas-software-buffer --libs --cflags`
 test-canvas:
 	clang++ $(TEST_CFLAGS) TestCanvas.cc Xwindow.cc CanvasEngine.cc Geometry.cc CanvasLayouts.cc
+
+test-options:
+	clang++ $(TEST_CFLAGS) TestOP.cc OptionParser.cc

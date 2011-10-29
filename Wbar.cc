@@ -21,7 +21,11 @@ int main(int argc, char *argv[]) {
 
   //ConfigReader cfgreader(optparser.getString("config"));
   //WaveLayout layout(cfgreader.sections.size() - 1);
-  WaveLayout layout(10);
+  WaveLayout layout(10,
+                    optparser.getInt("size"),
+                    optparser.getInt("nanim"),
+                    optparser.getFloat("zoomf"),
+                    optparser.getFloat("jumpf"));
   Xwindow window(layout.frameSize());
   CanvasEngine::init(window);
 
