@@ -11,6 +11,7 @@ class OptionParser {
 
     const std::string& getString(const std::string &name) const;
     int getInt(const std::string &name) const;
+    float getFloat(const std::string &name) const;
     bool isset(const std::string &name) const;
 
   protected:
@@ -22,11 +23,11 @@ class OptionParser {
         std::string name;
         std::string def_val;
         std::string descrip;
-        std::string argument;
+        std::string value;
 
         Option(bool is_set, int takes_arg,
                const char *name, const char *def_val,
-               const char *descrip, const char *argument);
+               const char *descrip, const char *value);
     };
 
     std::vector<Option> options;
