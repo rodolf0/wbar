@@ -26,8 +26,19 @@ int main(int argc, char *argv[]) {
                     optparser.getInt("nanim"),
                     optparser.getFloat("zoomf"),
                     optparser.getFloat("jumpf"));
+
   Xwindow window(layout.frameSize());
+  window.setSkipPager();
+  window.setSkipTaskbar();
+  window.setSticky();
+  window.setLayer(wlayer_above);
+  window.setType(wtype_dock);
+
+  Dock dock(layout);
   CanvasEngine::init(window);
+
+  RectLayout dock_layout(layout.dockLayout());
+  CanvasEngine::get().addImage("assets/dock.png", &dock_layout);
 
   typedef std::pair<Widget*, RectLayout*> LaidWidget;
   std::vector<LaidWidget> widgets;
@@ -39,14 +50,11 @@ int main(int argc, char *argv[]) {
     CanvasEngine::get().addImage("assets/firefox.png", widgets.back().second);
   }
 
-  //RectLayout dock_layout(layout.dockLayout());
-  //CanvasEngine::get().addImage("assets/dock.png", &dock_layout);
-  Dock dock(layout);
-
   window.map();
-  window.move(Point(600, 300));
-  dock.eventLoop(window);
+  window.move(Point((Xwindow::screenSize().x - layout.frameSize().x) / 2,
+                     Xwindow::screenSize().y - layout.frameSize().y));
 
+  dock.eventLoop(window);
   //TODO: free widgets
   return 0;
 }

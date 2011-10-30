@@ -7,12 +7,10 @@
 
 class Dock : public XEventHandler {
   private:
-    //Image &dock_background;
     LayoutStrategy &layout;
     void render();
 
   public:
-    //Dock(Image &bg, LayoutStrategy &ls); // std::vector<Widget *> &widgets
     Dock(LayoutStrategy &ls); // std::vector<Widget *> &widgets
     ~Dock();
 

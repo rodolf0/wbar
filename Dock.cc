@@ -1,13 +1,11 @@
 #include "Dock.h"
 
 Dock::Dock(LayoutStrategy &ls) : layout(ls) { }
-//Dock::Dock(Image &bg, LayoutStrategy &ls) :
-    //dock_background(bg), layout(ls) { }
 
 Dock::~Dock() {}
 
 void Dock::onExposure(const XExposeEvent &e) {
-	//evas_damage_rectangle_add(evas, x, y, w, h);
+	// TODO: evas_damage_rectangle_add(evas, x, y, w, h);
   CanvasEngine::get().render();
 }
 
