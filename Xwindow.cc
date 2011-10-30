@@ -1,3 +1,4 @@
+#include <X11/Xatom.h>
 #include <X11/extensions/Xrender.h>
 #include "Xwindow.h"
 
@@ -99,6 +100,10 @@ Colormap Xwindow::getColormap() const { return colormap; }
 Visual * Xwindow::getVisual() const { return visual; }
 int Xwindow::getScreen() const { return DefaultScreen(display); }
 
+Size Xwindow::screenSize() {
+  return Size(WidthOfScreen(DefaultScreenOfDisplay(display)),
+              HeightOfScreen(DefaultScreenOfDisplay(display)));
+}
 
 void Xwindow::move(const Point &pos) const {
   XMoveWindow(display, window, pos.x, pos.y);
@@ -169,6 +174,86 @@ void XEventHandler::eventLoop(Xwindow &w) {
         break;
     }
   }
+}
+
+
+void Xwindow::setType(wintype wtype) {
+  char *typestr = NULL;
+  switch (wtype) {
+    case wtype_normal:
+      typestr = (char *)"_NET_WM_WINDOW_TYPE_NORMAL";
+      break;
+    case wtype_dock:
+      typestr = (char *)"_NET_WM_WINDOW_TYPE_DOCK";
+      break;
+    case wtype_desktop:
+      typestr = (char *)"_NET_WM_WINDOW_TYPE_DESKTOP";
+      break;
+  }
+  Atom a = XInternAtom(display, "_NET_WM_WINDOW_TYPE", True);
+  Atom prop = XInternAtom(display, (const char *)typestr, True);
+  XChangeProperty(display, window, a, XA_ATOM, 32,
+                  PropModeReplace, (unsigned char *) &prop, 1);
+}
+
+
+void Xwindow::setSticky() {
+  Atom a = XInternAtom(display, "_NET_WM_DESKTOP", True);
+  long lprop[5] = { 0xFFFFFFFF, 0, 0, 0, 0 }; // TODO: turn off this too
+  XChangeProperty(display, window, a, XA_CARDINAL, 32,
+                  PropModeAppend, (unsigned char *)lprop, 1);
+  a = XInternAtom(display, "_NET_WM_STATE", True);
+  Atom prop = XInternAtom(display, "_NET_WM_STATE_STICKY", False);
+  XChangeProperty(display, window, a, XA_ATOM, 32,
+                  PropModeAppend, (unsigned char *)&prop, 1);
+}
+
+void Xwindow::decorationsOff() {
+  Atom a = XInternAtom(display, "_MOTIF_WM_HINTS", True);
+  long lprop[5] = { 2, 0, 0, 0, 0 };
+  XChangeProperty(display, window, a, a, 32,
+                  PropModeReplace, (unsigned char *)lprop, 5);
+}
+
+void Xwindow::setSkipPager() {
+  Atom a = XInternAtom(display, "_NET_WM_STATE", True);
+  Atom prop = XInternAtom(display, "_NET_WM_STATE_SKIP_PAGER", True);
+  XChangeProperty(display, window, a, XA_ATOM, 32,
+                  PropModeAppend, (unsigned char *)&prop, 1);
+}
+
+void Xwindow::setSkipTaskbar() {
+  Atom a = XInternAtom(display, "_NET_WM_STATE", True);
+  Atom prop = XInternAtom(display, "_NET_WM_STATE_SKIP_TASKBAR", True);
+  XChangeProperty(display, window, a, XA_ATOM, 32,
+                  PropModeAppend, (unsigned char *)&prop, 1);
+}
+
+void Xwindow::setLayer(winlayer layer) {
+  char *layerstr = NULL;
+  switch (layer) {
+    case wlayer_below:
+      layerstr = (char *)"_NET_WM_STATE_BELOW";
+      break;
+    case wlayer_above:
+      layerstr = (char *)"_NET_WM_STATE_ABOVE";
+      break;
+  }
+  Atom a = XInternAtom(display, "_NET_WM_STATE", True);
+  Atom prop = XInternAtom(display, layerstr, True);
+  XChangeProperty(display, window, a, XA_ATOM, 32,
+                  PropModeAppend, (unsigned char *)&prop, 1);
+  //a = XInternAtom(display, "_WIN_LAYER", True);
+  //XChangeProperty(display, window, a, XA_CARDINAL, 32,
+                  //PropModeAppend, (unsigned char *)&layer, 1);
+}
+
+void Xwindow::setOverrideRedirect(bool on) {
+  XSetWindowAttributes attr;
+  attr.override_redirect = (on ? True : False);
+  attr.background_pixmap = None; //Copy from back
+  XChangeWindowAttributes(display, window,
+                          CWOverrideRedirect | CWBackPixmap, &attr);
 }
 
 

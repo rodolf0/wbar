@@ -4,6 +4,17 @@
 #include <X11/Xlib.h>
 #include "Geometry.h"
 
+enum winlayer {
+  wlayer_below = 0,
+  wlayer_above = 6
+};
+
+enum wintype {
+  wtype_normal = 0,
+  wtype_dock,
+  wtype_desktop
+};
+
 class Xwindow {
   public:
     Xwindow(const Size &size);
@@ -13,7 +24,6 @@ class Xwindow {
     virtual void move(const Point &pos) const;
     virtual void map() const;
     virtual void hide() const;
-    //virtual void hints();
 
     Window getWindow() const;
     static Display * getDisplay();
@@ -22,10 +32,18 @@ class Xwindow {
     Visual * getVisual() const;
     int getScreen() const;
 
+    static Size screenSize();
 
     size_t width() const;
     size_t height() const;
 
+    void setType(wintype wtype);
+    void setSticky();
+    void setSkipPager();
+    void setSkipTaskbar();
+    void setLayer(winlayer layer);
+    void setOverrideRedirect(bool on);
+    void decorationsOff();
 
   protected:
     Window window;
