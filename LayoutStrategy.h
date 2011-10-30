@@ -36,7 +36,7 @@ class WaveLayout : public LayoutStrategy {
 
     Size frameSize() const;
 
-  private:
+  protected:
     int widget_size;
     int widget_dist;
     int num_animated;
@@ -46,7 +46,6 @@ class WaveLayout : public LayoutStrategy {
     int widget_unit() const;
     int widget_growth() const;
 
-    int bar_x() const;
     int bar_y() const;
     int bar_height() const;
 
@@ -55,6 +54,7 @@ class WaveLayout : public LayoutStrategy {
 
     std::vector<Point> position;
     std::vector<Rect> bounds;
+    Rect dock_bounds;
 };
 
 

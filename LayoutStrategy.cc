@@ -6,7 +6,9 @@ LayoutStrategy::~LayoutStrategy() {}
 WaveLayout::WaveLayout(int num_widgets, int widget_size,
                        int num_anim, float zoom_factor, float jump_factor) :
     widget_size(widget_size), widget_dist(5), num_animated(num_anim),
-    zoom_factor(zoom_factor), jump_factor(jump_factor), position(), bounds() {
+    zoom_factor(zoom_factor), jump_factor(jump_factor), position(), bounds(),
+    dock_bounds((widget_growth() - widget_dist)/2.0, bar_y(),
+                widget_unit() * (num_widgets + 1), bar_height()) {
 
   for (int i = 0; i < num_widgets; i++) {
     Point p(widget_growth()/2.0 + widget_unit() * (i + 0.5),
@@ -24,6 +26,8 @@ void WaveLayout::unfocus() {
     w.y = position[i].y;
     w.width = w.height = widget_size;
   }
+  dock_bounds.x = (widget_growth() - widget_dist) / 2.0;
+  dock_bounds.width = widget_unit() * (bounds.size() + 1);
 }
 
 
@@ -31,23 +35,24 @@ void WaveLayout::focus(const Point &p) {
   const float x = (p.x - (widget_growth() + widget_unit())/2.0);
   const int focused = x / widget_unit();
   float rx = x - widget_unit()/2.0; // widget-space relative x
+  const float wu_na = widget_unit() * num_animated;
 
   for (int i = 0; i < bounds.size(); i++, rx -= widget_unit()) {
     Rect &w = bounds[i];
-    if (std::abs(rx) > widget_unit() * num_animated/2) {
+    if (std::abs(rx) > wu_na/2) {
       w.width = w.height = widget_size;
       w.x = position[i].x + widget_growth() / (i<focused ? -2.0 : 2.0);
       w.y = position[i].y;
     } else {
-      float cos2 = std::cos(rx * M_PI/widget_unit()/num_animated);
-      w.width = w.height = widget_size * (1.0 + (zoom_factor-1.0) * cos2);
-
+      w.width = w.height =
+        widget_size * (1.0 + (zoom_factor-1.0) * std::cos(rx * M_PI/wu_na));
       w.x = position[i].x - (w.width - widget_size) / 2.0 -
-            rx * widget_growth() / widget_unit() / num_animated;
-
+        rx * widget_growth() / wu_na;
       w.y = position[i].y - jump_factor * (w.height - widget_size);
     }
   }
+  dock_bounds.x = (widget_unit() - widget_dist)/2.0;
+  dock_bounds.width = widget_growth() + widget_unit() * bounds.size();
 }
 
 
@@ -73,18 +78,11 @@ Size WaveLayout::frameSize() const {
               bar_height() + 2 * MARGEN + (int)(_upgrowth() + _dngrowth()));
 }
 
-
-const Rect & WaveLayout::widgetLayout(int idx) const {
-	return bounds[idx];
-}
+const Rect & WaveLayout::widgetLayout(int idx) const { return bounds[idx]; }
+const Rect & WaveLayout::dockLayout() const { return dock_bounds; }
 
 
-const Rect & WaveLayout::dockLayout() const {
-  //TODO: implement dock layout
-}
-
-
-///// WaveLayout private helpers ///// TODO: verify inlining or cache
+///// WaveLayout private helpers ///// TODO: memoize
 
 int WaveLayout::widget_unit() const {
   return widget_size + widget_dist;
@@ -103,9 +101,6 @@ int WaveLayout::widget_growth() const {
 
 int WaveLayout::bar_height() const {
   return widget_size * 1.25;
-}
-
-int WaveLayout::bar_x() const {
 }
 
 int WaveLayout::bar_y() const {
