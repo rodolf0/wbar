@@ -1,29 +1,22 @@
 #ifndef _CONFIGREADER_
 #define _CONFIGREADER_
 
+#include <map>
 #include <string>
-#include <list>
+
+typedef std::map<std::string, std::string> section_t;
 
 class ConfigReader {
   public:
 
-    class ConfigSection {
-      public:
-        const std::string& getString(const std::string &var) const;
-        const std::string& getName() const;
-    };
-
-  private:
-  public:
-
-    typedef std::list<ConfigSection>::iterator SectionIterator;
-    std::list<ConfigSection> sections;
-
     ConfigReader(const std::string &path);
 
-    const ConfigSection& getSection(const std::string &sec) const;
+    const section_t & section(std::string section);
+    const std::string & get(std::string section, std::string key);
 
+  protected:
 
+    std::map<std::string, section_t> config;
 };
 
 #endif /* _CONFIGREADER_ */
