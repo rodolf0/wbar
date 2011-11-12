@@ -49,13 +49,11 @@ Xwindow::Xwindow(const Size &size) {
   int screen = DefaultScreen(display);
   Window root = RootWindow(display, screen);
 
-  XSetWindowAttributes wa = {
-    .backing_store = NotUseful,
-    .border_pixel = 0,
-    .background_pixmap = None,
-    .bit_gravity = ForgetGravity,
-    //.override_redirect = 1,
-  };
+  XSetWindowAttributes wa;
+    wa.backing_store = NotUseful;
+    wa.border_pixel = 0;
+    wa.background_pixmap = None;
+    wa.bit_gravity = ForgetGravity;
 
   if ((visual = findARGB32Visual(screen))) {
     depth = 32;
@@ -71,7 +69,6 @@ Xwindow::Xwindow(const Size &size) {
 
   if (!(window = XCreateWindow(display, root, 0, 0,
                                size.x, size.y, 0, depth, InputOutput, visual,
-                               //CWOverrideRedirect |
                                CWBackingStore | CWColormap | CWBackPixmap |
                                CWBorderPixel | CWBitGravity, &wa))) {
     XFreeColormap(display, colormap);
