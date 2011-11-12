@@ -3,19 +3,17 @@
 
 class Point {
   public:
-    int x, y;
-
     Point(int x, int y);
+    int x, y;
 };
 
 typedef Point Size;
 
 class Rect {
   public:
+    Rect(int x, int y, int w, int h);
     int x, y;
     int width, height;
-
-    Rect(int x, int y, int w, int h);
 };
 
 #endif /* _GEOMETRY_ */
