@@ -3,27 +3,36 @@
 
 LayoutStrategy::~LayoutStrategy() {}
 
-WaveLayout::WaveLayout(int num_widgets, int widget_size,
-                       int num_anim, float zoom_factor, float jump_factor) :
+WaveLayout::WaveLayout(int widget_size, int num_anim,
+                       float zoom_factor, float jump_factor) :
     widget_size(widget_size), widget_dist(5), num_animated(num_anim),
     zoom_factor(zoom_factor), jump_factor(jump_factor), position(), bounds(),
     dock_bounds((widget_growth() - widget_dist)/2.0, bar_y(),
-                widget_unit() * (num_widgets + 1), bar_height()) {
+                widget_unit(), bar_height()) { }
 
-  for (int i = 0; i < num_widgets; i++) {
-    Point p(widget_growth()/2.0 + widget_unit() * (i + 0.5),
-            bar_y() + (int)(widget_size * 0.125));
-    position.push_back(p);
-    bounds.push_back(Rect(p.x, p.y, widget_size, widget_size));
-  }
+WaveLayout::~WaveLayout() {
+  for (std::vector<Rect *>::iterator r = bounds.begin();
+       r != bounds.end(); r++) delete *r;
+  for (std::vector<Point *>::iterator p = position.begin();
+       p != position.end(); p++) delete *p;
+}
+
+const Rect & WaveLayout::addWidget() {
+  dock_bounds.width += widget_unit();
+  Point *p = new Point(
+          widget_growth()/2.0 + widget_unit() * (bounds.size() + 0.5),
+          bar_y() + (int)(widget_size * 0.125));
+  position.push_back(p);
+  bounds.push_back(new Rect(p->x, p->y, widget_size, widget_size));
+  return *bounds.back();
 }
 
 
 void WaveLayout::unfocus() {
   for (int i = 0; i < position.size(); i++) {
-    Rect &w = bounds[i];
-    w.x = position[i].x;
-    w.y = position[i].y;
+    Rect &w = *bounds[i];
+    w.x = position[i]->x;
+    w.y = position[i]->y;
     w.width = w.height = widget_size;
   }
   dock_bounds.x = (widget_growth() - widget_dist) / 2.0;
@@ -38,17 +47,17 @@ void WaveLayout::focus(const Point &p) {
   const float wu_na = widget_unit() * num_animated;
 
   for (int i = 0; i < bounds.size(); i++, rx -= widget_unit()) {
-    Rect &w = bounds[i];
+    Rect &w = *bounds[i];
     if (std::abs(rx) > wu_na/2) {
       w.width = w.height = widget_size;
-      w.x = position[i].x + widget_growth() / (i<focused ? -2.0 : 2.0);
-      w.y = position[i].y;
+      w.x = position[i]->x + widget_growth() / (i<focused ? -2.0 : 2.0);
+      w.y = position[i]->y;
     } else {
       w.width = w.height =
         widget_size * (1.0 + (zoom_factor-1.0) * std::cos(rx * M_PI/wu_na));
-      w.x = position[i].x - (w.width - widget_size) / 2.0 -
+      w.x = position[i]->x - (w.width - widget_size) / 2.0 -
         rx * widget_growth() / wu_na;
-      w.y = position[i].y - jump_factor * (w.height - widget_size);
+      w.y = position[i]->y - jump_factor * (w.height - widget_size);
     }
   }
   dock_bounds.x = (widget_unit() - widget_dist)/2.0;
@@ -57,9 +66,9 @@ void WaveLayout::focus(const Point &p) {
 
 
 int WaveLayout::widgetAt(const Point &p) const {
-  for (std::vector<Rect>::const_iterator widget = bounds.begin();
+  for (std::vector<Rect*>::const_iterator widget = bounds.begin();
        widget != bounds.end(); widget++) {
-    if (p.x >= widget->x && p.x < widget->x + widget->width)
+    if (p.x >= (*widget)->x && p.x < (*widget)->x + (*widget)->width)
       return std::distance(widget, bounds.begin());
   }
   return -1;
@@ -78,7 +87,6 @@ Size WaveLayout::frameSize() const {
               bar_height() + 2 * MARGEN + (int)(_upgrowth() + _dngrowth()));
 }
 
-const Rect & WaveLayout::widgetLayout(int idx) const { return bounds[idx]; }
 const Rect & WaveLayout::dockLayout() const { return dock_bounds; }
 
 
