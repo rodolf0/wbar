@@ -11,7 +11,7 @@ class LayoutStrategy {
     virtual void unfocus() = 0;
     virtual void focus(const Point &p) = 0;
 
-    //const BaseGeom & addWidget() = 0;
+    virtual const GeometryObject & addWidget() = 0;
     virtual int widgetAt(const Point &x) const = 0;
     virtual bool atHoverZone(const Point &x) const = 0;
 

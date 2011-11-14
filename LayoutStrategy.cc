@@ -29,7 +29,7 @@ const Rect & WaveLayout::addWidget() {
 
 
 void WaveLayout::unfocus() {
-  for (int i = 0; i < position.size(); i++) {
+  for (size_t i = 0; i < position.size(); i++) {
     Rect &w = *bounds[i];
     w.x = position[i]->x;
     w.y = position[i]->y;
@@ -42,11 +42,11 @@ void WaveLayout::unfocus() {
 
 void WaveLayout::focus(const Point &p) {
   const float x = (p.x - (widget_growth() + widget_unit())/2.0);
-  const int focused = x / widget_unit();
+  const size_t focused = x / widget_unit();
   float rx = x - widget_unit()/2.0; // widget-space relative x
   const float wu_na = widget_unit() * num_animated;
 
-  for (int i = 0; i < bounds.size(); i++, rx -= widget_unit()) {
+  for (size_t i = 0; i < bounds.size(); i++, rx -= widget_unit()) {
     Rect &w = *bounds[i];
     if (std::abs(rx) > wu_na/2) {
       w.width = w.height = widget_size;
