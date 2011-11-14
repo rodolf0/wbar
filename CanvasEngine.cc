@@ -1,6 +1,6 @@
 #include "CanvasEngine.h"
-//#include <Evas_Engine_GL_X11.h>
 #include <Evas_Engine_Software_X11.h>
+//#include <Evas_Engine_GL_X11.h>
 
 
 CanvasEngine *CanvasEngine::instance = NULL;
@@ -19,7 +19,7 @@ void CanvasEngine::init(Xwindow &frame) {
 }
 
 
-CanvasEngine::CanvasEngine(Xwindow &frame) {
+CanvasEngine::CanvasEngine(Xwindow &frame) : canvas(NULL), widgets() {
   Evas_Engine_Info_Software_X11 *einfo;
   int32_t method;
 
@@ -55,32 +55,51 @@ CanvasEngine::CanvasEngine(Xwindow &frame) {
 }
 
 
+void CanvasEngine::resize(const Size &s) {
+  evas_output_size_set(canvas, s.x, s.y);
+  evas_output_viewport_set(canvas, 0, 0, s.x, s.y);
+}
+
+
 CanvasEngine::~CanvasEngine() {
-  for (std::map<Evas_Object *, const Layout *>::iterator img =
-        image_objects.begin(); img != image_objects.end(); img++) {
-    evas_object_del(img->first);
+  for (std::list<widget_t>::iterator w = widgets.begin();
+       w != widgets.end(); w++) {
+    evas_object_del(w->first);
+    delete w->second;
   }
-  image_objects.clear();
+  widgets.clear();
   evas_free(canvas);
 }
 
 
-void CanvasEngine::addImage(const std::string &path, const Layout *l) {
-  Evas_Object *img = evas_object_image_filled_add(canvas);
-  evas_object_image_file_set(img, path.c_str(), NULL);
-  if (evas_object_image_load_error_get(img) != EVAS_LOAD_ERROR_NONE)
+void CanvasEngine::addRectWidget(const std::string &path, const Rect &r) {
+  Evas_Object *image = evas_object_image_filled_add(canvas);
+  evas_object_image_file_set(image, path.c_str(), NULL);
+  if (evas_object_image_load_error_get(image) != EVAS_LOAD_ERROR_NONE)
     throw "ERROR: failed to load image.";
-	evas_object_image_smooth_scale_set(img, EINA_FALSE);
-	evas_object_image_alpha_set(img, EINA_TRUE);
-  image_objects[img] = l;
-  evas_object_show(img);
+  evas_object_image_smooth_scale_set(image, EINA_FALSE);
+  evas_object_image_alpha_set(image, EINA_TRUE);
+  evas_object_show(image);
+  widgets.push_back(std::make_pair(image, new RectLayout(r)));
 }
 
 
 void CanvasEngine::render() {
-  for (std::map<Evas_Object *, const Layout *>::iterator img =
-        image_objects.begin(); img != image_objects.end(); img++) {
-    img->second->transform(img->first);
+  for (std::list<widget_t>::const_iterator w = widgets.begin();
+       w != widgets.end(); w++) {
+    w->second->transform(w->first);
   }
   evas_render(canvas);
+}
+
+
+/////////////////////// CanvasWidget /////////////////////
+
+Layout::~Layout() {}
+
+RectLayout::RectLayout(const Rect &r) : layout(r) {}
+
+void RectLayout::transform(Evas_Object *img) const {
+  evas_object_resize(img, layout.width, layout.height);
+  evas_object_move(img, layout.x, layout.y);
 }

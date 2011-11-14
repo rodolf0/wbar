@@ -3,8 +3,92 @@
 #include "ConfigReader.h"
 #include "CanvasEngine.h"
 #include "LayoutStrategy.h"
-#include "Widget.h"
-#include "Dock.h"
+
+class Wbar : public XEventHandler {
+  private:
+
+    Wbar(const Wbar &);
+    Wbar & operator=(const Wbar &);
+
+    ConfigReader cfgreader;
+    Xwindow window;
+    WaveLayout *layout;
+
+  public:
+
+    Wbar(const OptionParser &optparser) :
+        cfgreader(optparser.getString("config")),
+        window(Size(10, 10)),
+        layout(new WaveLayout(optparser.getInt("size"),
+                              optparser.getInt("nanim"),
+                              optparser.getFloat("zoomf"),
+                              optparser.getFloat("jumpf"))) {
+
+      CanvasEngine::init(window);
+
+      for (std::list<ConfigReader::Section>::const_iterator section =
+           cfgreader.begin(); section != cfgreader.end(); section++) {
+
+        if (section->get("type") == "LauncherWidget") {
+          CanvasEngine::get().addRectWidget(
+            section->get("face"), layout->addWidget());
+        } else
+
+        if (section->get("type") == "Dock") {
+          CanvasEngine::get().addRectWidget(
+            section->get("face"), layout->dockLayout());
+        }
+      }
+
+      window.resize(layout->frameSize());
+      CanvasEngine::get().resize(layout->frameSize());
+
+      window.setSkipPager();
+      window.setSkipTaskbar();
+      window.setSticky();
+      window.setLayer(wlayer_above);
+      window.setType(wtype_dock);
+      window.map();
+      window.move(Point((Xwindow::screenSize().x - layout->frameSize().x) / 2,
+                         Xwindow::screenSize().y - layout->frameSize().y));
+      eventLoop(window);
+    }
+
+
+    void onExposure(const XExposeEvent &e) {
+      CanvasEngine::get().render();
+    }
+
+    void onMouseMove(const XMotionEvent &e) {
+      const Point p(e.x, e.y);
+      if (layout->atHoverZone(p)) {
+        layout->focus(p);
+      } else {
+        layout->unfocus();
+      }
+      CanvasEngine::get().render();
+    }
+
+    void onMouseDown(const XButtonEvent &e) {
+      int idx = layout->widgetAt(Point(e.x, e.y));
+    }
+
+    void onMouseUp(const XButtonEvent &e) {
+      int idx = layout->widgetAt(Point(e.x, e.y));
+    }
+
+    void onMouseEnter(const XCrossingEvent &e) {
+      layout->focus(Point(e.x, e.y));
+      CanvasEngine::get().render();
+    }
+
+    void onMouseLeave(const XCrossingEvent &e) {
+      layout->unfocus();
+      CanvasEngine::get().render();
+    }
+};
+
+
 
 void showHelp() {
   std::cout << "wbar 2.0" << std::endl;
@@ -12,50 +96,16 @@ void showHelp() {
 
 
 int main(int argc, char *argv[]) {
-
-  OptionParser optparser(argc, argv);
-  if (optparser.isset("help")) {
-    showHelp();
-    return 0;
+  try {
+    OptionParser optparser(argc, argv);
+    if (optparser.isset("help")) {
+      showHelp();
+    } else {
+      Wbar wbar(optparser);
+    }
+  } catch (const char *e) {
+    std::cout << e << std::endl;
   }
-
-  //ConfigReader cfgreader(optparser.getString("config"));
-  //WaveLayout layout(cfgreader.sections.size() - 1);
-  WaveLayout layout(10,
-                    optparser.getInt("size"),
-                    optparser.getInt("nanim"),
-                    optparser.getFloat("zoomf"),
-                    optparser.getFloat("jumpf"));
-
-  Xwindow window(layout.frameSize());
-  window.setSkipPager();
-  window.setSkipTaskbar();
-  window.setSticky();
-  window.setLayer(wlayer_above);
-  window.setType(wtype_dock);
-
-  Dock dock(layout);
-  CanvasEngine::init(window);
-
-  RectLayout dock_layout(layout.dockLayout());
-  CanvasEngine::get().addImage("assets/dock.png", &dock_layout);
-
-  typedef std::pair<Widget*, RectLayout*> LaidWidget;
-  std::vector<LaidWidget> widgets;
-
-  //for (size_t idx = 0; idx < cfgreader.sections.size(); idx++) {
-  for (size_t idx = 0; idx < 10; idx++) {
-    widgets.push_back(LaidWidget(new LauncherWidget(ExecuteCommand("")),
-                                  new RectLayout(layout.widgetLayout(idx))));
-    CanvasEngine::get().addImage("assets/firefox.png", widgets.back().second);
-  }
-
-  window.map();
-  window.move(Point((Xwindow::screenSize().x - layout.frameSize().x) / 2,
-                     Xwindow::screenSize().y - layout.frameSize().y));
-
-  dock.eventLoop(window);
-  //TODO: free widgets
   return 0;
 }
 

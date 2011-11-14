@@ -1,11 +1,27 @@
 #ifndef _CANVASENGINE_
 #define _CANVASENGINE_
 
-#include <map>
+#include <list>
 #include <string>
 #include <Evas.h>
 #include "Xwindow.h"
-#include "CanvasLayouts.h"
+#include "Geometry.h"
+
+
+class Layout {
+  public:
+    virtual ~Layout() = 0;
+    virtual void transform(Evas_Object *img) const = 0;
+};
+
+
+class RectLayout : public Layout {
+  public:
+    RectLayout(const Rect &r);
+    void transform(Evas_Object *img) const;
+  protected:
+    const Rect &layout;
+};
 
 
 class CanvasEngine {
@@ -14,17 +30,22 @@ class CanvasEngine {
     static void init(Xwindow &frame);
     static CanvasEngine & get();
 
-    virtual void addImage(const std::string &path, const Layout *l);
+    virtual void addRectWidget(const std::string &path, const Rect &r);
     virtual void render();
+    virtual void resize(const Size &s);
 
     virtual ~CanvasEngine();
 
   protected:
+    CanvasEngine(const CanvasEngine &);
+    CanvasEngine & operator=(const CanvasEngine &);
+
     CanvasEngine(Xwindow &frame);
     static CanvasEngine *instance;
 
     Evas *canvas;
-    std::map<Evas_Object *, const Layout *> image_objects;
+    typedef std::pair<Evas_Object *, const Layout *> widget_t;
+    std::list<widget_t> widgets;
 };
 
 #endif /* _CANVASENGINE_ */
