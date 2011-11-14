@@ -46,6 +46,10 @@ class Xwindow {
     void decorationsOff();
 
   protected:
+    // disallow copy constructor and assignment (pointer members)
+    Xwindow(const Xwindow &);
+    Xwindow & operator=(const Xwindow &);
+
     Window window;
     Colormap colormap;
     Visual *visual;
@@ -63,12 +67,12 @@ class XEventHandler {
   public:
     virtual ~XEventHandler() = 0;
 
-    virtual void onExposure(const XExposeEvent &e) = 0;
-    virtual void onMouseMove(const XMotionEvent &e) = 0;
-    virtual void onMouseDown(const XButtonEvent &e) = 0;
-    virtual void onMouseUp(const XButtonEvent &e) = 0;
-    virtual void onMouseEnter(const XCrossingEvent &e) = 0;
-    virtual void onMouseLeave(const XCrossingEvent &e) = 0;
+    virtual void onExposure(const XExposeEvent &e) {}
+    virtual void onMouseMove(const XMotionEvent &e) {}
+    virtual void onMouseDown(const XButtonEvent &e) {}
+    virtual void onMouseUp(const XButtonEvent &e) {}
+    virtual void onMouseEnter(const XCrossingEvent &e) {}
+    virtual void onMouseLeave(const XCrossingEvent &e) {}
 
     static unsigned long eventMask();
     virtual void eventLoop(Xwindow &w);

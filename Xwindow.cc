@@ -41,7 +41,8 @@ void Xwindow::registerDelete() const {
 }
 
 
-Xwindow::Xwindow(const Size &size) {
+Xwindow::Xwindow(const Size &size) :
+    window(0), colormap(0), visual(NULL), depth(0) {
   if (win_count == 0)
     if (!(display = XOpenDisplay(NULL)))
       throw "ERROR: XOpenDisplay failed.";
