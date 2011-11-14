@@ -12,7 +12,7 @@ OptionParser::Option::Option(bool is_set, int takes_arg,
     def_val(def_val), descrip(descrip), value(value) { }
 
 
-OptionParser::OptionParser(int argc, char *argv[]) {
+OptionParser::OptionParser(int argc, char *argv[]) : options() {
   size_t num_opts = sizeof(cmdline_options)/sizeof(struct _cmdline_options);
   struct option opts[num_opts + 1];
   // prepare structures for getopt()

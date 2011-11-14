@@ -1,8 +1,8 @@
 #ifndef _OPTIONPARSER_
 #define _OPTIONPARSER_
 
-#include <string>
 #include <vector>
+#include <string>
 
 class OptionParser {
   public:
