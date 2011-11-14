@@ -13,8 +13,6 @@ OBJECTS = \
 	Xwindow.o
 
 
-#all: test-options
-
 
 $(TARGET): $(OBJECTS)
 	clang++ $(LDFLAGS) -o $@ $(OBJECTS)
