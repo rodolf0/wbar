@@ -3,32 +3,31 @@
 CFGDIR=.
 APPDIR=/usr/share/applications
 ICONDIR=/usr/share/icons/hicolor
-MAXICONS=5
+MAXICONS=20
 
 apps=$(find $APPDIR -name '*.desktop' 2>/dev/null |
         xargs grep -l ^Name |
         xargs grep -l ^Icon |
         xargs grep -l ^Exec |
-        xargs grep -l ^Type=Application
+        xargs grep -l ^Type=Application |
+        sort -R
      )
 
 # print the dock background settings
 cat > "$CFGDIR/wbar.cfg" <<-EOF
 [dock]
 type=Dock
-face=assets/dock.png
+face=assets/dock.svg
 EOF
 
 for app in $apps; do
-  [ $((MAXICONS--)) -le 0 ] && break
-
   _name=$(grep ^Name= $app | sed 's/^.*=//')
   _exec=$(grep ^Exec= $app | sed 's/^.*=//')
   _icon=$(grep ^Icon= $app | sed 's/^.*=//')
   icons=$(find $ICONDIR | grep -i "${_icon}")
 
   # get the biggest resolution icon
-  for size in 256 128 64 48; do
+  for size in 128 64 48; do
     for icon in $icons; do
       if [[ "$icon" =~ $size ]]; then
         selected_icon=$icon
@@ -38,7 +37,9 @@ for app in $apps; do
   done
 
   if [ -s $selected_icon ]; then
+    rm -f "$CFGDIR/assets/$(basename $selected_icon)"
     ln -s $selected_icon "$CFGDIR/assets/"
+    grep -q $(basename $selected_icon) "$CFGDIR/wbar.cfg" && continue
     cat >> "$CFGDIR/wbar.cfg" <<-EOF
 [$_name]
 type=LauncherWidget
@@ -47,6 +48,7 @@ command=$_exec
 EOF
   fi
 
+  [ $((MAXICONS--)) -le 1 ] && break
 done
 
 # vim: set sw=2 sts=2 : #

@@ -11,7 +11,7 @@ ConfigReader::ConfigReader(const std::string &path) :
   std::ifstream cfgfile;
   char linebuf[LINEBUF];
 
-  if (regcomp(&section_expr, "^\\[(\\w+)\\]$", REG_EXTENDED))
+  if (regcomp(&section_expr, "^\\[(.+)\\]$", REG_EXTENDED))
     throw "Failed to compile section regex.";
   if (regcomp(&value_expr, "^ *([^= ]+) *= *(.*) *$", REG_EXTENDED))
     throw "Failed to compile value regex.";

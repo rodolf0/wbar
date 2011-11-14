@@ -77,7 +77,7 @@ void CanvasEngine::addRectWidget(const std::string &path, const Rect &r) {
   evas_object_image_file_set(image, path.c_str(), NULL);
   if (evas_object_image_load_error_get(image) != EVAS_LOAD_ERROR_NONE)
     throw "ERROR: failed to load image.";
-  evas_object_image_smooth_scale_set(image, EINA_FALSE);
+  evas_object_image_smooth_scale_set(image, EINA_TRUE);
   evas_object_image_alpha_set(image, EINA_TRUE);
   evas_object_show(image);
   widgets.push_back(std::make_pair(image, new RectLayout(r)));
