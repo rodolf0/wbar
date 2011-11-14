@@ -6,14 +6,11 @@ LDFLAGS=`pkg-config x11 xrender evas --libs`
 OBJECTS = \
 	Wbar.o \
 	OptionParser.o \
+	ConfigReader.o \
 	CanvasEngine.o \
-	CanvasLayouts.o \
 	LayoutStrategy.o \
 	Geometry.o \
-	Xwindow.o \
-	Dock.o \
-	Command.o \
-	Widget.o
+	Xwindow.o
 
 
 #all: test-options
