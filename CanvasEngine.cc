@@ -84,6 +84,20 @@ void CanvasEngine::addRectWidget(const std::string &path, const Rect &r) {
 }
 
 
+void CanvasEngine::addFramedWidget(const std::string &path,
+                                       const Rect &r, const Border &b) {
+  Evas_Object *image = evas_object_image_filled_add(canvas);
+  evas_object_image_border_set(image, b.left, b.right, b.top, b.bottom);
+  evas_object_image_file_set(image, path.c_str(), NULL);
+  if (evas_object_image_load_error_get(image) != EVAS_LOAD_ERROR_NONE)
+    throw "ERROR: failed to load image.";
+  evas_object_image_smooth_scale_set(image, EINA_TRUE);
+  evas_object_image_alpha_set(image, EINA_TRUE);
+  evas_object_show(image);
+  widgets.push_back(std::make_pair(image, new RectLayout(r)));
+}
+
+
 void CanvasEngine::render() {
   for (std::list<widget_t>::const_iterator w = widgets.begin();
        w != widgets.end(); w++) {

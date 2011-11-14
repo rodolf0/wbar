@@ -35,8 +35,9 @@ class Wbar : public XEventHandler {
         } else
 
         if (section->get("type") == "Dock") {
-          CanvasEngine::get().addRectWidget(
-            section->get("face"), layout->dockLayout());
+          CanvasEngine::get().addFramedWidget(
+            section->get("face"), layout->dockLayout(),
+            Border(5, 5, 5, 5));
         }
       }
 

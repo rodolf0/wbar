@@ -21,6 +21,12 @@ class Rect : public GeometryObject {
     int width, height;
 };
 
+class Border : public GeometryObject {
+  public:
+    Border(int l, int r, int t, int b);
+    int left, right, top, bottom;
+};
+
 #endif /* _GEOMETRY_ */
 
 /* vim: set sw=2 sts=2 : */

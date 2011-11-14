@@ -6,4 +6,7 @@ Point::Point(int x, int y) :
 Rect::Rect(int x, int y, int w, int h) :
     x(x), y(y), width(w), height(h) { }
 
+Border::Border(int l, int r, int t, int b) :
+    left(l), right(r), top(t), bottom(b) { }
+
 /* vim: set sw=2 sts=2 : */

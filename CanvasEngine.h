@@ -31,6 +31,8 @@ class CanvasEngine {
     static CanvasEngine & get();
 
     virtual void addRectWidget(const std::string &path, const Rect &r);
+    virtual void addFramedWidget(const std::string &path,
+                                 const Rect &r, const Border &b);
     virtual void render();
     virtual void resize(const Size &s);
 
