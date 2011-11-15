@@ -3,7 +3,7 @@
 CFGDIR=.
 APPDIR=/usr/share/applications
 ICONDIR=/usr/share/icons/hicolor
-MAXICONS=20
+MAXICONS=10
 
 apps=$(find $APPDIR -name '*.desktop' 2>/dev/null |
         xargs grep -l ^Name |
@@ -38,7 +38,7 @@ for app in $apps; do
 
   if [ -s $selected_icon ]; then
     rm -f "$CFGDIR/assets/$(basename $selected_icon)"
-    ln -s $selected_icon "$CFGDIR/assets/"
+    ln -s "$selected_icon" "$CFGDIR/assets/"
     grep -q $(basename $selected_icon) "$CFGDIR/wbar.cfg" && continue
     cat >> "$CFGDIR/wbar.cfg" <<-EOF
 [$_name]

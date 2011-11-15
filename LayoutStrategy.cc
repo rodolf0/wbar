@@ -3,12 +3,14 @@
 
 LayoutStrategy::~LayoutStrategy() {}
 
+
 WaveLayout::WaveLayout(int widget_size, int num_anim,
                        float zoom_factor, float jump_factor) :
-    widget_size(widget_size), widget_dist(5), num_animated(num_anim),
-    zoom_factor(zoom_factor), jump_factor(jump_factor), position(), bounds(),
-    dock_bounds((widget_growth() - widget_dist)/2.0, bar_y(),
-                widget_unit(), bar_height()) { }
+    widget_size(widget_size), widget_dist(10), bar_margin(5),
+    num_animated(num_anim), zoom_factor(zoom_factor), jump_factor(jump_factor),
+    position(), bounds(),
+    dock_bounds(widget_growth()/2.0, bar_y(), widget_unit(), bar_height()) { }
+
 
 WaveLayout::~WaveLayout() {
   for (std::vector<Rect *>::iterator r = bounds.begin();
@@ -17,11 +19,12 @@ WaveLayout::~WaveLayout() {
        p != position.end(); p++) delete *p;
 }
 
+
 const Rect & WaveLayout::addWidget() {
   dock_bounds.width += widget_unit();
   Point *p = new Point(
-          widget_growth()/2.0 + widget_unit() * (bounds.size() + 0.5),
-          bar_y() + (int)(widget_size * 0.125));
+    (widget_growth() + widget_dist)/2.0 + widget_unit() * (bounds.size() + 0.5),
+    bar_y() + (int)(widget_size * 0.125));
   position.push_back(p);
   bounds.push_back(new Rect(p->x, p->y, widget_size, widget_size));
   return *bounds.back();
@@ -35,13 +38,13 @@ void WaveLayout::unfocus() {
     w.y = position[i]->y;
     w.width = w.height = widget_size;
   }
-  dock_bounds.x = (widget_growth() - widget_dist) / 2.0;
+  dock_bounds.x = widget_growth() / 2.0;
   dock_bounds.width = widget_unit() * (bounds.size() + 1);
 }
 
 
 void WaveLayout::focus(const Point &p) {
-  const float x = (p.x - (widget_growth() + widget_unit())/2.0);
+  const float x = (p.x - (widget_growth() + widget_unit() + widget_dist)/2.0);
   const size_t focused = x / widget_unit();
   float rx = x - widget_unit()/2.0; // widget-space relative x
   const float wu_na = widget_unit() * num_animated;
@@ -60,8 +63,8 @@ void WaveLayout::focus(const Point &p) {
       w.y = position[i]->y - jump_factor * (w.height - widget_size);
     }
   }
-  dock_bounds.x = (widget_unit() - widget_dist)/2.0;
-  dock_bounds.width = widget_growth() + widget_unit() * bounds.size();
+  dock_bounds.x = 0;
+  dock_bounds.width = widget_growth() + widget_unit() * (bounds.size() + 1);
 }
 
 
@@ -76,15 +79,14 @@ int WaveLayout::widgetAt(const Point &p) const {
 
 
 bool WaveLayout::atHoverZone(const Point &p) const {
-  const float relativex = (p.x - (widget_growth() + widget_unit())/2.0);
-  return (relativex >= 0.0 && relativex < bounds.size() * widget_unit());
+  const float x = (p.x - (widget_growth() + widget_unit() + widget_dist)/2.0);
+  return (x >= 0.0 && x < bounds.size() * widget_unit() - widget_dist);
 }
 
 
-#define MARGEN 4
 Size WaveLayout::frameSize() const {
   return Size(widget_growth() + widget_unit() * (bounds.size() + 1),
-              bar_height() + 2 * MARGEN + (int)(_upgrowth() + _dngrowth()));
+              bar_height() + 2 * bar_margin + (int)(_upgrowth() + _dngrowth()));
 }
 
 const Rect & WaveLayout::dockLayout() const { return dock_bounds; }
@@ -112,7 +114,7 @@ int WaveLayout::bar_height() const {
 }
 
 int WaveLayout::bar_y() const {
-  return MARGEN + (int)_upgrowth();
+  return bar_margin + (int)_upgrowth();
 }
 
 float WaveLayout::_upgrowth() const {

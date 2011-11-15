@@ -40,6 +40,7 @@ class WaveLayout : public LayoutStrategy {
   protected:
     int widget_size;
     int widget_dist;
+    int bar_margin;
     int num_animated;
     float zoom_factor;
     float jump_factor;
