@@ -29,14 +29,14 @@ for app in $apps; do
   # get the biggest resolution icon
   for size in 128 64 48; do
     for icon in $icons; do
-      if [[ "$icon" =~ $size ]]; then
-        selected_icon=$icon
+      if [[ "$icon" =~ $size ]] && [ -f "$icon" ]; then
+        selected_icon="$icon"
         break 2
       fi
     done
   done
 
-  if [ -s $selected_icon ]; then
+  if [ -s "$selected_icon" ]; then
     rm -f "$CFGDIR/assets/$(basename $selected_icon)"
     ln -s "$selected_icon" "$CFGDIR/assets/"
     grep -q $(basename $selected_icon) "$CFGDIR/wbar.cfg" && continue
