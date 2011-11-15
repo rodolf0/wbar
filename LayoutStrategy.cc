@@ -1,6 +1,8 @@
 #include <cmath>
 #include "LayoutStrategy.h"
 
+#define BAR_HEIGHT_FACTOR 0.5
+
 LayoutStrategy::~LayoutStrategy() {}
 
 
@@ -24,7 +26,7 @@ const Rect & WaveLayout::addWidget() {
   dock_bounds.width += widget_unit();
   Point *p = new Point(
     (widget_growth() + widget_dist)/2.0 + widget_unit() * (bounds.size() + 0.5),
-    bar_y() + (int)(widget_size * 0.125));
+    bar_y() + (int)(widget_size * BAR_HEIGHT_FACTOR / 2.0));
   position.push_back(p);
   bounds.push_back(new Rect(p->x, p->y, widget_size, widget_size));
   return *bounds.back();
@@ -110,7 +112,7 @@ int WaveLayout::widget_growth() const {
 }
 
 int WaveLayout::bar_height() const {
-  return widget_size * 1.25;
+  return widget_size * (1 + BAR_HEIGHT_FACTOR);
 }
 
 int WaveLayout::bar_y() const {
@@ -118,13 +120,14 @@ int WaveLayout::bar_y() const {
 }
 
 float WaveLayout::_upgrowth() const {
-  const float ug = widget_size * ((zoom_factor - 1.0) * jump_factor - 0.125);
+  const float ug = widget_size *
+    ((zoom_factor - 1.0) * jump_factor - BAR_HEIGHT_FACTOR/2.0);
   return (ug > 0.0 ? ug : 0.0);
 }
 
 float WaveLayout::_dngrowth() const {
-  const float dg =
-           widget_size * ((zoom_factor - 1.0) * (1.0 - jump_factor) - 0.125);
+  const float dg = widget_size *
+    ((zoom_factor - 1.0) * (1.0 - jump_factor) - BAR_HEIGHT_FACTOR/2.0);
   return (dg > 0.0 ? dg : 0.0);
 }
 
