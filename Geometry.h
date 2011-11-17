@@ -27,6 +27,12 @@ class Border : public GeometryObject {
     int left, right, top, bottom;
 };
 
+class Rect2D : public GeometryObject {
+  public:
+    Rect2D(float x, float y, float w, float h, float a);
+    float x, y, width, height, angle;
+};
+
 #endif /* _GEOMETRY_ */
 
 /* vim: set sw=2 sts=2 : */

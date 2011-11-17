@@ -24,6 +24,14 @@ class RectLayout : public Layout {
 };
 
 
+class CanvasWidget {
+  public:
+    CanvasWidget(const std::string &path, const Rect &r);
+    CanvasWidget(const std::string &path, const Rect2D &r);
+    void setFrame(const Border &b);
+};
+
+
 class CanvasEngine {
   public:
 

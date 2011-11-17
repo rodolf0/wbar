@@ -61,6 +61,21 @@ class WaveLayout : public LayoutStrategy {
 
 
 class CoverflowLayout : public LayoutStrategy {
+  public:
+    CoverflowLayout();
+
+    void unfocus();
+    void focus(const Point &p);
+
+    const Rect & addWidget();
+    int widgetAt(const Point &x) const;
+    bool atHoverZone(const Point &x) const;
+
+    const Rect & dockLayout() const;
+
+    Size frameSize() const;
+
+  protected:
 };
 
 #endif /* _LAYOUTSTRATEGY_ */
