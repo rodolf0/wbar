@@ -26,18 +26,19 @@ class Wbar : public XEventHandler {
 
       CanvasEngine::init(window);
 
+      //if (cfgreader.get("Dock").get("layout") == "Wave") {
+      //}
+
+      CanvasWidget &dock = CanvasEngine::get().addWidget(
+          cfgreader.get("Dock").get("face"),
+          RectLayout(layout->dockLayout()));
+      dock.setFrame(Border(5, 5, 5, 5));
+
       for (std::list<ConfigReader::Section>::const_iterator section =
            cfgreader.begin(); section != cfgreader.end(); section++) {
-
         if (section->get("type") == "LauncherWidget") {
-          CanvasEngine::get().addRectWidget(
-            section->get("face"), layout->addWidget());
-        } else
-
-        if (section->get("type") == "Dock") {
-          CanvasEngine::get().addFramedWidget(
-            section->get("face"), layout->dockLayout(),
-            Border(5, 5, 5, 5));
+          CanvasEngine::get().addWidget(section->get("face"),
+                                        RectLayout(layout->addWidget()));
         }
       }
 
@@ -55,6 +56,9 @@ class Wbar : public XEventHandler {
       eventLoop(window);
     }
 
+    ~Wbar() {
+      delete layout;
+    }
 
     void onExposure(const XExposeEvent &e) {
       CanvasEngine::get().render();
@@ -76,6 +80,7 @@ class Wbar : public XEventHandler {
 
     void onMouseUp(const XButtonEvent &e) {
       int idx = layout->widgetAt(Point(e.x, e.y));
+      std::cout << "Widget clicked: " << idx << std::endl;
     }
 
     void onMouseEnter(const XCrossingEvent &e) {

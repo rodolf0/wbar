@@ -33,6 +33,13 @@ class Rect2D : public GeometryObject {
     float x, y, width, height, angle;
 };
 
+class Rect3D : public GeometryObject {
+  public:
+    Rect3D(float x, float y, float w, float h,
+           float ax, float ay, float az);
+    float x, y, width, height, angle;
+};
+
 #endif /* _GEOMETRY_ */
 
 /* vim: set sw=2 sts=2 : */
