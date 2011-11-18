@@ -14,6 +14,8 @@ class Wbar : public XEventHandler {
     Xwindow window;
     WaveLayout *layout;
 
+    XButtonEvent mouse_position;
+
   public:
 
     Wbar(const OptionParser &optparser) :
@@ -75,12 +77,14 @@ class Wbar : public XEventHandler {
     }
 
     void onMouseDown(const XButtonEvent &e) {
-      int idx = layout->widgetAt(Point(e.x, e.y));
+      mouse_position = e;
     }
 
     void onMouseUp(const XButtonEvent &e) {
-      int idx = layout->widgetAt(Point(e.x, e.y));
-      std::cout << "Widget clicked: " << idx << std::endl;
+      if (mouse_position.x == e.x && mouse_position.y == e.y) {
+        int idx = layout->widgetAt(Point(e.x, e.y));
+        std::cout << "Widget clicked: " << idx << std::endl;
+      }
     }
 
     void onMouseEnter(const XCrossingEvent &e) {

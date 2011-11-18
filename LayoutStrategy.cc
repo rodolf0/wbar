@@ -74,7 +74,7 @@ int WaveLayout::widgetAt(const Point &p) const {
   for (std::vector<Rect*>::const_iterator widget = bounds.begin();
        widget != bounds.end(); widget++) {
     if (p.x >= (*widget)->x && p.x < (*widget)->x + (*widget)->width)
-      return std::distance(widget, bounds.begin());
+      return std::distance(bounds.begin(), widget);
   }
   return -1;
 }
