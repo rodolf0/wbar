@@ -1,7 +1,12 @@
 TARGET=Wbar
 
-CXXFLAGS=-include cstddef -O0 -ggdb -Wall -Weffc++ `pkg-config x11 xrender evas --cflags`
-LDFLAGS=`pkg-config x11 xrender evas --libs`
+CXXFLAGS=\
+	-include cstddef \
+	-O0 -ggdb -Wall -Weffc++ \
+	`pkg-config x11 xrender evas --cflags` \
+	#-DDISCARD_MOUSE_MOVES
+
+LDFLAGS=`pkg-config x11 xrender evas --libs` -Wl,-O0
 
 OBJECTS = \
 	Wbar.o \
@@ -11,7 +16,6 @@ OBJECTS = \
 	LayoutStrategy.o \
 	Geometry.o \
 	Xwindow.o
-
 
 
 $(TARGET): $(OBJECTS)

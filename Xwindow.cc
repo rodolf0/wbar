@@ -143,7 +143,14 @@ void XEventHandler::eventLoop(Xwindow &w) {
 
   while (process_events) {
     XEvent ev;
+// HINT: discard mouse moves for slow machines
+#ifdef DISCARD_MOUSE_MOVES
+    do {
+      XWindowEvent(w.getDisplay(), w.getWindow(), eventMask(), &ev);
+    } while (ev.type == MotionNotify && XQLength(w.getDisplay()) > 1);
+#else
     XWindowEvent(w.getDisplay(), w.getWindow(), eventMask(), &ev);
+#endif
 
     switch (ev.type) {
       case EnterNotify:

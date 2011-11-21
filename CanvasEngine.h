@@ -42,7 +42,6 @@ class CanvasWidget {
     virtual ~CanvasWidget();
 
     void setFrame(const Border &b);
-    void setCommand(const std::string &cmd);
 
   protected:
     friend class CanvasEngine;

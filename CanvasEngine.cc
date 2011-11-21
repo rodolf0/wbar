@@ -75,6 +75,7 @@ CanvasWidget & CanvasEngine::addWidget(
   evas_object_image_file_set(image, path.c_str(), NULL);
   if (evas_object_image_load_error_get(image) != EVAS_LOAD_ERROR_NONE)
     throw "ERROR: failed to load image.";
+// HINT: disable smooth scaling for slow machines
   evas_object_image_smooth_scale_set(image, EINA_TRUE);
   evas_object_image_alpha_set(image, EINA_TRUE);
   evas_object_show(image);
