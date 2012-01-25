@@ -1,0 +1,1 @@
+A rewrite of wbar attempting to use evas instead of Imlib2 for real transparency.
