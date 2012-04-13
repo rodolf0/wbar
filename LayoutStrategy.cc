@@ -8,7 +8,7 @@ LayoutStrategy::~LayoutStrategy() {}
 
 WaveLayout::WaveLayout(int widget_size, int num_anim,
                        float zoom_factor, float jump_factor) :
-    widget_size(widget_size), widget_dist(10), bar_margin(5),
+    widget_size(widget_size), widget_dist(5), bar_margin(5),
     num_animated(num_anim), zoom_factor(zoom_factor), jump_factor(jump_factor),
     position(), bounds(),
     dock_bounds(widget_growth()/2.0, bar_y(), widget_unit(), bar_height()) { }
