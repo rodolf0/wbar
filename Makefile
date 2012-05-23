@@ -19,7 +19,7 @@ OBJECTS = \
 
 
 $(TARGET): $(OBJECTS)
-	clang++ $(LDFLAGS) -o $@ $(OBJECTS)
+	clang++ $(OBJECTS) $(LDFLAGS) -o $@
 
 %.o: %.cc
 	clang++ $(CXXFLAGS) -c $^
