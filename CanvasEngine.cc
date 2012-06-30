@@ -26,7 +26,7 @@ CanvasEngine::CanvasEngine(Xwindow &frame) : canvas(NULL), widgets() {
 
   evas_init();
 
-  if ((method = evas_render_method_lookup("software_x11")) <= 0)
+  if (!(method = evas_render_method_lookup("software_x11")))
     throw "ERROR: evas was not compiled with 'software_x11' engine!";
 
   if (!(canvas = evas_new()))

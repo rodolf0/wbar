@@ -3,7 +3,7 @@
 CFGDIR=.
 APPDIR=/usr/share/applications
 ICONDIR=/usr/share/icons/hicolor
-MAXICONS=10
+MAXICONS=30
 
 apps=$(find $APPDIR -name '*.desktop' 2>/dev/null |
         xargs grep -l ^Name |
