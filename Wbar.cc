@@ -55,6 +55,7 @@ class Wbar : public XEventHandler {
       window.setSticky();
       window.setType(wtype_dock);
       window.setLayer(wlayer_above);
+      window.decorationsOff();
       window.map();
       window.move(Point((Xwindow::screenSize().x - layout->frameSize().x) / 2,
                          Xwindow::screenSize().y - layout->frameSize().y));
