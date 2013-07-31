@@ -22,7 +22,7 @@ set(LIBS ${LIBS}
   ${EINA_LIBRARIES}
   ${X11_LIBRARIES}
   ${X11_Xrender_LIB}
-) 
+)
 
 add_executable(Wbar
   Wbar.cc

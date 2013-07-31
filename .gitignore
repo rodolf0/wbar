@@ -1,1 +1,3 @@
-assets/*
+assets/
+!assets/dock.svg
+wbar.cfg
