@@ -3,7 +3,7 @@
 CFGDIR=.
 APPDIR=/usr/share/applications
 ICONDIR=/usr/share/icons/hicolor
-MAXICONS=10
+MAXICONS=30
 
 apps=$(find $APPDIR -name '*.desktop' 2>/dev/null |
         xargs grep -l ^Name |
@@ -15,9 +15,10 @@ apps=$(find $APPDIR -name '*.desktop' 2>/dev/null |
 
 # print the dock background settings
 cat > "$CFGDIR/wbar.cfg" <<-EOF
-[dock]
+[Dock]
 type=Dock
 face=assets/dock.svg
+layout=Wave
 EOF
 
 for app in $apps; do

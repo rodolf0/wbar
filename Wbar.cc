@@ -1,4 +1,6 @@
 #include <iostream>
+#include <unistd.h>
+#include <signal.h>
 #include "OptionParser.h"
 #include "ConfigReader.h"
 #include "CanvasEngine.h"
@@ -14,6 +16,8 @@ class Wbar : public XEventHandler {
     Xwindow window;
     WaveLayout *layout;
 
+    XButtonEvent mouse_position;
+
   public:
 
     Wbar(const OptionParser &optparser) :
@@ -26,18 +30,20 @@ class Wbar : public XEventHandler {
 
       CanvasEngine::init(window);
 
+      //if (cfgreader.get("Dock").get("layout") == "Wave") {
+      //  layout = new WaveLayout();
+      //}
+
+      CanvasWidget &dock = CanvasEngine::get().addWidget(
+          cfgreader.get("Dock").get("face"),
+          RectLayout(layout->dockLayout()));
+      dock.setFrame(Border(5, 5, 5, 5));
+
       for (std::list<ConfigReader::Section>::const_iterator section =
            cfgreader.begin(); section != cfgreader.end(); section++) {
-
         if (section->get("type") == "LauncherWidget") {
-          CanvasEngine::get().addRectWidget(
-            section->get("face"), layout->addWidget());
-        } else
-
-        if (section->get("type") == "Dock") {
-          CanvasEngine::get().addFramedWidget(
-            section->get("face"), layout->dockLayout(),
-            Border(5, 5, 5, 5));
+          CanvasEngine::get().addWidget(
+              section->get("face"), RectLayout(layout->addWidget()));
         }
       }
 
@@ -47,14 +53,18 @@ class Wbar : public XEventHandler {
       window.setSkipPager();
       window.setSkipTaskbar();
       window.setSticky();
-      window.setLayer(wlayer_above);
       window.setType(wtype_dock);
+      window.setLayer(wlayer_above);
+      window.decorationsOff();
       window.map();
       window.move(Point((Xwindow::screenSize().x - layout->frameSize().x) / 2,
                          Xwindow::screenSize().y - layout->frameSize().y));
       eventLoop(window);
     }
 
+    ~Wbar() {
+      delete layout;
+    }
 
     void onExposure(const XExposeEvent &e) {
       CanvasEngine::get().render();
@@ -71,11 +81,23 @@ class Wbar : public XEventHandler {
     }
 
     void onMouseDown(const XButtonEvent &e) {
-      int idx = layout->widgetAt(Point(e.x, e.y));
+      mouse_position = e;
     }
 
     void onMouseUp(const XButtonEvent &e) {
-      int idx = layout->widgetAt(Point(e.x, e.y));
+      if (mouse_position.x == e.x && mouse_position.y == e.y) {
+        int idx = layout->widgetAt(Point(e.x, e.y));
+        for (std::list<ConfigReader::Section>::const_iterator section =
+             cfgreader.begin(); section != cfgreader.end(); section++) {
+          if (section->get("type") == "LauncherWidget" && idx-- == 0) {
+            if (!fork()) {
+              execl("/bin/sh", "/bin/sh", "-c",
+                    section->get("command").c_str(), NULL);
+              _exit(1);
+            } else break;
+          }
+        }
+      }
     }
 
     void onMouseEnter(const XCrossingEvent &e) {
@@ -102,6 +124,10 @@ int main(int argc, char *argv[]) {
     if (optparser.isset("help")) {
       showHelp();
     } else {
+      struct sigaction sa;
+      sa.sa_flags = SA_NOCLDSTOP;
+      sa.sa_handler = SIG_IGN;
+      sigaction(SIGCHLD, &sa, NULL);
       Wbar wbar(optparser);
     }
   } catch (const char *e) {
