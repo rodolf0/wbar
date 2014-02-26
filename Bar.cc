@@ -9,7 +9,7 @@
 using namespace std;
 
 /* Bar Constructor & Destructor *//*{{{*/
-Bar::Bar(XWin *win, string barImg, int iSize, int iDist, float zFactor, 
+Bar::Bar(XWin *win, string barImg, int iSize, int iDist, float zFactor,
 	float jFactor, int bOrient, int bPosition, int nAnim) :
 
     /* Initialization */
@@ -26,7 +26,7 @@ Bar::Bar(XWin *win, string barImg, int iSize, int iDist, float zFactor,
 
     owidth = IMAGE_WIDTH(); oheight = IMAGE_HEIGHT();
     if( orientation == 1 ) IMAGE_TRANSPOSE();
-       
+
     /* Enable Bar's alpha channel */
     IMAGE_ENABLE_ALPHA(1);
 
@@ -106,9 +106,9 @@ void Bar::scale(bool updateBG){
     up_growth-= icon_size*0.125;
     dn_growth-= icon_size*0.125;
 
-    /* Set new window width */ 
+    /* Set new window width */
     window->w = (int)(width + 2*icon_offset);
-    window->h = height + 2*MARGEN +	
+    window->h = height + 2*MARGEN +
 	(int)((up_growth>0.0? up_growth : 0.0))+
 	(int)((dn_growth>0.0? dn_growth : 0.0));
 
@@ -116,7 +116,7 @@ void Bar::scale(bool updateBG){
     y = MARGEN + (int)(up_growth>0.0? up_growth : 0.0);
     x = (int)icon_offset;
 
-    if(updateBG) 
+    if(updateBG)
 	acquireBack();
 }
 /*}}}*/
@@ -174,7 +174,7 @@ void Bar::acquireBack(){
 /*}}}*/
 
 /* Icons Scaling *//*{{{*/
-void Bar::transform(int mousex){ 
+void Bar::transform(int mousex){
 #ifdef LINEAR_TRASL
     int x0 = (icon_ansd+1) * icon_unit; // last movable pos
 #endif
@@ -185,7 +185,7 @@ void Bar::transform(int mousex){
     int t_x, t_y, a;
     Icon *cur_ic=0;
 
-    zoomed_icon = -1 ; 
+    zoomed_icon = -1 ;
 
 #ifdef LINEAR_TRASL
     for(a=0; a<(int)icons.size(); a++, rx -= icon_unit, x0 += icon_unit ){
@@ -194,7 +194,7 @@ void Bar::transform(int mousex){
 #endif
 
 	cur_ic = icons[a];
-	
+
 	/* Check if over the icon */
 	if(zoomed_icon == -1)
 	    if(xx >= cur_ic->x && xx < cur_ic->x + cur_ic->size)
@@ -214,23 +214,23 @@ void Bar::transform(int mousex){
 		cur_ic->y = t_y;
 		cur_ic->need_update = 1;
 	    }
-	
+
 	}else{
 
 	    cur_ic->cx = cur_ic->x;
 	    cur_ic->csize = cur_ic->size;
 
 #ifdef COS_ZOOM
-	    cur_ic->size = (int)( icon_size * 
+	    cur_ic->size = (int)( icon_size *
 		    ( 1.0 + (zoom_factor-1.0)*cosf(b_scl_b * rx)));
 #else
-	    cur_ic->size = (int)( icon_size * 
+	    cur_ic->size = (int)( icon_size *
 		( 1.0 + (zoom_factor-1.0)/(1.0 + expf(b_scl_a + b_scl_b*rx*rx))/b_scl_d));
 #endif
 
 #ifdef LINEAR_TRASL
 	    cur_ic->x = cur_ic->ox - (int)(icon_ansd * b_dd - b_pos_m * (mousex - x0));
-#else 
+#else
 	    cur_ic->x = cur_ic->ox + (int)(icon_ansd * b_dd * sinf(b_pos_m * rx));
 #endif
 
@@ -258,7 +258,7 @@ void Bar::cleanBack(){
 	for(size_t b=a+1; b<icons.size(); b++){
 	    next_ic = icons[b];
 
-	    if(next_ic->need_update == 1) 
+	    if(next_ic->need_update == 1)
 		continue;
 
 	    if(cur_ic->cx + cur_ic->csize >= next_ic->x){
@@ -271,16 +271,16 @@ void Bar::cleanBack(){
 
 	/* Copy Root Background */
 	if(orientation == 0)
-	    BLEND_IMAGE(cleaning_buffer, cur_ic->cx, 0, cur_ic->csize, window->h, 
+	    BLEND_IMAGE(cleaning_buffer, cur_ic->cx, 0, cur_ic->csize, window->h,
 		    cur_ic->cx, 0, cur_ic->csize, window->h);
 	else
-	    BLEND_IMAGE(cleaning_buffer, 0, cur_ic->cx, window->h, cur_ic->csize, 
+	    BLEND_IMAGE(cleaning_buffer, 0, cur_ic->cx, window->h, cur_ic->csize,
 		    0, cur_ic->cx, window->h, cur_ic->csize);
     }
 }
 
 void Bar::drawBack(){
-    
+
     if(cleaning_buffer) FREE_IMAGE(cleaning_buffer);
 
     USE_IMAGE(buffer);
@@ -289,15 +289,15 @@ void Bar::drawBack(){
     SET_BLEND(0);
 
     if(orientation == 0){
-	BLEND_IMAGE(barback, 0, 0, window->w, window->h, 
+	BLEND_IMAGE(barback, 0, 0, window->w, window->h,
 		0, 0, window->w, window->h);
-	
+
 	/* Blend the bar */
 	SET_BLEND(1);
 	BLEND_IMAGE(bar, 0, 0, owidth, oheight, x, y, width, height);
 
     }else{
-	BLEND_IMAGE(barback, 0, 0, window->h, window->w, 
+	BLEND_IMAGE(barback, 0, 0, window->h, window->w,
 		0, 0, window->h, window->w);
 
 	/* Blend the bar */
@@ -327,17 +327,17 @@ void Bar::render(){
     /* Blend Icons */
     for(size_t a=0; a<icons.size(); a++){
 	cur_ic = icons[a];
-	
+
 	/* If Icon needs update => blend it */
 	if(cur_ic->need_update == 1){
 
 	    cur_ic->need_update = 0;
 
 	    if(orientation == 0)
-		BLEND_IMAGE(cur_ic->icon, 0, 0, cur_ic->osize, cur_ic->osize, 
+		BLEND_IMAGE(cur_ic->icon, 0, 0, cur_ic->osize, cur_ic->osize,
 		    cur_ic->x, cur_ic->y, cur_ic->size, cur_ic->size);
 	    else
-		BLEND_IMAGE(cur_ic->icon, 0, 0, cur_ic->osize, cur_ic->osize, 
+		BLEND_IMAGE(cur_ic->icon, 0, 0, cur_ic->osize, cur_ic->osize,
 		    cur_ic->y, cur_ic->x, cur_ic->size, cur_ic->size);
 	}
     }
@@ -347,7 +347,7 @@ void Bar::render(){
 	icons.back() = icons[zoomed_icon];
 	icons[zoomed_icon] = cur_ic;
     }
-    
+
     /* Show the buffer */
     SET_BLEND(0);
     RENDER_TO_DRAWABLE(0, 0);
@@ -357,37 +357,39 @@ void Bar::render(){
 
 /* Refresh *//*{{{*/
 void Bar::refresh(int mouse_x){
-    /* Relative coords */
-    mouse_x -= (int)(icon_offset + icon_size/2.0);
+  /* Relative coords */
+  mouse_x -= (int)(icon_offset + icon_size/2.0);
 
-    /* on the bar */
-    if(mouse_x > 0 && mouse_x < (int)icons.size() * icon_unit){
+  /* on the bar */
+  if(mouse_x > 0 && mouse_x < (int)icons.size() * icon_unit){
 
-	transform(mouse_x);
+    transform(mouse_x);
 
-	if(!focused)
-	    focus();
+    if(!focused) {
+      y -= icon_size;
+      focus();
+    }
 
-	cleanBack();
+    cleanBack();
 
     /* out of the bar */
-    }else if(focused)
-	unfocus();
+  }else if(focused) {
+    y += icon_size;
+    unfocus();
+  }
 
-    render();
+  render();
 }
 /*}}}*/
 
 /* In & out of the bar *//*{{{*/
 inline void Bar::unfocus(){
     focused = 0;
-
     x = (int)icon_offset;
     width = (int)(window->w - 2*icon_offset);
     zoomed_icon = -1;
 
     drawBack();
-
 #ifndef NO_EXPAND
     expand(true);
 #endif
@@ -395,12 +397,10 @@ inline void Bar::unfocus(){
 
 inline void Bar::focus(){
     focused = 1;
-
     x=0;
     width = window->w;
 
     drawBack();
-
 #ifndef NO_EXPAND
     expand(false);
 #endif
@@ -413,9 +413,10 @@ void Bar::expand(bool inverse){
     int t=0, anim_time = 80;
     struct timeval tv0, tv;
 
-    if(inverse)
+    if(inverse) {
 	for(size_t i = 0; i<icons.size(); i++){
 	    cur_ic = icons[i];
+	    cur_ic->oy += icon_size;
 	    cur_ic->vx = -(cur_ic->x - cur_ic->ox) / (float)anim_time;
 	    cur_ic->vy = -(cur_ic->y - cur_ic->oy) / (float)anim_time;
 	    cur_ic->vs = -(cur_ic->size - icon_size) / (float)anim_time;
@@ -424,9 +425,11 @@ void Bar::expand(bool inverse){
 	    cur_ic->by = cur_ic->y;
 	    cur_ic->bs = cur_ic->size;
 	}
-    else
+    }
+    else {
 	for(size_t i = 0; i<icons.size(); i++){
 	    cur_ic = icons[i];
+	    cur_ic->y -= icon_size;
 	    cur_ic->vx = (cur_ic->x - cur_ic->ox) / (float)anim_time;
 	    cur_ic->vy = (cur_ic->y - cur_ic->oy) / (float)anim_time;
 	    cur_ic->vs = (cur_ic->size - icon_size) / (float)anim_time;
@@ -434,7 +437,9 @@ void Bar::expand(bool inverse){
 	    cur_ic->bx = cur_ic->ox;
 	    cur_ic->by = cur_ic->oy;
 	    cur_ic->bs = icon_size;
+	    cur_ic->oy -= icon_size;
 	}
+    }
 
     gettimeofday(&tv0, NULL);
 
@@ -442,7 +447,6 @@ void Bar::expand(bool inverse){
 	gettimeofday(&tv, NULL);
 
 	t = (int)((tv.tv_sec - tv0.tv_sec) * 1000 + (tv.tv_usec - tv0.tv_usec)/1000);
-	/* Printing t here can tell you the max system responsiveness */
 	if(t > anim_time) t = anim_time;
 
 	for(size_t j = 0; j< icons.size(); j++){
@@ -495,7 +499,7 @@ void Bar::iconDown(int i_num){
 
 /* Position the Bar *//*{{{*/
 void Bar::setPosition(string pos){
-    
+
     if( !pos.compare("bottom") ) position = 1;
     else if( !pos.compare("top") ) position = 2;
     else if( !pos.compare("left") ) position = 3;
@@ -515,7 +519,7 @@ void Bar::setPosition(string pos){
 string Bar::iconCommand(int i_num){
 
     if(i_num<0 || i_num>=(int)icons.size()) return NULL;
-    
+
     return icons[i_num]->command;
 }
 
@@ -525,7 +529,7 @@ int Bar::iconIndex(int mousex){
     for(int a=0; a<(int)icons.size(); a++){
 
 	cur_ic = icons[a];
-	
+
 	/* Check if over the icon */
 	if(mousex >= cur_ic->x && mousex < cur_ic->x + cur_ic->size)
 	    return a;
