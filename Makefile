@@ -1,7 +1,8 @@
 TARGET=wbar
 CXXFLAGS=`imlib2-config --cflags` -Wall -O2 #-DCOS_ZOOM #-DLINEAR_TRASL -DNO_EXPAND #-DAVGFILTER
 LDFLAGS=`imlib2-config --libs | sed s,@my_libs@,,`  -Wl,-O2 -lX11
-PREFIX=/usr/share/wbar
+#PREFIX=/usr/local
+PREFIX=/tmp
 
 	
 sources= XWin.cc Icon.cc Bar.cc IconLoader.cc \
@@ -15,24 +16,16 @@ $(objects): $(headers) Makefile
 
 $(TARGET): $(objects) 
 	g++ $(LDFLAGS) -o $(@) $(objects)
-	#strip $(@)
 
 install: $(TARGET)
-	install -d $(PREFIX)
-	awk '{if($$1 ~ /i:/ || ($$1 ~ /t:/ && NR<4)) print $$1" $(PREFIX)/"$$2; else print $$0;}' \
-		./dot.wbar > $(PREFIX)/dot.wbar
-	cp -a ./iconpack $(PREFIX)/iconpack
-
-	ln -fs $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.nuvoux/font.ttf
-	ln -fs $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.ice/font.ttf
-	ln -fs $(PREFIX)/iconpack/comic.ttf $(PREFIX)/iconpack/wbar.osx/font.ttf
-	
-	install ./wbar /usr/bin
+	install -d $(PREFIX)/share/wbar $(PREFIX)/bin
+	sed 's@iconpack@$(PREFIX)/share/wbar/iconpack@' dot.wbar > $(PREFIX)/share/wbar/dot.wbar
+	cp -a iconpack $(PREFIX)/share/wbar/iconpack
+	install wbar $(PREFIX)/bin/
 
 uninstall:
-	rm -rf $(PREFIX)
-	rm -f /usr/bin/wbar
-
+	rm -rf $(PREFIX)/share/wbar
+	rm -f $(PREFIX)/bin/wbar
 
 clean:
 	rm -f *.o $(TARGET) 

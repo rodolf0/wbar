@@ -1,72 +1,72 @@
 # The Bar && Font
-i: iconpack/wbar.osx/osxbarback.png
-t: iconpack/wbar.osx/font/12
+i: iconpack/osxbarback.png
+t: iconpack/font/12
 c:
 
-i: iconpack/wbar.osx/nautilus.png
+i: iconpack/nautilus.png
 c: nautilus --no-desktop --browser
 t: nautilus
 
-i: iconpack/wbar.osx/cedega.png
+i: iconpack/cedega.png
 c: 
 t: wine
 
-i: iconpack/wbar.osx/firefox.png
+i: iconpack/firefox.png
 c: firefox
 t: firefox
 
-i: iconpack/wbar.osx/thunderbird.png
+i: iconpack/thunderbird.png
 c: thunderbird
 t: thunderbird
 
-i: iconpack/wbar.osx/gearth.png
+i: iconpack/gearth.png
 c: 
 t: gearth
 
-i: iconpack/wbar.osx/skype.png
+i: iconpack/skype.png
 c: skype
 t: skype
 
-i: iconpack/wbar.osx/psi.png
+i: iconpack/psi.png
 c: pidgin
 t: pidgin
 
-i: iconpack/wbar.osx/mlgui.png
+i: iconpack/mlgui.png
 c: 
 t: sancho
 
-i: iconpack/wbar.osx/ooffice.png
+i: iconpack/ooffice.png
 c: soffice
 t: ooffice
 
-i: iconpack/wbar.osx/acroread.png
+i: iconpack/acroread.png
 c: acroread
 t: acroread
 
-i: iconpack/wbar.osx/beagle.png
+i: iconpack/beagle.png
 c: beagle-search
 t: beagle
 
-i: iconpack/wbar.osx/gimp.png
+i: iconpack/gimp.png
 c: gimp
 t: gimp
 
-i: iconpack/wbar.osx/picasa.png
+i: iconpack/picasa.png
 c: picasa
 t: picasa
 
-i: iconpack/wbar.osx/gqview.png
+i: iconpack/gqview.png
 c: gqview
 t: gqview
 
-i: iconpack/wbar.osx/xmms.png
+i: iconpack/xmms.png
 c: audacious
 t: audacious
 
-i: iconpack/wbar.osx/gnucash.png
+i: iconpack/gnucash.png
 c: gnucash
 t: gnucash
 
-i: iconpack/wbar.osx/gmplayer.png
+i: iconpack/gmplayer.png
 c: gmplayer
 t: gmplayer
