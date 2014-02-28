@@ -14,18 +14,17 @@ WaveLayout::WaveLayout(int widget_size_, int num_anim_, float zoom_factor_,
 }
 
 WaveLayout::~WaveLayout() {
-  for (std::vector<Rect *>::iterator r = bounds.begin(); r != bounds.end(); r++)
-    delete *r;
-  for (std::vector<Point *>::iterator p = position.begin(); p != position.end();
-       p++)
-    delete *p;
+  for (auto &elem : bounds)
+    delete elem;
+  for (auto &elem : position)
+    delete elem;
 }
 
 const Rect &WaveLayout::addWidget() {
   dock_bounds.width += widget_unit();
-  Point *p = new Point((widget_growth() + widget_dist) / 2.0 +
-                           widget_unit() * (bounds.size() + 0.5),
-                       bar_y() + (int)(widget_size * BAR_HEIGHT_FACTOR / 2.0));
+  auto p = new Point((widget_growth() + widget_dist) / 2.0 +
+                         widget_unit() * (bounds.size() + 0.5),
+                     bar_y() + (int)(widget_size * BAR_HEIGHT_FACTOR / 2.0));
   position.push_back(p);
   bounds.push_back(new Rect(p->x, p->y, widget_size, widget_size));
   return *bounds.back();
@@ -68,8 +67,7 @@ void WaveLayout::focus(const Point &p) {
 }
 
 int WaveLayout::widgetAt(const Point &p) const {
-  for (std::vector<Rect *>::const_iterator widget = bounds.begin();
-       widget != bounds.end(); widget++) {
+  for (auto widget = bounds.begin(); widget != bounds.end(); widget++) {
     if (p.x >= (*widget)->x && p.x < (*widget)->x + (*widget)->width)
       return std::distance(bounds.begin(), widget);
   }

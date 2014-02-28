@@ -48,10 +48,9 @@ std::list<ConfigReader::Section>::const_iterator ConfigReader::end() const {
 }
 
 const ConfigReader::Section &ConfigReader::get(const std::string &name) const {
-  for (std::list<Section>::const_iterator s = sections.begin();
-       s != sections.end(); s++) {
-    if (s->name() == name)
-      return *s;
+  for (const auto &elem : sections) {
+    if (elem.name() == name)
+      return elem;
   }
   throw "ERROR: invalid section name.";
 }
@@ -66,7 +65,7 @@ void ConfigReader::Section::add(const std::string &k, const std::string &v) {
 }
 
 const std::string &ConfigReader::Section::get(const std::string &key) const {
-  std::map<std::string, std::string>::const_iterator e = entries.find(key);
+  auto e = entries.find(key);
   if (e != entries.end())
     return e->second;
   throw "ERROR: invalid key name.";

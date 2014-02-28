@@ -3,7 +3,7 @@
 #include <Evas_Engine_Software_X11.h>
 //#include <Evas_Engine_GL_X11.h>
 
-CanvasEngine *CanvasEngine::instance = NULL;
+CanvasEngine *CanvasEngine::instance = nullptr;
 
 CanvasEngine &CanvasEngine::get() {
   if (!instance)
@@ -17,7 +17,7 @@ void CanvasEngine::init(Xwindow &frame) {
   instance = new CanvasEngine(frame);
 }
 
-CanvasEngine::CanvasEngine(Xwindow &frame) : canvas(NULL), widgets() {
+CanvasEngine::CanvasEngine(Xwindow &frame) : canvas(nullptr), widgets() {
   Evas_Engine_Info_Software_X11 *einfo;
   int32_t method;
 
@@ -67,7 +67,7 @@ CanvasEngine::~CanvasEngine() {
 CanvasWidget &CanvasEngine::addWidget(const std::string &path,
                                       const Layout &layout) {
   Evas_Object *image = evas_object_image_filled_add(canvas);
-  evas_object_image_file_set(image, path.c_str(), NULL);
+  evas_object_image_file_set(image, path.c_str(), nullptr);
   if (evas_object_image_load_error_get(image) != EVAS_LOAD_ERROR_NONE)
     throw "ERROR: failed to load image.";
   // HINT: disable smooth scaling for slow machines
@@ -79,9 +79,8 @@ CanvasWidget &CanvasEngine::addWidget(const std::string &path,
 }
 
 void CanvasEngine::render() const {
-  for (std::list<CanvasWidget *>::const_iterator w = widgets.begin();
-       w != widgets.end(); w++) {
-    (*w)->render();
+  for (const auto &elem : widgets) {
+    (elem)->render();
   }
   evas_render(canvas);
 }
@@ -91,14 +90,14 @@ void CanvasEngine::render() const {
 CanvasWidget::~CanvasWidget() {
   if (layout)
     delete layout;
-  layout = NULL;
+  layout = nullptr;
   if (image)
     evas_object_del(image);
-  image = NULL;
+  image = nullptr;
 }
 
 CanvasWidget::CanvasWidget(Evas_Object *img, const Layout &l)
-    : image(img), layout(NULL) {
+    : image(img), layout(nullptr) {
 
   if (typeid(l) == typeid(RectLayout)) {
     layout = new RectLayout(dynamic_cast<const RectLayout &>(l));

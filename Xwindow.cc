@@ -2,11 +2,11 @@
 #include <X11/extensions/Xrender.h>
 #include "Xwindow.h"
 
-Display *Xwindow::display = NULL;
+Display *Xwindow::display = nullptr;
 size_t Xwindow::win_count = 0;
 
 Visual *Xwindow::findARGB32Visual(int screen) {
-  Visual *v = NULL;
+  Visual *v = nullptr;
   int event_base, error_base;
 
   if (XRenderQueryExtension(display, &event_base, &error_base)) {
@@ -40,9 +40,9 @@ void Xwindow::registerDelete() const {
 }
 
 Xwindow::Xwindow(const Size &size)
-    : window(0), colormap(0), visual(NULL), depth(0) {
+    : window(0), colormap(0), visual(nullptr), depth(0) {
   if (win_count == 0)
-    if (!(display = XOpenDisplay(NULL)))
+    if (!(display = XOpenDisplay(nullptr)))
       throw "ERROR: XOpenDisplay failed.";
 
   int screen = DefaultScreen(display);
@@ -174,7 +174,7 @@ void XEventHandler::eventLoop(Xwindow &w) {
 }
 
 void Xwindow::setType(wintype wtype) {
-  char *typestr = NULL;
+  char *typestr = nullptr;
   switch (wtype) {
   case wtype_normal:
     typestr = (char *)"_NET_WM_WINDOW_TYPE_NORMAL";
@@ -225,7 +225,7 @@ void Xwindow::setSkipTaskbar() {
 }
 
 void Xwindow::setLayer(winlayer layer) {
-  char *layerstr = NULL;
+  char *layerstr = nullptr;
   switch (layer) {
   case wlayer_below:
     layerstr = (char *)"_NET_WM_STATE_BELOW";

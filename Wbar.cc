@@ -34,11 +34,9 @@ public:
         cfgreader.get("Dock").get("face"), RectLayout(layout->dockLayout()));
     dock.setFrame(Border(5, 5, 5, 5));
 
-    for (std::list<ConfigReader::Section>::const_iterator section =
-             cfgreader.begin();
-         section != cfgreader.end(); section++) {
-      if (section->get("type") == "LauncherWidget") {
-        CanvasEngine::get().addWidget(section->get("face"),
+    for (const auto &elem : cfgreader) {
+      if (elem.get("type") == "LauncherWidget") {
+        CanvasEngine::get().addWidget(elem.get("face"),
                                       RectLayout(layout->addWidget()));
       }
     }
@@ -60,9 +58,11 @@ public:
 
   ~Wbar() { delete layout; }
 
-  void onExposure(const XExposeEvent &) { CanvasEngine::get().render(); }
+  void onExposure(const XExposeEvent &) override {
+    CanvasEngine::get().render();
+  }
 
-  void onMouseMove(const XMotionEvent &e) {
+  void onMouseMove(const XMotionEvent &e) override {
     const Point p(e.x, e.y);
     if (layout->atHoverZone(p)) {
       layout->focus(p);
@@ -72,17 +72,15 @@ public:
     CanvasEngine::get().render();
   }
 
-  void onMouseDown(const XButtonEvent &e) { mouse_position = e; }
+  void onMouseDown(const XButtonEvent &e) override { mouse_position = e; }
 
-  void onMouseUp(const XButtonEvent &e) {
+  void onMouseUp(const XButtonEvent &e) override {
     if (mouse_position.x == e.x && mouse_position.y == e.y) {
       int idx = layout->widgetAt(Point(e.x, e.y));
-      for (std::list<ConfigReader::Section>::const_iterator section =
-               cfgreader.begin();
-           section != cfgreader.end(); section++) {
-        if (section->get("type") == "LauncherWidget" && idx-- == 0) {
+      for (const auto &elem : cfgreader) {
+        if (elem.get("type") == "LauncherWidget" && idx-- == 0) {
           if (!fork()) {
-            execl("/bin/sh", "/bin/sh", "-c", section->get("command").c_str(),
+            execl("/bin/sh", "/bin/sh", "-c", elem.get("command").c_str(),
                   NULL);
             _exit(1);
           } else
@@ -92,12 +90,12 @@ public:
     }
   }
 
-  void onMouseEnter(const XCrossingEvent &e) {
+  void onMouseEnter(const XCrossingEvent &e) override {
     layout->focus(Point(e.x, e.y));
     CanvasEngine::get().render();
   }
 
-  void onMouseLeave(const XCrossingEvent &) {
+  void onMouseLeave(const XCrossingEvent &) override {
     layout->unfocus();
     CanvasEngine::get().render();
   }
@@ -114,7 +112,7 @@ int main(int argc, char *argv[]) {
       struct sigaction sa;
       sa.sa_flags = SA_NOCLDSTOP;
       sa.sa_handler = SIG_IGN;
-      sigaction(SIGCHLD, &sa, NULL);
+      sigaction(SIGCHLD, &sa, nullptr);
       Wbar wbar(optparser);
     }
   }

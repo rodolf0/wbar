@@ -25,4 +25,20 @@ function format_source {
   fi
 }
 
+function modernize {
+  local build_path="$1"; shift
+  if ! [ -d "$srcdir" ]; then
+    echo "source code directory not found at [$srcdir]" >&2
+    exit 1;
+  fi
+  if ! [ -d "$build_path" ]; then
+    echo "build path not found at [$build_path]" >&2
+    exit 1;
+  fi
+
+  find "$srcdir" -name \*.cc |
+    xargs clang-modernize -p "$build_path" -format -style=LLVM
+}
+
 format_source "$@"
+#modernize "$@"

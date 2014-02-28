@@ -56,10 +56,9 @@ bool OptionParser::isset(const std::string &name) const {
 }
 
 const OptionParser::Option &OptionParser::find(const std::string &name) const {
-  for (std::vector<Option>::const_iterator it = options.begin();
-       it != options.end(); it++) {
-    if (it->name == name)
-      return *it;
+  for (const auto &elem : options) {
+    if (elem.name == name)
+      return elem;
   }
   throw "Unkown option name.";
 }
