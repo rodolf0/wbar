@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Wbar)
 set(Wbar_VERSION_MAJOR 3)
 set(Wbar_VERSION_MINOR 0)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions(
   -std=c++11
