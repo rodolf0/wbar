@@ -5,11 +5,11 @@
 #include "OptionParser.h"
 #include "Options.h"
 
-OptionParser::Option::Option(bool is_set, int takes_arg,
-                             const char *name, const char *def_val,
-                             const char *descrip, const char *value) :
-    is_set(is_set), takes_arg(takes_arg), name(name),
-    def_val(def_val), descrip(descrip), value(value) { }
+OptionParser::Option::Option(bool is_set_, int takes_arg_,
+                             const char *name_, const char *def_val_,
+                             const char *descrip_, const char *value_) :
+    is_set(is_set_), takes_arg(takes_arg_), name(name_),
+    def_val(def_val_), descrip(descrip_), value(value_) { }
 
 
 OptionParser::OptionParser(int argc, char *argv[]) : options() {

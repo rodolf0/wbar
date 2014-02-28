@@ -66,7 +66,7 @@ class Wbar : public XEventHandler {
       delete layout;
     }
 
-    void onExposure(const XExposeEvent &e) {
+    void onExposure(const XExposeEvent &) {
       CanvasEngine::get().render();
     }
 
@@ -105,7 +105,7 @@ class Wbar : public XEventHandler {
       CanvasEngine::get().render();
     }
 
-    void onMouseLeave(const XCrossingEvent &e) {
+    void onMouseLeave(const XCrossingEvent &) {
       layout->unfocus();
       CanvasEngine::get().render();
     }

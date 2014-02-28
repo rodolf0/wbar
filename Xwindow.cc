@@ -116,19 +116,19 @@ void Xwindow::hide() const { XUnmapWindow(display, window); }
 
 size_t Xwindow::width() const {
   int x, y;
-  unsigned int w, h, bw, depth;
+  unsigned int w, h, bw, depth_;
   Window root;
   XGetGeometry(display, window, &root,
-               &x, &y, &w, &h, &bw, &depth);
+               &x, &y, &w, &h, &bw, &depth_);
   return w;
 }
 
 size_t Xwindow::height() const {
   int x, y;
-  unsigned int w, h, bw, depth;
+  unsigned int w, h, bw, depth_;
   Window root;
   XGetGeometry(display, window, &root,
-               &x, &y, &w, &h, &bw, &depth);
+               &x, &y, &w, &h, &bw, &depth_);
   return h;
 }
 

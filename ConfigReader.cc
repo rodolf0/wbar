@@ -61,8 +61,8 @@ const ConfigReader::Section & ConfigReader::get(const std::string &name) const {
 
 /////////////// ConfigReader::Section ////////////////
 
-ConfigReader::Section::Section(const std::string &name) :
-    _name(name), entries() { }
+ConfigReader::Section::Section(const std::string &name_) :
+    _name(name_), entries() { }
 
 void ConfigReader::Section::add(const std::string &k, const std::string &v) {
   entries.insert(std::make_pair(k, v));

@@ -1,12 +1,12 @@
 #include "Geometry.h"
 
-Point::Point(int x, int y) :
-    x(x), y(y) { }
+Point::Point(int x_, int y_) :
+    x(x_), y(y_) { }
 
-Rect::Rect(int x, int y, int w, int h) :
-    x(x), y(y), width(w), height(h) { }
+Rect::Rect(int x_, int y_, int w_, int h_) :
+    x(x_), y(y_), width(w_), height(h_) { }
 
-Border::Border(int l, int r, int t, int b) :
-    left(l), right(r), top(t), bottom(b) { }
+Border::Border(int l_, int r_, int t_, int b_) :
+    left(l_), right(r_), top(t_), bottom(b_) { }
 
 /* vim: set sw=2 sts=2 : */

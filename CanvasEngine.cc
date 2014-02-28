@@ -144,6 +144,6 @@ void RectLayout::transform(Evas_Object *img) const {
 Layout3D::Layout3D(const Rect3D &r) : layout(r) {
 }
 
-void Layout3D::transform(Evas_Object *img) const {
+void Layout3D::transform(Evas_Object *) const {
 }
 

@@ -14,14 +14,14 @@ struct _cmdline_options {
   const char *def_val;
 } cmdline_options[] = {
 
-  { "help"       , no_arg  , "this help" }                                ,
+  { "help"       , no_arg  , "this help", nullptr }                                ,
   { "config"     , req_arg , "config file"                                , "wbar.cfg" } ,
   { "size"       , req_arg , "widget normal size"                         , "32" }       ,
   { "zoomf"      , req_arg , "widget zoomed size factor"                  , "1.8" }      ,
   { "jumpf"      , req_arg , "widget jump factor"                         , "1.0" }      ,
   { "nanim"      , req_arg , "number of animated icons"                   , "3" }        ,
-  { "layer"      , req_arg , "above|bellow choose at wich layer to run" } ,
-  { "above-desk" , no_arg  , "run over desktop manager (ie: nautilus)" }  ,
+  { "layer"      , req_arg , "above|bellow choose at wich layer to run" , nullptr} ,
+  { "above-desk" , no_arg  , "run over desktop manager (ie: nautilus)" , nullptr}  ,
   { "pos"        , req_arg , "wbar position (top / bottom / +x+y)"        , "bottom" }   ,
 
 };

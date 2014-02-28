@@ -1,28 +1,28 @@
 cmake_minimum_required(VERSION 2.6)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
-
 project(Wbar)
+set(Wbar_VERSION_MAJOR 3)
+set(Wbar_VERSION_MINOR 0)
 
-# http://svn.enlightenment.org/svn/e/trunk/PROTO/eobj/cmake/Modules/
+add_definitions(
+  -std=c++11
+  -g -O3
+  -Wall
+  -Wextra -Werror
+  #-Wcast-qual # EINA commits some crimes here
+  -Wshadow
+  -Wpointer-arith
+)
+
 find_package(Evas REQUIRED)
-find_package(Eina REQUIRED)
 find_package(X11 REQUIRED)
 
 include_directories(
   ${EVAS_INCLUDE_DIRS}
-  ${EINA_INCLUDE_DIRS}
-  ${X11_INCLUDE_DIRS}
+  ${X11_INCLUDE_DIR}
   ${X11_Xrender_INCLUDE_PATH}
 )
 
 add_definitions(-include cstddef)
-
-set(LIBS ${LIBS}
-  ${EVAS_LIBRARIES}
-  ${EINA_LIBRARIES}
-  ${X11_LIBRARIES}
-  ${X11_Xrender_LIB}
-)
 
 add_executable(Wbar
   Wbar.cc
@@ -34,4 +34,8 @@ add_executable(Wbar
   Xwindow.cc
 )
 
-target_link_libraries(Wbar ${LIBS})
+target_link_libraries(Wbar
+  ${EVAS_LIBRARIES}
+  ${X11_LIBRARIES}
+  ${X11_Xrender_LIB}
+)

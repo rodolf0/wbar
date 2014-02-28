@@ -67,12 +67,12 @@ class XEventHandler {
   public:
     virtual ~XEventHandler() = 0;
 
-    virtual void onExposure(const XExposeEvent &e) {}
-    virtual void onMouseMove(const XMotionEvent &e) {}
-    virtual void onMouseDown(const XButtonEvent &e) {}
-    virtual void onMouseUp(const XButtonEvent &e) {}
-    virtual void onMouseEnter(const XCrossingEvent &e) {}
-    virtual void onMouseLeave(const XCrossingEvent &e) {}
+    virtual void onExposure(const XExposeEvent &) {}
+    virtual void onMouseMove(const XMotionEvent &) {}
+    virtual void onMouseDown(const XButtonEvent &) {}
+    virtual void onMouseUp(const XButtonEvent &) {}
+    virtual void onMouseEnter(const XCrossingEvent &) {}
+    virtual void onMouseLeave(const XCrossingEvent &) {}
 
     static unsigned long eventMask();
     virtual void eventLoop(Xwindow &w);
